@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "allegro5tests", "allegro5tests\allegro5tests.vcxproj", "{6FA2C7AE-622D-491E-B4B2-EEFAD9CB1465}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6FA2C7AE-622D-491E-B4B2-EEFAD9CB1465}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6FA2C7AE-622D-491E-B4B2-EEFAD9CB1465}.Debug|Win32.Build.0 = Debug|Win32
+		{6FA2C7AE-622D-491E-B4B2-EEFAD9CB1465}.Release|Win32.ActiveCfg = Release|Win32
+		{6FA2C7AE-622D-491E-B4B2-EEFAD9CB1465}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
