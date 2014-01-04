@@ -15,7 +15,20 @@ Polarity is a procedurally generated tunnel navigation game that uses magnetism 
 through the tunnel. Each playthrough would be different and movement manuevers would get harder the longer the player has
 played the current tunnel. 
 
-Current Version - 1.02 Pre-Alpha (1/1/2014)
+==========================================
+Current Version: 1.03 Pre-Alpha (1/3/2014)
+==========================================
+
+Changes to this version included the integration of force and field caculations based on magnetism and electric current 
+has been added to the Polaris Engine. Point Charge struct has been added as well for use in magnetic calculations. 
+
+-- Note *Using test seed #24 *
+
+==================
+Previoius Versions
+==================
+
+- 1.02 Pre-Alpha (1/1/2014)
 
 In its current state Project Polarity has the beginnings of the foundation for the physics library. The library supports 
 the following data containers - Vector3, Quaternion, Martix4 and Matrix3. These will be manipulated through the physics
