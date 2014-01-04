@@ -42,12 +42,18 @@
     <ClInclude Include="precision.h">
       <Filter>Header Files\PolarisEngine</Filter>
     </ClInclude>
+    <ClInclude Include="polaris.h">
+      <Filter>Header Files\PolarisEngine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files\Polarity</Filter>
     </ClCompile>
     <ClCompile Include="particle.cpp">
+      <Filter>Source Files\PolarisEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="polaris.cpp">
       <Filter>Source Files\PolarisEngine</Filter>
     </ClCompile>
   </ItemGroup>
