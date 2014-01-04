@@ -14,6 +14,7 @@ const int WIDTH = 1280;
 const int HEIGHT = 500;
 
 ALLEGRO_FONT *font;
+
 //level dimensions
 const int LEVELWIDTH = 4000;
 const int LEVELHEIGHT = 500;
@@ -57,7 +58,6 @@ void ConnectPointsTop(Point points[]);
 void PlotPointsAndConnectBottom(Point oldP, Point newP, Point points[]);
 int  GenerateNewPointBottom();
 void ConnectPointsBottom(Point points[]);
-bool CollideLineTop(SpaceShip &ship);
 void DrawObsticles(Point obsticles[]);
 void GenerateObsticles(Point obsticles[]);
 
@@ -296,7 +296,7 @@ void InitShip(SpaceShip &ship)
 	ship.ID = PLAYER;
 	ship.lives = 3;
 	ship.score = 0;
-	ship.speed = 7;
+	ship.speed = 2;
 	ship.boundx = 15;
 	ship.boundy = 15;
 }
@@ -355,11 +355,6 @@ void MoveShipRight(SpaceShip &ship)
 	ship.pos.x += ship.speed;
 	if( ship.pos.x > WIDTH)
 		ship.pos.x = WIDTH;
-}
-
-bool CollideLineTop(SpaceShip &ship)
-{
-	return true;
 }
 
 #pragma endregion
@@ -611,13 +606,14 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship)
 		{
 			//preliminary check for collision, is ship within checking range?
 			if( (ship.pos.x > points[i].x) &&
-				(ship.pos.x < points[i + 1].x) &&
-				(ship.pos.y > points[i + 1].y) &&
+				(ship.pos.x < points[i + 1].x))
+
+			if(	(ship.pos.y > points[i + 1].y) &&
 				(ship.pos.y < points[i].y))
 			{
 				//TODO: need to place another if statment here checking the slope of the line and if the point lies on the line. 
 				float slope = GetLineSlope(points[i], points[i + 1]);
-				float intercept = GetYIntercept(points[i], slope);
+				//float intercept = GetYIntercept(points[i], slope);
 				//if( IsOnLine(ship.pos.x, ship.pos.y, slope, intercept) )
 				if(IsOnLine(ship.pos.x, ship.pos.y, points[i], points[i + 1]))
 				{
@@ -651,15 +647,35 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship)
 		{
 			//preliminary check for collision. Is ship within checking range?
 			if( (ship.pos.x > points[i].x) &&
-				(ship.pos.x < points[i + 1].x) &&
-				(ship.pos.y < points[i + 1].y) &&
+				(ship.pos.x < points[i + 1].x))
+
+				if( (ship.pos.y < points[i + 1].y) &&
 				(ship.pos.y > points[i].y))
 			{
-				//TODO: need to place another if statment here checking the slope of the line and if the point lies on the line. 
-				//collide
-				al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
-				al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
-				return true;
+				float slope = GetLineSlope(points[i], points[i + 1]);
+				float intercept = GetYIntercept(points[i], slope);
+
+				if(IsOnLine(ship.pos.x, ship.pos.y, points[i], points[i + 1]))
+				{
+					//collide Top Left Corner
+					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
+					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
+					return true;
+				}
+				else if(IsOnLine(ship.pos.x + ship.boundx / 2, ship.pos.y, points[i], points[i + 1]) )
+				{
+					//collide Top Middle
+					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
+					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
+					return true;
+				}
+				else if(IsOnLine(ship.pos.x + ship.boundx, ship.pos.y, points[i], points[i + 1]) )
+				{
+					//Collide Top Right Corner
+					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
+					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
+					return true;
+				}
 			}
 		}
 	}
@@ -702,7 +718,13 @@ bool CollideTunnelBottom(Point points[], SpaceShip &ship)
 
 float GetLineSlope(Point p1, Point p2)
 {	
-	return ( (p2.y - p1.y) / (p2.x - p1.x) );
+	float slope;
+	float yDistance, xDistance;
+	yDistance = (p2.y - p1.y);
+	xDistance = (p2.x - p1.x);
+	slope = yDistance / xDistance;
+	
+	return slope;
 }
 
 float GetYIntercept(Point p1, float slope)
