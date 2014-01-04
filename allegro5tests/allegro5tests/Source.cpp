@@ -12,6 +12,7 @@
 //screen dimensions
 const int WIDTH = 1280;
 const int HEIGHT = 500;
+
 ALLEGRO_FONT *font;
 //level dimensions
 const int LEVELWIDTH = 4000;
