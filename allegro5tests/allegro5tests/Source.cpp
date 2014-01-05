@@ -79,6 +79,7 @@ float GetLineSlope(Point p1, Point p2);
 float GetYIntercept(Point p1, float slope);
 //bool IsOnLine(int x, int y, float slope, float intercept);
 bool IsOnLine(int boxX, int boxY, Point p1, Point p2);
+float GetPerpedicularSlope(float slope);
 
 
 //==========================================================================================
@@ -289,6 +290,7 @@ int main(void)
 
 #pragma region Ship
 
+//Initialize the ship's values to starting values
 void InitShip(SpaceShip &ship)
 {
 	ship.pos.x = 20;
@@ -301,6 +303,7 @@ void InitShip(SpaceShip &ship)
 	ship.boundy = 15;
 }
 
+//Designs and draw's the ship. 
 void DrawShip(SpaceShip &ship, bool polarity)
 {
 	if(polarity)
@@ -329,6 +332,7 @@ void DrawShip(SpaceShip &ship, bool polarity)
 	}
 }
 
+//Keyboard input to move the player forcefully up
 void MoveShipUp(SpaceShip &ship)
 {
 	ship.pos.y -= ship.speed;
@@ -336,6 +340,7 @@ void MoveShipUp(SpaceShip &ship)
 		ship.pos.y = 66;
 }
 
+//Keyboard input to move the player forcefully down
 void MoveShipDown(SpaceShip &ship)
 {
 	ship.pos.y += ship.speed;
@@ -343,6 +348,7 @@ void MoveShipDown(SpaceShip &ship)
 		ship.pos.y = HEIGHT - 100;
 }
 
+//Keyboard input to move the player forcefully left
 void MoveShipLeft(SpaceShip &ship)
 {
 	ship.pos.x -= ship.speed;
@@ -350,6 +356,7 @@ void MoveShipLeft(SpaceShip &ship)
 		ship.pos.x = 20;
 }
 
+//Keyboard input to move the player forcefully right
 void MoveShipRight(SpaceShip &ship)
 {
 	ship.pos.x += ship.speed;
@@ -360,7 +367,8 @@ void MoveShipRight(SpaceShip &ship)
 #pragma endregion
 
 #pragma region Procedual Tunnel
-	
+
+//Randomly generates new Y value for the top of the tunnel generation
 int GenerateNewPointTop()
 {
 	int y = NULL;
@@ -371,6 +379,7 @@ int GenerateNewPointTop()
 	return y;
 }
 
+//Randomly generates new Y value for the bottom of the tunnel generation
 int GenerateNewPointBottom()
 {
 	int y = NULL;
@@ -381,6 +390,8 @@ int GenerateNewPointBottom()
 	return y;
 }
 
+/*main generation of bottom of tunnel. Sets number of points to plot, hard sets first point in level, moves the current point to the new point 
+  once generated. 1 in 66 points generated will result in == Y values, this creates flat spots in the tunnel design. */
 void PlotPointsAndConnectBottom(Point oldP, Point newP, Point pointsBot[])
 {
 	if(newP.x >= 4000)
@@ -426,6 +437,8 @@ void PlotPointsAndConnectBottom(Point oldP, Point newP, Point pointsBot[])
 	}	
 }
 
+/*Main generation of top of tunnel. Sets number of points to plot, hard sets first point in level, moves the current point to the new point
+  once generated. 1 in 66 points generated will result in == Y values, this creates flat spots in the tunnel design. */
 void PlotPointsAndConnectTop(Point oldP, Point newP, Point points[])
 {
 	if(newP.x >= 4000)
@@ -468,6 +481,7 @@ void PlotPointsAndConnectTop(Point oldP, Point newP, Point points[])
 	}	
 }
 
+//Draws lines from point to point. Connects top of tunnel. Uses Allegro al_draw_line() to do it. 
 void ConnectPointsTop(Point points[])
 {
 	for(int i = 0; i < NUM_POINTS; i++)
@@ -476,6 +490,7 @@ void ConnectPointsTop(Point points[])
 	}
 }
 
+//Draws lines from point to point. Connects bottom of tunnel. Uses Allegro al_draw_line() to do it. 
 void ConnectPointsBottom(Point pointsBot[])
 {
 	for (int i = 0; i < NUM_POINTS; i++)
@@ -484,6 +499,7 @@ void ConnectPointsBottom(Point pointsBot[])
 	}
 }
 
+//Takes array of obsticles generated and draws them to the screen. Obsticles reside inside the tunnel for the player to dodge.
 void DrawObsticles(Point obsticles[])
 {
 	for (int i = 0; i < NUM_OBSTICLES; i++)
@@ -492,12 +508,13 @@ void DrawObsticles(Point obsticles[])
 	}
 }
 
+//Generates and populates obsticles[]. Randomly places obsticles within the level. 
 void GenerateObsticles(Point obsticles[])
 {
 	for (int i = 0; i < NUM_OBSTICLES; i++)
 	{
 		obsticles[i].x = ((rand() % (WIDTH - 30)) + 100);
-		obsticles[i].y = HEIGHT / 2 - 20;
+		obsticles[i].y = HEIGHT / 2 - ((rand() % 25) + 20);
 	}
 }
 
@@ -535,6 +552,7 @@ Point UpdateCamera(int x, int y, SpaceShip &ship)
 
 #pragma region Magnets
 
+//Sets all magnets to default start properties. Also places the magnet location with calls to GetMagnetLocationX() and GetMagnetLocationY()
 void InitMagnets(Magnet magnets[], Magnet magnetsBot[])
 {
 	for(int i = 0; i < NUM_MAGNETS; ++i)
@@ -556,6 +574,7 @@ void InitMagnets(Magnet magnets[], Magnet magnetsBot[])
 
 }
 
+//Generate random X value for Magnet location
 int GetMagnetLocationX()
 {
 	int x = (rand() % WIDTH) + 30;
@@ -563,6 +582,7 @@ int GetMagnetLocationX()
 	return x;
 }
 
+//Generate random Y value for magnet location
 int GetMagnetLocationY()
 {
 	int y = (rand() % 60) + 15;
@@ -570,6 +590,7 @@ int GetMagnetLocationY()
 	return y;
 }
 
+//Draw the magnets to the screen, using Allegro's al_draw_filled_rectangle
 void DrawMagnets(Magnet magnets[], Magnet magnetsBot[])
 {
 	for(int i = 0; i < NUM_MAGNETS; ++i)
@@ -583,6 +604,7 @@ void DrawMagnets(Magnet magnets[], Magnet magnetsBot[])
 
 #pragma region Helper Functions
 
+//Returns distance between two points p1 and p2
 double GetPointDistance(Point p1, Point p2)
 {
 	double temp;
@@ -716,6 +738,7 @@ bool CollideTunnelBottom(Point points[], SpaceShip &ship)
 	return false;
 }
 
+//Returns the slope of the line based on points p1 and p2
 float GetLineSlope(Point p1, Point p2)
 {	
 	float slope;
@@ -727,6 +750,7 @@ float GetLineSlope(Point p1, Point p2)
 	return slope;
 }
 
+//Returns the Y intercept of line based on a point of the line and its slope
 float GetYIntercept(Point p1, float slope)
 {
 	float intercept;
@@ -751,4 +775,11 @@ bool IsOnLine(int boxX, int boxY, Point p1, Point p2)
 	temp.y = boxY;
 	return ( (p1.y - temp.y) == GetLineSlope(p1, p2) * (p1.x - temp.x) );
 }
+
+//returns the slope of a line that is perpendicular to slope of line passed to function.
+float GetPerpedicularSlope(float slope)
+{
+	return ( -1 / slope);
+}
+
 #pragma endregion

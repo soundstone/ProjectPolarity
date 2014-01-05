@@ -72,6 +72,7 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="objects.h" />
     <ClInclude Include="particle.h" />

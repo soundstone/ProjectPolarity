@@ -8,8 +8,8 @@ using namespace std;
 
 namespace PolarisEngine
 {
-	typename double kConst = 8.99;
-	typename double pi = 3.1415926;
+	const double kConst = 8.99;
+	const double pi = 3.1415926;
 
 	double Polaris::Get_Force(PointCharge p1, PointCharge p2, double dist)
 	{
@@ -38,11 +38,15 @@ namespace PolarisEngine
 
 	double Polaris::Get_Magnetic_Field(double current, double distance)
 	{
+		//Hold strength of magentic field
 		double magneticField;
-		double newZero = 4 * (3.13e-7);
+
+		//used in calculation along with electric current 
+		const double newZero = 4 * (3.13e-7);
 
 		double numerator;
 		double denomitor;
+
 
 		numerator = newZero * current;
 		denomitor = 2 * pi * distance;

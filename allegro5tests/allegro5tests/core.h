@@ -1,5 +1,5 @@
 //core.h
-//Basic building blocks of the engine. 
+//Basic building blocks of the engine. Holds Vector3, Quaternion, Matrix3 and Matrix4 structures
 #include <math.h>
 
 #ifndef POLARISENGINE_CORE_H
