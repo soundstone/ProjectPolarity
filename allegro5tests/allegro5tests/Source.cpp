@@ -298,7 +298,7 @@ void InitShip(SpaceShip &ship)
 	ship.ID = PLAYER;
 	ship.lives = 3;
 	ship.score = 0;
-	ship.speed = 2;
+	ship.speed = 7;
 	ship.boundx = 15;
 	ship.boundy = 15;
 }
@@ -610,15 +610,24 @@ Point GetPointDistance(Point p1, Point p2)
 	Point temp;
 	double x, y;
 
-
-	temp.x = abs((p2.x - p1.x));
-	temp.x /= 2;
-	temp.y = abs((p2.y - p1.y));
-	temp.y /= 2;
-//	temp = sqrt(x + y);
-	temp.x = p2.x - temp.x;
-	temp.y = p2.y - temp.y;
-
+	if(p2.y > p1.y)
+	{
+		temp.x = abs((p2.x - p1.x));
+		temp.x /= 2;
+		temp.y = abs((p2.y - p1.y));
+		temp.y /= 2;
+		temp.x = p2.x - temp.x;
+		temp.y = p2.y - temp.y;
+	}
+	else
+	{
+		temp.x = abs((p2.x - p1.x));
+		temp.x /= 2;
+		temp.y = abs((p2.y - p1.y));
+		temp.y /= 2;
+		temp.x = p2.x - temp.x;
+		temp.y = p1.y - temp.y;
+	}
 	return temp;
 
 }
@@ -652,8 +661,8 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship)
 		}
 		else 
 		{
-			if( (ship.pos.x < points[i].x) &&
-				(ship.pos.x > points[i + 1].x))
+			if( (ship.pos.x < points[i + i].x) &&
+				(ship.pos.x > points[i].x))
 			{
 				if( (ship.pos.y < points[i + 1].y) &&
 					(ship.pos.y > points[i].y))
