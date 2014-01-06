@@ -6,7 +6,6 @@
 #include <math.h>
 
 
-
 #pragma region Globals
 
 //screen dimensions
@@ -72,7 +71,7 @@ int GetMagnetLocationY();
 void DrawMagnets(Magnet magnets[], Magnet magnetsBot[]);
 
 //Helper Functions
-double GetPointDistance(Point p1, Point p2);
+Point GetPointDistance(Point p1, Point p2);
 bool CollideTunnelTop(Point points[], SpaceShip &ship);
 bool CollideTunnelBottom(Point points[], SpaceShip &ship);
 float GetLineSlope(Point p1, Point p2);
@@ -80,6 +79,7 @@ float GetYIntercept(Point p1, float slope);
 //bool IsOnLine(int x, int y, float slope, float intercept);
 bool IsOnLine(int boxX, int boxY, Point p1, Point p2);
 float GetPerpedicularSlope(float slope);
+Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept);
 
 
 //==========================================================================================
@@ -605,20 +605,79 @@ void DrawMagnets(Magnet magnets[], Magnet magnetsBot[])
 #pragma region Helper Functions
 
 //Returns distance between two points p1 and p2
-double GetPointDistance(Point p1, Point p2)
+Point GetPointDistance(Point p1, Point p2)
 {
-	double temp;
+	Point temp;
 	double x, y;
 
 
-	x = abs((p2.x - p1.x)*(p2.x - p1.x));
-	y = abs((p2.y - p1.y)*(p2.y - p1.y));
-	temp = sqrt(x + y);
+	temp.x = abs((p2.x - p1.x));
+	temp.x /= 2;
+	temp.y = abs((p2.y - p1.y));
+	temp.y /= 2;
+//	temp = sqrt(x + y);
+	temp.x = p2.x - temp.x;
+	temp.y = p2.y - temp.y;
 
 	return temp;
 
 }
 
+bool CollideTunnelTop(Point points[], SpaceShip &ship)
+{
+	for(int i = 0; i < NUM_POINTS; i++)
+	{
+		if(points[i + 1].y < points[i].y)
+		{
+			if( (ship.pos.x > points[i].x) &&
+				(ship.pos.x < points[i + 1].x))
+			{
+				if( (ship.pos.y > points[i + 1].y) &&
+					(ship.pos.y < points[i].y))
+				{
+					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
+					float slope = GetLineSlope(points[i], points[i + 1]);
+					float perpSlope = GetPerpedicularSlope(slope);
+					float lineIntercept =  GetYIntercept(points[i], slope);
+					float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
+					Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
+											points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
+
+					al_draw_line(intersection.x, intersection.y, ship.pos.x, ship.pos.y, al_map_rgb(255, 255, 0), 1.0f);
+					al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
+					al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
+					al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);
+				}
+			}
+		}
+		else 
+		{
+			if( (ship.pos.x < points[i].x) &&
+				(ship.pos.x > points[i + 1].x))
+			{
+				if( (ship.pos.y < points[i + 1].y) &&
+					(ship.pos.y > points[i].y))
+				{
+					
+					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
+					float slope = GetLineSlope(points[i], points[i + 1]);
+					float perpSlope = GetPerpedicularSlope(slope);
+					float lineIntercept =  GetYIntercept(points[i], slope);
+					float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
+					Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
+											points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
+
+					al_draw_line(intersection.x, intersection.y, ship.pos.x, ship.pos.y, al_map_rgb(255, 255, 0), 1.0f);
+					al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
+					al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
+					al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);
+				}
+			}
+		}
+	}
+	return false;
+}
+/*
 bool CollideTunnelTop(Point points[], SpaceShip &ship)
 {
 
@@ -703,7 +762,7 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship)
 	}
 	return false;
 }
-
+*/
 bool CollideTunnelBottom(Point points[], SpaceShip &ship)
 {
 	for (int i = 0; i < NUM_POINTS; i++)
@@ -782,4 +841,15 @@ float GetPerpedicularSlope(float slope)
 	return ( -1 / slope);
 }
 
+Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept)
+{
+	Point intersection;
+	//y1 = slope * x1 + intercept - convert to y1 - slope * x1 = intercept
+	intersection.y = slope * x1 + intercept;
+	intersection.x = y2 = perpSlope * intersection.y + perpIntercept;
+	intersection.y = slope * intersection.x + intercept;
+
+	return intersection;
+
+}
 #pragma endregion
