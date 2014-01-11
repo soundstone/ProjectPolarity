@@ -10,7 +10,6 @@
 
 namespace PolarisEngine
 {
-	
 	/* 
 		Holds the value for energy under which a body will be put to sleep. This is a global value for
 		the whole solution. By default it is 0.1, which is fine for simulation when graity is about 20 units per second squared, 

@@ -3,7 +3,15 @@
 #include <allegro5\allegro_font.h>
 #include <allegro5\allegro_ttf.h>
 #include "objects.h"
+#include "polaris.h"
+#include "core.h"
 #include <math.h>
+
+using namespace PolarisEngine;
+
+#define dot(u,v) ((u).x * (v).x + (u).y * (v).y)
+#define norm(v)  sqrt(dot(v,v)) //Length of vector
+#define d(u, v)  norm(u-v) //distance = normal of differences
 
 
 #pragma region Globals
@@ -72,7 +80,7 @@ void DrawMagnets(Magnet magnets[], Magnet magnetsBot[]);
 
 //Helper Functions
 Point GetPointDistance(Point p1, Point p2);
-bool CollideTunnelTop(Point points[], SpaceShip &ship);
+bool CollideTunnelTop(Point points[], SpaceShip &ship, Vector3 shipPosition);
 bool CollideTunnelBottom(Point points[], SpaceShip &ship);
 float GetLineSlope(Point p1, Point p2);
 float GetYIntercept(Point p1, float slope);
@@ -80,6 +88,11 @@ float GetYIntercept(Point p1, float slope);
 bool IsOnLine(int boxX, int boxY, Point p1, Point p2);
 float GetPerpedicularSlope(float slope);
 Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept);
+float DistancePointToLine(Point, Point, Point);
+double GetDoublePointsDistance(Point p1, Point p2, int (*pfun)(int, int));
+int GetCoordDistanceSquared(int xy1, int xy2);
+Vector3 GetNormal(Point lineStart, Point lineEnd, int (*pfun)(int, int));
+
 
 
 //==========================================================================================
@@ -102,6 +115,7 @@ int main(void)
 
 	//object variables
 	SpaceShip ship;
+	Vector3 shipPosition(0,0,0);
 	Magnet magnets[NUM_MAGNETS];
 	Magnet magnetsBot[NUM_MAGNETS];
 	bool polarity = false;
@@ -196,8 +210,10 @@ int main(void)
 					polarity = !polarity;
 				}
 			}		
-
-			collide = CollideTunnelTop(pointsTop, ship);
+			shipPosition.x = ship.pos.x;
+			shipPosition.y = ship.pos.y;
+			
+			collide = CollideTunnelTop(pointsTop, ship, shipPosition);
 			collideBot = CollideTunnelBottom(pointsBottom, ship);
 
 			//CollideLineTop(ship);
@@ -632,7 +648,37 @@ Point GetPointDistance(Point p1, Point p2)
 
 }
 
-bool CollideTunnelTop(Point points[], SpaceShip &ship)
+double GetDoublePointsDistance(Point p1, Point p2, int (*pfun)(int, int))
+{
+	double temp;
+	double x, y;
+
+	x = abs( pfun(p1.x, p2.x) );
+	y = abs( pfun(p1.y, p2.y) );
+
+	temp = sqrt( x + y );
+
+	return temp;
+}
+
+int GetCoordDistanceSquared(int xy1, int xy2)
+{
+	return sqrt( ( xy2 - xy1 ) * (xy2 - xy1) );
+}
+
+Vector3 GetNormal(Point lineStart, Point lineEnd)
+{
+	Vector3 normal(0, 0, 0);
+
+	// (-dy, dx) - upwards (Bottom) (dy, -dx) -downwards (Top)
+	normal.x = GetCoordDistanceSquared(lineStart.x, lineEnd.x);
+	normal.y = GetCoordDistanceSquared(lineStart.y, lineEnd.y);
+	normal.z = 0;
+	
+	return normal;
+}
+
+bool CollideTunnelTop(Point points[], SpaceShip &ship, PolarisEngine::Vector3 shipPosition)
 {
 	for(int i = 0; i < NUM_POINTS; i++)
 	{
@@ -644,7 +690,7 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship)
 				if( (ship.pos.y > points[i + 1].y) &&
 					(ship.pos.y < points[i].y))
 				{
-					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
+					/*Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
 					float slope = GetLineSlope(points[i], points[i + 1]);
 					float perpSlope = GetPerpedicularSlope(slope);
 					float lineIntercept =  GetYIntercept(points[i], slope);
@@ -656,6 +702,19 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship)
 					al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
 					al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
 					al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);
+
+					float distance = DistancePointToLine(ship.pos, points[i], points[i + 1]);
+					if(distance <= 0)
+						al_draw_text(font, al_map_rgb(255,0,0), 10, 10, 0, "Collision");
+					if(distance >= 0)
+						al_draw_textf(font, al_map_rgb(255,255,0), 50, 50, 0, "Distance is %f", distance);*/
+
+					Vector3 test = GetNormal(points[i], points[i + 1]);
+					test.x * -1;
+					if (shipPosition < test )
+					{
+						al_draw_text(font, al_map_rgb(255,255,255), 400, 300, 0, "COLLISION");
+					}
 				}
 			}
 		}
@@ -860,5 +919,23 @@ Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, 
 
 	return intersection;
 
+}
+
+float DistancePointToLine(Point p, Point start, Point end)
+{
+	Point v;
+	v.x = end.x - start.x;
+	v.y = end.y - start.y;
+	
+	Point w;
+	w.x = p.x - start.x;
+	w.y = p.y - start.y;
+
+	double c1 = dot(w,v);
+	double c2 = dot(v,v);
+	double b = c1 / c2;
+
+	Point Pb = start + (b * v.x);
+	return d(p, Pb);
 }
 #pragma endregion
