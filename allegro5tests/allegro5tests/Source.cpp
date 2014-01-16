@@ -427,6 +427,9 @@ void PlotPointsAndConnectBottom(Point oldP, Point newP, Point pointsBot[])
 	pointsBot[0] = oldP;
 	newP.x = oldP.x;
 
+	Logger::log("POINTS BOTTOM.......................", Logger::logLevelInfo);
+	Logger::closeLog();
+
 	for (int i = 1; i < NUM_POINTS; i++)
 	{
 		//One in 66 the points will not vary in height. This cause flat areas, and makes the lines look more cavelike. 
@@ -455,12 +458,9 @@ void PlotPointsAndConnectBottom(Point oldP, Point newP, Point pointsBot[])
 			
 			pointsBot[i] = newP;
 		}
-
-		int x = newP.x;
-		int y = newP.y;
-
+		
 		stringstream ss;
-		ss << "Point[" << i << "] = (" << x << ", " <<  y << ")";
+		ss << "PointBot[" << i << "] = (" << pointsBot[i].x << ", " <<  pointsBot[i].y << ")";
 		string message = ss.str();
 		Logger::log(message, Logger::logLevelInfo);
 		Logger::closeLog();
@@ -483,6 +483,9 @@ void PlotPointsAndConnectTop(Point oldP, Point newP, Point points[])
 
 	points[0] = oldP;
 	newP.x = oldP.x;
+
+	Logger::log("POINTS TOP.......................", Logger::logLevelInfo);
+	Logger::closeLog();
 
 	for (int i = 1; i < NUM_POINTS; i++)
 	{
@@ -508,6 +511,13 @@ void PlotPointsAndConnectTop(Point oldP, Point newP, Point points[])
 			
 			points[i] = newP;
 		}
+
+		
+		stringstream ss;
+		ss << "Point[" << i << "] = (" << points[i].x << ", " <<  points[i].y << ")";
+		string message = ss.str();
+		Logger::log(message, Logger::logLevelInfo);
+		Logger::closeLog();
 	}	
 }
 
