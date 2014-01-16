@@ -70,10 +70,12 @@
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="polaris.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Logger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="core.h" />
+    <ClInclude Include="logger.h" />
     <ClInclude Include="objects.h" />
     <ClInclude Include="particle.h" />
     <ClInclude Include="polaris.h" />

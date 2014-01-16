@@ -48,6 +48,9 @@
     <ClInclude Include="core.h">
       <Filter>Header Files\PolarisEngine</Filter>
     </ClInclude>
+    <ClInclude Include="logger.h">
+      <Filter>Header Files\PolarisEngine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -57,6 +60,9 @@
       <Filter>Source Files\PolarisEngine</Filter>
     </ClCompile>
     <ClCompile Include="polaris.cpp">
+      <Filter>Source Files\PolarisEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
       <Filter>Source Files\PolarisEngine</Filter>
     </ClCompile>
   </ItemGroup>

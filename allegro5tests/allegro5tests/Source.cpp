@@ -1,13 +1,17 @@
-#include <allegro5\allegro.h>
+#include<allegro5\allegro.h>
 #include <allegro5\allegro_primitives.h>
 #include <allegro5\allegro_font.h>
 #include <allegro5\allegro_ttf.h>
 #include "objects.h"
 #include "polaris.h"
+#include "logger.h"
 #include "core.h"
 #include <math.h>
+#include <string>
+#include <sstream>
 
 using namespace PolarisEngine;
+using namespace std;
 
 #define dot(u,v) ((u).x * (v).x + (u).y * (v).y)
 #define norm(v)  sqrt(dot(v,v)) //Length of vector
@@ -438,6 +442,7 @@ void PlotPointsAndConnectBottom(Point oldP, Point newP, Point pointsBot[])
 				
 				//add the new point to the bottom of the map
 				pointsBot[i] = newP;
+
 			}
 		}
 		//Generates new points until pointsBot[i] reaches 4000 points. These vary in height.
@@ -450,7 +455,16 @@ void PlotPointsAndConnectBottom(Point oldP, Point newP, Point pointsBot[])
 			
 			pointsBot[i] = newP;
 		}
-	}	
+
+		int x = newP.x;
+		int y = newP.y;
+
+		stringstream ss;
+		ss << "Point[" << i << "] = (" << x << ", " <<  y << ")";
+		string message = ss.str();
+		Logger::log(message, Logger::logLevelInfo);
+		Logger::closeLog();
+	}
 }
 
 /*Main generation of top of tunnel. Sets number of points to plot, hard sets first point in level, moves the current point to the new point
