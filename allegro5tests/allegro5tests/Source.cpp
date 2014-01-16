@@ -91,7 +91,7 @@ Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, 
 float DistancePointToLine(Point, Point, Point);
 double GetDoublePointsDistance(Point p1, Point p2, int (*pfun)(int, int));
 int GetCoordDistanceSquared(int xy1, int xy2);
-Vector3 GetNormal(Point lineStart, Point lineEnd, int (*pfun)(int, int));
+Vector3& GetNormal(Point lineStart, Point lineEnd, int (*pfun)(int, int));
 
 
 
@@ -666,7 +666,7 @@ int GetCoordDistanceSquared(int xy1, int xy2)
 	return sqrt( ( xy2 - xy1 ) * (xy2 - xy1) );
 }
 
-Vector3 GetNormal(Point lineStart, Point lineEnd)
+Vector3& GetNormal(Point lineStart, Point lineEnd)
 {
 	Vector3 normal(0, 0, 0);
 
@@ -675,6 +675,7 @@ Vector3 GetNormal(Point lineStart, Point lineEnd)
 	normal.y = GetCoordDistanceSquared(lineStart.y, lineEnd.y);
 	normal.z = 0;
 	
+	//normal = normal / normal;
 	return normal;
 }
 
@@ -709,8 +710,11 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship, PolarisEngine::Vector3 sh
 					if(distance >= 0)
 						al_draw_textf(font, al_map_rgb(255,255,0), 50, 50, 0, "Distance is %f", distance);*/
 
-					Vector3 test = GetNormal(points[i], points[i + 1]);
-					test.x * -1;
+					Vector3 test(0,0,0);
+					test.x = GetCoordDistanceSquared(points[i].x, points[i + 1].x);
+					test.y = GetCoordDistanceSquared(points[i].y, points[i + 1].y);
+					test.x *= -1;
+
 					if (shipPosition < test )
 					{
 						al_draw_text(font, al_map_rgb(255,255,255), 400, 300, 0, "COLLISION");
@@ -723,8 +727,8 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship, PolarisEngine::Vector3 sh
 			if( (ship.pos.x < points[i + i].x) &&
 				(ship.pos.x > points[i].x))
 			{
-				if( (ship.pos.y < points[i + 1].y) &&
-					(ship.pos.y > points[i].y))
+				if( (ship.pos.y > points[i + 1].y) &&
+					(ship.pos.y < points[i].y))
 				{
 					
 					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));

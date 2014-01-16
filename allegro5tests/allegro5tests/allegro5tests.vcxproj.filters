@@ -36,9 +36,6 @@
     <ClInclude Include="particle.h">
       <Filter>Header Files\PolarisEngine</Filter>
     </ClInclude>
-    <ClInclude Include="core.h">
-      <Filter>Header Files\PolarisEngine</Filter>
-    </ClInclude>
     <ClInclude Include="precision.h">
       <Filter>Header Files\PolarisEngine</Filter>
     </ClInclude>
@@ -46,6 +43,9 @@
       <Filter>Header Files\PolarisEngine</Filter>
     </ClInclude>
     <ClInclude Include="camera.h">
+      <Filter>Header Files\PolarisEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="core.h">
       <Filter>Header Files\PolarisEngine</Filter>
     </ClInclude>
   </ItemGroup>
