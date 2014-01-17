@@ -48,8 +48,8 @@ struct SpaceShip
 	Point pos;
 	int lives;
 	int speed;
-	int boundx;
-	int boundy;
+	int width;
+	int height;
 	int score;
 
 };

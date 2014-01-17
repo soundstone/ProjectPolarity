@@ -31,8 +31,7 @@ const int LEVELWIDTH = 4000;
 const int LEVELHEIGHT = 500;
 
 //Camera position
-int cameraX = 0;
-int cameraY = 0;
+float cameraPosition[2] = { 0, 0 };
 
 //how many points and spacing between points for lines drawn
 const int PLOT_INTERVAL = 36;
@@ -75,6 +74,7 @@ void GenerateObsticles(Point obsticles[]);
 //camera functions
 Point TranslateWorldToScreen(int objectX, int objectY, int cameraX, int cameraY);
 Point UpdateCamera(int x, int y, SpaceShip &ship);
+void CameraUpdate(float *cameraPosition, SpaceShip ship);
 
 //Magnet Functions
 void InitMagnets(Magnet magnets[], Magnet magnetsBot[]);
@@ -132,6 +132,7 @@ int main(void)
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer = NULL;	
+	ALLEGRO_TRANSFORM camera;
 
 	//Initialization functions
 	if(!al_init())
@@ -221,7 +222,11 @@ int main(void)
 			collideBot = CollideTunnelBottom(pointsBottom, ship);
 
 			//CollideLineTop(ship);
-			UpdateCamera(cameraX, cameraY, ship);
+			CameraUpdate(cameraPosition, ship);
+			al_identity_transform(&camera);
+			al_translate_transform(&camera, -cameraPosition[0], -cameraPosition[1]);
+			al_use_transform(&camera);
+			//UpdateCamera(cameraX, cameraY, ship);
 		}
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
@@ -319,8 +324,8 @@ void InitShip(SpaceShip &ship)
 	ship.lives = 3;
 	ship.score = 0;
 	ship.speed = 7;
-	ship.boundx = 15;
-	ship.boundy = 15;
+	ship.width = 15;
+	ship.height = 15;
 }
 
 //Designs and draw's the ship. 
@@ -328,8 +333,8 @@ void DrawShip(SpaceShip &ship, bool polarity)
 {
 	if(polarity)
 	{
-		al_draw_filled_rectangle(ship.pos.x, ship.pos.y, ship.pos.x + ship.boundx, ship.pos.y + ship.boundy, al_map_rgb(255,0,0));
-		al_draw_pixel(ship.pos.x + (ship.boundx / 2), ship.pos.y + (ship.boundy / 2), al_map_rgb(0,0,0));
+		al_draw_filled_rectangle(ship.pos.x, ship.pos.y, ship.pos.x + ship.width, ship.pos.y + ship.height, al_map_rgb(255,0,0));
+		al_draw_pixel(ship.pos.x + (ship.width / 2), ship.pos.y + (ship.height / 2), al_map_rgb(0,0,0));
 		//turrets
 		//al_draw_filled_rectangle(ship.x, ship.y - 9, ship.x + 10, ship.y - 7, al_map_rgb(0,145,255));
 		//al_draw_filled_rectangle(ship.x, ship.y + 9, ship.x + 10, ship.y + 7, al_map_rgb(0,145,255));
@@ -340,8 +345,8 @@ void DrawShip(SpaceShip &ship, bool polarity)
 	}
 	else
 	{
-		al_draw_filled_rectangle(ship.pos.x, ship.pos.y, ship.pos.x + ship.boundx, ship.pos.y + ship.boundy, al_map_rgb(255,255,255));
-		al_draw_pixel(ship.pos.x + (ship.boundx / 2), ship.pos.y + (ship.boundy / 2), al_map_rgb(0,0,0));
+		al_draw_filled_rectangle(ship.pos.x, ship.pos.y, ship.pos.x + ship.width, ship.pos.y + ship.height, al_map_rgb(255,255,255));
+		al_draw_pixel(ship.pos.x + (ship.width / 2), ship.pos.y + (ship.height / 2), al_map_rgb(0,0,0));
 		//turrets
 		//al_draw_filled_rectangle(ship.x, ship.y - 9, ship.x + 10, ship.y - 7, al_map_rgb(0,0,255));
 		//al_draw_filled_rectangle(ship.x, ship.y + 9, ship.x + 10, ship.y + 7, al_map_rgb(0,0,255));
@@ -588,6 +593,17 @@ Point UpdateCamera(int x, int y, SpaceShip &ship)
 	return CameraPoint;
 }
 
+void CameraUpdate(float *cameraPosition, SpaceShip ship)
+{
+	cameraPosition[0] = -(WIDTH / 2 + ((float)ship.pos.x) + ship.width / 2);
+	cameraPosition[1] = -(HEIGHT / 2 + ((float)ship.pos.y) + ship.height / 2);
+
+	if(cameraPosition[0] < 0)
+		cameraPosition[0] = 0;
+	if(cameraPosition[1] < 0)
+		cameraPosition[1] = 0;
+}
+
 #pragma endregion
 
 #pragma region Magnets
@@ -603,6 +619,7 @@ void InitMagnets(Magnet magnets[], Magnet magnetsBot[])
 		magnets[i].polarity = POSITIVE;
 		magnets[i].x = GetMagnetLocationX();
 		magnets[i].y = GetMagnetLocationY();
+		magnets[i].force = 7;
 
 		//Bottom
 		magnetsBot[i].ID = MAGNET;
@@ -610,6 +627,7 @@ void InitMagnets(Magnet magnets[], Magnet magnetsBot[])
 		magnetsBot[i].polarity = POSITIVE;
 		magnetsBot[i].x = GetMagnetLocationX();
 		magnetsBot[i].y = GetMagnetLocationY() + 370;
+		magnetsBot[i].force = 7;
 	}
 
 }
