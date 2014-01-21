@@ -13,14 +13,19 @@
 
 namespace PolarisEngine
 {
+	const double kConst(8.99);
+	const double pi(3.1415926);
 
 	struct PointCharge
 	{
 		double charge;
+		Vector3 *pos;
 
 		PointCharge(double x, double y, double c)
 		{
-			Vector3 pos(x, y, 0);
+			pos->x = x;
+			pos->y = y;
+			pos->z = 0;
 
 			if(c < 0)
 				charge = c * -1;
@@ -32,6 +37,7 @@ namespace PolarisEngine
 	class Polaris
 	{
 	public:
+		
 		//returns the force between 2 point charges
 		static double Get_Force(PointCharge p1, PointCharge p2, double distance);
 
@@ -49,9 +55,10 @@ namespace PolarisEngine
 
 		//returns distance between two points in space
 		static double Get_Distance(Vector3 v1, Vector3 v2);
+
+		//returns distance between two PointCharges in space
+		static double Get_Distance(PointCharge p1, PointCharge p2);
 	};
-
-
 };
 
 #endif

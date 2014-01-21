@@ -3,9 +3,11 @@
 #include <allegro5\allegro_font.h>
 #include <allegro5\allegro_ttf.h>
 #include "objects.h"
+#include "polaris.h"
 #include <math.h>
 
-
+using namespace PolarisEngine;
+using namespace std;
 
 #pragma region Globals
 
@@ -45,7 +47,7 @@ bool keys[5] = {false, false, false, false, false};
 
 //Ship functions
 void InitShip(SpaceShip &ship);
-void DrawShip(SpaceShip &ship, bool polarity);
+void DrawShip(SpaceShip &ship);
 void MoveShipUp(SpaceShip &ship);
 void MoveShipDown(SpaceShip &ship);
 void MoveShipLeft(SpaceShip &ship);
@@ -70,6 +72,7 @@ void InitMagnets(Magnet magnets[], Magnet magnetsBot[]);
 int GetMagnetLocationX();
 int GetMagnetLocationY();
 void DrawMagnets(Magnet magnets[], Magnet magnetsBot[]);
+bool CheckMagnets(SpaceShip ship, Magnet magnets[], Magnet magnetsBot[]);
 
 //Helper Functions
 double GetPointDistance(Point p1, Point p2);
@@ -179,6 +182,9 @@ int main(void)
 			
 			collide = false;
 			redraw = true;
+
+			CheckMagnets(ship, magnets, magnetsBot);
+
 			if(keys[UP])
 				MoveShipUp(ship);
 			if(keys[DOWN])
@@ -192,7 +198,7 @@ int main(void)
 				if(buttonTimer >= BUTTON_TIME)
 				{
 					buttonTimer = 0.0f;
-					polarity = !polarity;
+					ship.polarity = !ship.polarity;
 				}
 			}		
 
@@ -264,7 +270,7 @@ int main(void)
 			if(collideBot)
 				al_draw_textf(font, al_map_rgb(0,255,50), WIDTH / 2, HEIGHT / 2, 0, "Collision at %5d, %5d", ship.pos.x, ship.pos.y);*/
 
-			DrawShip(ship, polarity);
+			DrawShip(ship);
 
 			//TODO: list out what is in the array
 
@@ -293,20 +299,24 @@ void InitShip(SpaceShip &ship)
 {
 	ship.pos.x = 20;
 	ship.pos.y = HEIGHT / 2;
+	ship.shipPos->x = 20;
+	ship.shipPos->y = HEIGHT / 2;
+	ship.shipPos->z = 0;
 	ship.ID = PLAYER;
 	ship.lives = 3;
 	ship.score = 0;
 	ship.speed = 2;
-	ship.boundx = 15;
-	ship.boundy = 15;
+	ship.width = 15;
+	ship.height = 15;
+	ship.polarity = NEGATIVE;
 }
 
-void DrawShip(SpaceShip &ship, bool polarity)
+void DrawShip(SpaceShip &ship)
 {
-	if(polarity)
+	if(ship.polarity)
 	{
-		al_draw_filled_rectangle(ship.pos.x, ship.pos.y, ship.pos.x + ship.boundx, ship.pos.y + ship.boundy, al_map_rgb(255,0,0));
-		al_draw_pixel(ship.pos.x + (ship.boundx / 2), ship.pos.y + (ship.boundy / 2), al_map_rgb(0,0,0));
+		al_draw_filled_rectangle(ship.pos.x, ship.pos.y, ship.pos.x + ship.width, ship.pos.y + ship.height, al_map_rgb(255,0,0));
+		al_draw_pixel(ship.pos.x + (ship.width / 2), ship.pos.y + (ship.height / 2), al_map_rgb(0,0,0));
 		//turrets
 		//al_draw_filled_rectangle(ship.x, ship.y - 9, ship.x + 10, ship.y - 7, al_map_rgb(0,145,255));
 		//al_draw_filled_rectangle(ship.x, ship.y + 9, ship.x + 10, ship.y + 7, al_map_rgb(0,145,255));
@@ -317,8 +327,8 @@ void DrawShip(SpaceShip &ship, bool polarity)
 	}
 	else
 	{
-		al_draw_filled_rectangle(ship.pos.x, ship.pos.y, ship.pos.x + ship.boundx, ship.pos.y + ship.boundy, al_map_rgb(255,255,255));
-		al_draw_pixel(ship.pos.x + (ship.boundx / 2), ship.pos.y + (ship.boundy / 2), al_map_rgb(0,0,0));
+		al_draw_filled_rectangle(ship.pos.x, ship.pos.y, ship.pos.x + ship.width, ship.pos.y + ship.height, al_map_rgb(255,255,255));
+		al_draw_pixel(ship.pos.x + (ship.width / 2), ship.pos.y + (ship.height / 2), al_map_rgb(0,0,0));
 		//turrets
 		//al_draw_filled_rectangle(ship.x, ship.y - 9, ship.x + 10, ship.y - 7, al_map_rgb(0,0,255));
 		//al_draw_filled_rectangle(ship.x, ship.y + 9, ship.x + 10, ship.y + 7, al_map_rgb(0,0,255));
@@ -579,6 +589,45 @@ void DrawMagnets(Magnet magnets[], Magnet magnetsBot[])
 	}
 }
 
+bool CheckMagnets(SpaceShip ship, Magnet magnets[], Magnet magnetsBot[])
+{
+	bool result;
+
+	for (int i = 0; i < NUM_MAGNETS; i++)
+	{
+		float dx = abs(ship.pos.x - magnets[i].x);
+		float dy = (ship.pos.y - magnets[i].y);
+		int radius = magnets[i].radius;
+
+		if (dx > radius)
+			result = false;
+		if (dy > radius)
+			result = false;
+		if (dx + dy <= radius)
+			result = true;
+		if ( (dx * dx) + (dy * dy) <= (radius * radius) )
+			result = true;
+		else 
+			result = false;
+
+		if (result)
+		{
+			PointCharge magnet(magnets[i].x, magnets[i].y, magnets[i].force);
+
+			//use shipPos->z as third parameter because it will be 0 anyway
+			PointCharge shipPoint(ship.shipPos->x, ship.shipPos->y, ship.shipPos->z); 
+
+			double distance = Polaris::Get_Distance(shipPoint, magnet);
+			double force = Polaris::Get_Force(shipPoint, magnet, distance);
+			
+			
+			ship.shipPos->operator*=(force);
+		}
+		else
+			continue;
+	}
+}
+
 #pragma endregion
 
 #pragma region Helper Functions
@@ -623,22 +672,22 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship)
 					al_draw_textf(font, al_map_rgb(255,0,0), WIDTH / 2, HEIGHT / 2, 0, "COLLISION AT %5d, %5d", ship.pos.x, ship.pos.y);
 					return true;
 				}
-				//else if ( IsOnLine((ship.pos.x + ship.boundx) / 2, ship.pos.y, slope, intercept) )
-				else if( IsOnLine( (ship.pos.x + ship.boundx) / 2, ship.pos.y, points[i], points[i + 1]) )
+				//else if ( IsOnLine((ship.pos.x + ship.width) / 2, ship.pos.y, slope, intercept) )
+				else if( IsOnLine( (ship.pos.x + ship.width) / 2, ship.pos.y, points[i], points[i + 1]) )
 				{
 					//Collide
 					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
 					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
-					al_draw_textf(font, al_map_rgb(255,0,0), WIDTH / 2, HEIGHT / 2, 0, "COLLISION AT %5d, %5d", ship.pos.x + ship.boundx, ship.pos.y);
+					al_draw_textf(font, al_map_rgb(255,0,0), WIDTH / 2, HEIGHT / 2, 0, "COLLISION AT %5d, %5d", ship.pos.x + ship.width, ship.pos.y);
 					return true;
 				}
-				//else if ( IsOnLine(ship.pos.x + ship.boundx, ship.pos.y, slope, intercept) )
-				else if( IsOnLine(ship.pos.x + ship.boundx, ship.pos.y, points[i], points[i + 1]) )
+				//else if ( IsOnLine(ship.pos.x + ship.width, ship.pos.y, slope, intercept) )
+				else if( IsOnLine(ship.pos.x + ship.width, ship.pos.y, points[i], points[i + 1]) )
 				{
 					//Collide
 					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
 					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
-					al_draw_textf(font, al_map_rgb(255,0,0), WIDTH / 2, HEIGHT / 2, 0, "COLLISION AT %5d, %5d", (ship.pos.x + ship.boundx) / 2, ship.pos.y);
+					al_draw_textf(font, al_map_rgb(255,0,0), WIDTH / 2, HEIGHT / 2, 0, "COLLISION AT %5d, %5d", (ship.pos.x + ship.width) / 2, ship.pos.y);
 					return true;
 				}
 			}
@@ -662,14 +711,14 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship)
 					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
 					return true;
 				}
-				else if(IsOnLine(ship.pos.x + ship.boundx / 2, ship.pos.y, points[i], points[i + 1]) )
+				else if(IsOnLine(ship.pos.x + ship.width / 2, ship.pos.y, points[i], points[i + 1]) )
 				{
 					//collide Top Middle
 					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
 					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
 					return true;
 				}
-				else if(IsOnLine(ship.pos.x + ship.boundx, ship.pos.y, points[i], points[i + 1]) )
+				else if(IsOnLine(ship.pos.x + ship.width, ship.pos.y, points[i], points[i + 1]) )
 				{
 					//Collide Top Right Corner
 					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
