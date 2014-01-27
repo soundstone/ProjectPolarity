@@ -136,7 +136,7 @@ int main(void)
 		Seed set to 24 for testing purposes.
 		//TODO: need to set up so that all coords print to a text file. 
 	*/
-	srand(24);
+	srand(64789);
 
 	//Initialize the ship to center screen to start game.
 	InitShip(ship);
