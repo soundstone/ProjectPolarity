@@ -15,7 +15,7 @@ struct SpaceShip
 {
 	int ID;
 	Point pos;
-	Vector3 *shipPos;
+	PolarisEngine::Vector3 shipPos;
 	int lives;
 	int speed;
 	int width;
