@@ -125,6 +125,7 @@ int main(void)
 
 	//allegro variables
 	ALLEGRO_DISPLAY *display = NULL;
+	ALLEGRO_BITMAP *backBuffer = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer = NULL;	
 
@@ -133,6 +134,7 @@ int main(void)
 		return -1;
 
 	display = al_create_display(WIDTH, HEIGHT);
+	backBuffer = al_create_bitmap(WIDTH, HEIGHT);
 	
 	if(!display)
 		return -1;
@@ -273,6 +275,9 @@ int main(void)
 		{
 			redraw = false;
 
+			al_set_target_bitmap(backBuffer);
+			al_clear_to_color(al_map_rgb(0,0,0));
+
 			DrawShip(ship, polarity);
 
 			ConnectPointsTop(pointsTop);
@@ -281,7 +286,10 @@ int main(void)
 			DrawMagnets(topMagnets, botMagnets);
 			
 			DrawObsticles(obsticles);
-			
+
+			al_set_target_bitmap(al_get_backbuffer(display));
+
+			al_draw_bitmap(backBuffer, 0, 0, 0);
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(0,0,0));
 		}
