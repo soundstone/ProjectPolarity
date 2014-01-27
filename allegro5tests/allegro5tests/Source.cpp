@@ -8,6 +8,7 @@
 #include "Logger.h"
 #include "polaris.h"
 #include "core.h"
+#include "MagnetFactory.h"
 
 using namespace std;
 using namespace PolarisEngine;
@@ -34,6 +35,8 @@ const int NUM_POINTS = 333;
 
 //Magnet consts
 const int NUM_MAGNETS = 3;
+Magnet topMagnets[NUM_MAGNETS];
+Magnet botMagnets[NUM_MAGNETS];
 
 //obstacle consts
 const int NUM_OBSTICLES = 2;
@@ -41,6 +44,9 @@ const int BUTTON_TIME = 1.0f;
 
 enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE };
 bool keys[5] = {false, false, false, false, false};
+
+TopMagnetFactory topFactory;
+BottomMagnetFactory bottomFactory;
 
 //================================================================
 
@@ -57,10 +63,10 @@ void MoveShipLeft(SpaceShip &ship);
 void MoveShipRight(SpaceShip &ship);
 
 //Tunnel generation functions
-void PlotPointsAndConnectTop(Point oldP, Point newP, Point points[]);
+void PlotPointsTop(Point oldP, Point newP, Point points[]);
 int  GenerateNewPointTop();
 void ConnectPointsTop(Point points[]);
-void PlotPointsAndConnectBottom(Point oldP, Point newP, Point points[]);
+void PlotPointsBottom(Point oldP, Point newP, Point points[]);
 int  GenerateNewPointBottom();
 void ConnectPointsBottom(Point points[]);
 void DrawObsticles(Point obsticles[]);
@@ -71,10 +77,11 @@ Point TranslateWorldToScreen(int objectX, int objectY, int cameraX, int cameraY)
 Point UpdateCamera(int x, int y, SpaceShip &ship);
 
 //Magnet Functions
-void InitMagnets(Magnet magnets[], Magnet magnetsBot[]);
+//void InitMagnets(Magnet magnets[], Magnet magnetsBot[]);
 int GetMagnetLocationX();
 int GetMagnetLocationY();
 void DrawMagnets(Magnet magnets[], Magnet magnetsBot[]);
+void SetupMagnetsTop();
 
 //Helper Functions
 Point GetPointDistance(Point p1, Point p2);
@@ -82,7 +89,6 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship);
 bool CollideTunnelBottom(Point points[], SpaceShip &ship);
 float GetLineSlope(Point p1, Point p2);
 float GetYIntercept(Point p1, float slope);
-bool IsOnLine(int boxX, int boxY, Point p1, Point p2);
 float GetPerpedicularSlope(float slope);
 Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept);
 
@@ -107,8 +113,8 @@ int main(void)
 
 	//object variables
 	SpaceShip ship;
-	Magnet magnets[NUM_MAGNETS];
-	Magnet magnetsBot[NUM_MAGNETS];
+	//Magnet magnets[NUM_MAGNETS];
+	//Magnet magnetsBot[NUM_MAGNETS];
 	bool polarity = false;
 	float buttonTimer = 0.0f;
 	bool collide = false;
@@ -139,7 +145,6 @@ int main(void)
 	//srand(time(NULL));
 	/*
 		Seed set to 64789 for testing purposes.
-		//TODO: need to set up so that all coords print to a text file. 
 	*/
 	srand(64789);
 
@@ -150,7 +155,8 @@ int main(void)
 	font = al_load_font("arial.ttf", 16, 0);
 	
 	//Initialize the magnets on the map
-	InitMagnets(magnets, magnetsBot);
+	//InitMagnets(magnets, magnetsBot);
+	SetupMagnetsTop();
 
 	//Place the center obstacles
 	GenerateObsticles(obsticles);
@@ -162,8 +168,8 @@ int main(void)
 	newP.y = NULL;
 
 	//These two function calls generate and draw the points in the array and connect them by drawing a line to each of them.
-	PlotPointsAndConnectTop(oldP, newP, pointsTop);
-	PlotPointsAndConnectBottom(oldP, newP, pointsBottom);
+	PlotPointsTop(oldP, newP, pointsTop);
+	PlotPointsBottom(oldP, newP, pointsBottom);
 
 	
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
@@ -264,20 +270,13 @@ int main(void)
 		if(redraw && al_event_queue_is_empty(event_queue))
 		{
 			redraw = false;
-			
-			/*if(collide)
-				al_draw_textf(font, al_map_rgb(255,0,0), WIDTH / 2, HEIGHT / 2, 0, "COLLISION AT %5d, %5d", ship.pos.x, ship.pos.y);
-			if(collideBot)
-				al_draw_textf(font, al_map_rgb(0,255,50), WIDTH / 2, HEIGHT / 2, 0, "Collision at %5d, %5d", ship.pos.x, ship.pos.y);*/
 
 			DrawShip(ship, polarity);
-
-			//TODO: list out what is in the array
 
 			ConnectPointsTop(pointsTop);
 			ConnectPointsBottom(pointsBottom);
 			
-			DrawMagnets(magnets, magnetsBot);
+			DrawMagnets(topMagnets, botMagnets);
 			
 			DrawObsticles(obsticles);
 			
@@ -384,7 +383,7 @@ int GenerateNewPointBottom()
 
 /*main generation of bottom of tunnel. Sets number of points to plot, hard sets first point in level, moves the current point to the new point 
   once generated. 1 in 66 points generated will result in == Y values, this creates flat spots in the tunnel design. */
-void PlotPointsAndConnectBottom(Point oldP, Point newP, Point pointsBot[])
+void PlotPointsBottom(Point oldP, Point newP, Point pointsBot[])
 {
 	char logStringbuffer[50];
 	logStringbuffer[0] = 0;
@@ -439,7 +438,7 @@ void PlotPointsAndConnectBottom(Point oldP, Point newP, Point pointsBot[])
 
 /*Main generation of top of tunnel. Sets number of points to plot, hard sets first point in level, moves the current point to the new point
   once generated. 1 in 66 points generated will result in == Y values, this creates flat spots in the tunnel design. */
-void PlotPointsAndConnectTop(Point oldP, Point newP, Point points[])
+void PlotPointsTop(Point oldP, Point newP, Point points[])
 {
 	char logStringbuffer[50];
 	logStringbuffer[0] = 0;
@@ -559,30 +558,35 @@ Point UpdateCamera(int x, int y, SpaceShip &ship)
 
 #pragma endregion
 
+//TODO: Turn magnets into a Factory class
 #pragma region Magnets
 
 //Sets all magnets to default start properties. Also places the magnet location with calls to GetMagnetLocationX() and GetMagnetLocationY()
-void InitMagnets(Magnet magnets[], Magnet magnetsBot[])
-{
-	for(int i = 0; i < NUM_MAGNETS; ++i)
-	{
-		//Top
-		magnets[i].ID = MAGNET;
-		magnets[i].radius = 10;
-		magnets[i].polarity = POSITIVE;
-		magnets[i].x = GetMagnetLocationX();
-		magnets[i].y = GetMagnetLocationY();
-
-		//Bottom
-		magnetsBot[i].ID = MAGNET;
-		magnetsBot[i].radius = 10;
-		magnetsBot[i].polarity = POSITIVE;
-		magnetsBot[i].x = GetMagnetLocationX();
-		magnetsBot[i].y = GetMagnetLocationY() + 370;
-	}
-
-}
-
+//void InitMagnets(Magnet magnets[], Magnet magnetsBot[])
+//{
+//	for(int i = 0; i < NUM_MAGNETS; ++i)
+//	{
+//		//Top
+//		magnets[i] = 
+//
+//		/*magnets[i].ID = MAGNET;
+//		magnets[i].radius = 10;
+//		magnets[i].polarity = POSITIVE;
+//		magnets[i].x = GetMagnetLocationX();
+//		magnets[i].y = GetMagnetLocationY();
+//		magnets[i].force = 1.9f;*/
+//
+//		//Bottom
+//		magnetsBot[i].ID = MAGNET;
+//		magnetsBot[i].radius = 10;
+//		magnetsBot[i].polarity = POSITIVE;
+//		magnetsBot[i].x = GetMagnetLocationX();
+//		magnetsBot[i].y = GetMagnetLocationY() + 370;
+//		magnetsBot[i].force = 0.9f;
+//	}
+//
+//}
+//
 //Generate random X value for Magnet location
 int GetMagnetLocationX()
 {
@@ -604,9 +608,37 @@ void DrawMagnets(Magnet magnets[], Magnet magnetsBot[])
 {
 	for(int i = 0; i < NUM_MAGNETS; ++i)
 	{
-		al_draw_filled_rectangle(magnets[i].x, magnets[i].y, magnets[i].x + 20, magnets[i].y + 20, al_map_rgb(0,255,255));
-		al_draw_filled_rectangle(magnetsBot[i].x, magnetsBot[i].y, magnetsBot[i].x + 20, magnetsBot[i].y + 20, al_map_rgb(0, 255, 255));
+		al_draw_filled_rectangle(magnets[i].magnetX, magnets[i].magnetY, magnets[i].magnetX + 20, magnets[i].magnetY + 20, al_map_rgb(0,255,255));
+		al_draw_filled_rectangle(magnetsBot[i].magnetX, magnetsBot[i].magnetY, magnetsBot[i].magnetX + 20, magnetsBot[i].magnetY + 20, al_map_rgb(0, 255, 255));
 	}
+}
+
+void SetupMagnetsTop()
+{
+	char logStringBuffer[50];
+	logStringBuffer[0] = 0;
+
+	bool polaricCharge = POSITIVE;
+
+	Logger::Log("MAGNETS - TOP", Logger::logLevelInfo);
+
+	for (int i = 0; i < NUM_MAGNETS; i++)
+	{
+		Magnet *topMagnet = topFactory.requestMagnet();
+
+		if (i % 2 == 0)
+			polaricCharge != polaricCharge;
+
+		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 10, 1.9f, polaricCharge);
+		topMagnets[i] = *topMagnet;
+
+
+		sprintf(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, topMagnet->magnetX, topMagnet->magnetY);  
+		Logger::Log(logStringBuffer, Logger::logLevelInfo);
+		memset(logStringBuffer, 0, sizeof(logStringBuffer));
+	}
+
+	Logger::ShutdownLogger();
 }
 
 #pragma endregion
@@ -695,93 +727,6 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship)
 	return false;
 }
 
-/*
-bool CollideTunnelTop(Point points[], SpaceShip &ship)
-{
-
-	for (int i = 0; i < NUM_POINTS; i++)
-	{
-		if(points[i + 1].y < points[i].y)
-		{
-			//preliminary check for collision, is ship within checking range?
-			if( (ship.pos.x > points[i].x) &&
-				(ship.pos.x < points[i + 1].x))
-
-			if(	(ship.pos.y > points[i + 1].y) &&
-				(ship.pos.y < points[i].y))
-			{
-				//TODO: need to place another if statment here checking the slope of the line and if the point lies on the line. 
-				float slope = GetLineSlope(points[i], points[i + 1]);
-				//float intercept = GetYIntercept(points[i], slope);
-				//if( IsOnLine(ship.pos.x, ship.pos.y, slope, intercept) )
-				if(IsOnLine(ship.pos.x, ship.pos.y, points[i], points[i + 1]))
-				{
-					//Collide
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
-					al_draw_textf(font, al_map_rgb(255,0,0), WIDTH / 2, HEIGHT / 2, 0, "COLLISION AT %5d, %5d", ship.pos.x, ship.pos.y);
-					return true;
-				}
-				//else if ( IsOnLine((ship.pos.x + ship.width) / 2, ship.pos.y, slope, intercept) )
-				else if( IsOnLine( (ship.pos.x + ship.width) / 2, ship.pos.y, points[i], points[i + 1]) )
-				{
-					//Collide
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
-					al_draw_textf(font, al_map_rgb(255,0,0), WIDTH / 2, HEIGHT / 2, 0, "COLLISION AT %5d, %5d", ship.pos.x + ship.width, ship.pos.y);
-					return true;
-				}
-				//else if ( IsOnLine(ship.pos.x + ship.width, ship.pos.y, slope, intercept) )
-				else if( IsOnLine(ship.pos.x + ship.width, ship.pos.y, points[i], points[i + 1]) )
-				{
-					//Collide
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
-					al_draw_textf(font, al_map_rgb(255,0,0), WIDTH / 2, HEIGHT / 2, 0, "COLLISION AT %5d, %5d", (ship.pos.x + ship.width) / 2, ship.pos.y);
-					return true;
-				}
-			}
-		}
-		else if(points[i + 1].y > points[i].y)
-		{
-			//preliminary check for collision. Is ship within checking range?
-			if( (ship.pos.x > points[i].x) &&
-				(ship.pos.x < points[i + 1].x))
-
-				if( (ship.pos.y < points[i + 1].y) &&
-				(ship.pos.y > points[i].y))
-			{
-				float slope = GetLineSlope(points[i], points[i + 1]);
-				float intercept = GetYIntercept(points[i], slope);
-
-				if(IsOnLine(ship.pos.x, ship.pos.y, points[i], points[i + 1]))
-				{
-					//collide Top Left Corner
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
-					return true;
-				}
-				else if(IsOnLine(ship.pos.x + ship.width / 2, ship.pos.y, points[i], points[i + 1]) )
-				{
-					//collide Top Middle
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
-					return true;
-				}
-				else if(IsOnLine(ship.pos.x + ship.width, ship.pos.y, points[i], points[i + 1]) )
-				{
-					//Collide Top Right Corner
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 10, 0, "Line points (%5d, %5d)", points[i].x, points[i].y);
-					al_draw_textf(font, al_map_rgb(255,0,0), 100, 35, 0, "Line points (%5d, %5d)", points[i + 1].x, points[i + 1].y);
-					return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-*/
-
 bool CollideTunnelBottom(Point points[], SpaceShip &ship)
 {
 	for (int i = 0; i < NUM_POINTS; i++)
@@ -794,7 +739,6 @@ bool CollideTunnelBottom(Point points[], SpaceShip &ship)
 				(ship.pos.y > points[i].y) &&
 				(ship.pos.y < points[i + 1].y))
 			{
-				//TODO: need to place another if statement here checking the slope of the line and if the point lies on it
 				//Collide
 				return true;
 			}
@@ -807,7 +751,6 @@ bool CollideTunnelBottom(Point points[], SpaceShip &ship)
 				(ship.pos.y + 10 < points[i + 1].y) &&
 				(ship.pos.y - 10> points[i].y))
 			{
-				//TODO: need to place another if statement here checking the slope of the line and if the point lies on it.
 				//collide
 				return true;
 			}
@@ -837,14 +780,6 @@ float GetYIntercept(Point p1, float slope)
 	intercept *= -1;
 
 	return intercept;
-}
-
-bool IsOnLine(int boxX, int boxY, Point p1, Point p2)
-{
-	Point temp;
-	temp.x = boxX;
-	temp.y = boxY;
-	return ( (p1.y - temp.y) == GetLineSlope(p1, p2) * (p1.x - temp.x) );
 }
 
 //returns the slope of a line that is perpendicular to slope of line passed to function.

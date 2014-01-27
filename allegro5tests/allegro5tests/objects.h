@@ -25,15 +25,6 @@ struct SpaceShip
 
 };
 
-struct Magnet
-{
-	int ID;
-	int x, y;
-	int radius;
-	int force;
-	bool polarity; 
-};
-
 struct Bullet
 {
 	int ID;
