@@ -1,3 +1,5 @@
+#include "polaris.h"
+
 //Object IDs
 enum IDS {PLAYER, BULLET, ENEMY, MAGNET};
 enum Polarity {POSITIVE, NEGATIVE};
@@ -13,21 +15,14 @@ struct SpaceShip
 {
 	int ID;
 	Point pos;
+	PolarisEngine::Vector3 shipPos;
 	int lives;
 	int speed;
-	int boundx;
-	int boundy;
+	int width;
+	int height;
 	int score;
-
-};
-
-struct Magnet
-{
-	int ID;
-	int x, y;
-	int radius;
-	int force;
 	bool polarity;
+
 };
 
 struct Bullet

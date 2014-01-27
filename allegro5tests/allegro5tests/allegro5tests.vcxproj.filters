@@ -45,9 +45,21 @@
     <ClInclude Include="polaris.h">
       <Filter>Header Files\PolarisEngine</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="camera.h">
       <Filter>Header Files\PolarisEngine</Filter>
     </ClInclude>
+=======
+    <ClInclude Include="Logger.h">
+      <Filter>Header Files\PolarisEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Magnets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MagnetFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+>>>>>>> origin/PolarisEngine
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -58,6 +70,12 @@
     </ClCompile>
     <ClCompile Include="polaris.cpp">
       <Filter>Source Files\PolarisEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Files\PolarisEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="MagnetFactory.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
