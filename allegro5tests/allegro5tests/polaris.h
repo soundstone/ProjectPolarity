@@ -37,11 +37,6 @@ namespace PolarisEngine
 	class Polaris
 	{
 	public:
-<<<<<<< HEAD
-
-=======
-		
->>>>>>> origin/PolarisEngine
 		//returns the force between 2 point charges
 		static double Get_Force(PointCharge p1, PointCharge p2, double distance);
 

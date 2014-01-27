@@ -8,13 +8,9 @@ using namespace std;
 
 namespace PolarisEngine
 {
-<<<<<<< HEAD
-	const double kConst = 8.99;
-	const double pi = 3.1415926;
+	//const double kConst = 8.99;
+	//const double pi = 3.1415926;
 
-=======
-	
->>>>>>> origin/PolarisEngine
 	double Polaris::Get_Force(PointCharge p1, PointCharge p2, double dist)
 	{
 		//Hold force of calculation
