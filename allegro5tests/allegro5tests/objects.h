@@ -11,16 +11,16 @@ struct Point
 };
 
 //player
-struct SpaceShip
-{
-	int ID;
-	Point pos;
-	PolarisEngine::Vector3 shipPos;
-	int lives;
-	int speed;
-	int width;
-	int height;
-	int score;
-	bool polarity;
-};
+//struct SpaceShip
+//{
+//	int ID;
+//	Point pos;
+//	PolarisEngine::Vector3 shipPos;
+//	int lives;
+//	int speed;
+//	int width;
+//	int height;
+//	int score;
+//	bool polarity;
+//};
 

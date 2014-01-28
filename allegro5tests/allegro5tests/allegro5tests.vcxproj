@@ -72,6 +72,7 @@
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="polaris.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="SpaceShip.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />

@@ -9,6 +9,7 @@
 #include "polaris.h"
 #include "core.h"
 #include "MagnetFactory.h"
+#include "Spaceship.h"
 
 using namespace std;
 using namespace PolarisEngine;
@@ -40,7 +41,7 @@ Magnet botMagnets[NUM_MAGNETS];
 
 //obstacle consts
 const int NUM_OBSTICLES = 2;
-const int BUTTON_TIME = 1.0f;
+const int BUTTON_TIME = 1.5f;
 
 enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE };
 bool keys[5] = {false, false, false, false, false};
@@ -53,14 +54,6 @@ BottomMagnetFactory bottomFactory;
 #pragma endregion
 
 #pragma region Prototypes
-
-//Ship functions
-void InitShip(SpaceShip &ship);
-void DrawShip(SpaceShip &ship, bool polarity);
-void MoveShipUp(SpaceShip &ship);
-void MoveShipDown(SpaceShip &ship);
-void MoveShipLeft(SpaceShip &ship);
-void MoveShipRight(SpaceShip &ship);
 
 //Tunnel generation functions
 void PlotPointsTop(Point oldP, Point newP, Point points[]);
@@ -115,9 +108,11 @@ int main(void)
 	Point obsticles[NUM_OBSTICLES];
 
 	//object variables
-	SpaceShip ship;
-	//Magnet magnets[NUM_MAGNETS];
-	//Magnet magnetsBot[NUM_MAGNETS];
+	PolarisEngine::Vector3 shipStartingPosition;
+	shipStartingPosition.x = 20;
+	shipStartingPosition.y = HEIGHT / 2;
+	shipStartingPosition.z = 0;
+	SpaceShip ship(shipStartingPosition, 15, 15, 7, 3, NEGATIVE);
 	bool polarity = false;
 	float buttonTimer = 0.0f;
 	bool collide = false;
@@ -155,10 +150,7 @@ int main(void)
 
 	Logger::Log("Seed is 64789", Logger::logLevelInfo);
 	Logger::ShutdownLogger();
-
-	//Initialize the ship to center screen to start game.
-	InitShip(ship);
-
+	
 	//Font used for Debug display
 	font = al_load_font("arial.ttf", 16, 0);
 	
@@ -179,7 +171,6 @@ int main(void)
 	PlotPointsTop(oldP, newP, pointsTop);
 	PlotPointsBottom(oldP, newP, pointsBottom);
 
-	
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 	al_register_event_source(event_queue, al_get_display_event_source(display));
@@ -200,19 +191,19 @@ int main(void)
 			collide = false;
 			redraw = true;
 			if(keys[UP])
-				MoveShipUp(ship);
+				ship.MoveShipUp();
 			if(keys[DOWN])
-				MoveShipDown(ship);
+				ship.MoveShipDown();
 			if(keys[LEFT])
-				MoveShipLeft(ship);
+				ship.MoveShipLeft();
 			if(keys[RIGHT])
-				MoveShipRight(ship);
+				ship.MoveShipRight();
 			if(keys[SPACE])
 			{
 				if(buttonTimer >= BUTTON_TIME)
 				{
 					buttonTimer = 0.0f;
-					polarity = !polarity;
+					ship.TogglePolaricCharge();	
 				}
 			}		
 
@@ -282,7 +273,7 @@ int main(void)
 			al_set_target_bitmap(backBuffer);
 			al_clear_to_color(al_map_rgb(0,0,0));
 
-			DrawShip(ship, polarity);
+			ship.DrawShip();
 
 			ConnectPointsTop(pointsTop);
 			ConnectPointsBottom(pointsBottom);
@@ -305,77 +296,6 @@ int main(void)
 	al_destroy_display(display);
 	return 0;
 }
-
-//TODO: Turn Ship into a singleton class
-#pragma region Ship
-
-//Initialize the ship's values to starting values
-void InitShip(SpaceShip &ship)
-{
-	ship.pos.x = 20;
-	ship.pos.y = HEIGHT / 2;
-	ship.ID = PLAYER;
-	ship.lives = 3;
-	ship.score = 0;
-	ship.speed = 7;
-
-	ship.width = 15;
-	ship.height = 15;
-
-	ship.width = 15;
-	ship.height = 15;
-	ship.polarity = NEGATIVE;
-
-}
-
-//Designs and draw's the ship. 
-void DrawShip(SpaceShip &ship, bool polarity)
-{
-	if(polarity)
-	{
-		al_draw_filled_rectangle(ship.pos.x, ship.pos.y, ship.pos.x + ship.width, ship.pos.y + ship.height, al_map_rgb(255,0,0));
-		al_draw_pixel(ship.pos.x + (ship.width / 2), ship.pos.y + (ship.height / 2), al_map_rgb(0,0,0));
-	}
-	else
-	{
-		al_draw_filled_rectangle(ship.pos.x, ship.pos.y, ship.pos.x + ship.width, ship.pos.y + ship.height, al_map_rgb(255,255,255));
-		al_draw_pixel(ship.pos.x + (ship.width / 2), ship.pos.y + (ship.height / 2), al_map_rgb(0,0,0));
-	}
-}
-
-//Keyboard input to move the player forcefully up
-void MoveShipUp(SpaceShip &ship)
-{
-	ship.pos.y -= ship.speed;
-	if( ship.pos.y < 66)
-		ship.pos.y = 66;
-}
-
-//Keyboard input to move the player forcefully down
-void MoveShipDown(SpaceShip &ship)
-{
-	ship.pos.y += ship.speed;
-	if( ship.pos.y > HEIGHT - 100)
-		ship.pos.y = HEIGHT - 100;
-}
-
-//Keyboard input to move the player forcefully left
-void MoveShipLeft(SpaceShip &ship)
-{
-	ship.pos.x -= ship.speed;
-	if( ship.pos.x < 20)
-		ship.pos.x = 20;
-}
-
-//Keyboard input to move the player forcefully right
-void MoveShipRight(SpaceShip &ship)
-{
-	ship.pos.x += ship.speed;
-	if( ship.pos.x > WIDTH)
-		ship.pos.x = WIDTH;
-}
-
-#pragma endregion
 
 #pragma region Procedual Tunnel
 
@@ -562,8 +482,8 @@ Point TranslateWorldToScreen(int objectX, int objectY, int cameraX, int cameraY)
 
 Point UpdateCamera(int x, int y, SpaceShip &ship)
 {
-	x = ship.pos.x - WIDTH / 2;
-	y = ship.pos.y - HEIGHT / 2;
+	x = ship.GetShipPosition().x - WIDTH / 2;
+	y = ship.GetShipPosition().y - HEIGHT / 2;
 
 	if(x < 0) x = 0;
 	if(y < 0) y = 0;
@@ -702,48 +622,48 @@ bool CollideTunnelTop(Point points[], SpaceShip &ship)
 	{
 		if(points[i + 1].y < points[i].y)
 		{
-			if( (ship.pos.x > points[i].x) &&
-				(ship.pos.x < points[i + 1].x))
+			if( (ship.GetShipPosition().x > points[i].x) &&
+				(ship.GetShipPosition().x < points[i + 1].x))
 			{
-				if( (ship.pos.y > points[i + 1].y) &&
-					(ship.pos.y < points[i].y))
+				if( (ship.GetShipPosition().y > points[i + 1].y) &&
+					(ship.GetShipPosition().y < points[i].y))
 				{
 					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
 					float slope = GetLineSlope(points[i], points[i + 1]);
 					float perpSlope = GetPerpedicularSlope(slope);
 					float lineIntercept =  GetYIntercept(points[i], slope);
-					float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
-					Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
-											points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
+					//float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
+				//	Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
+					/*						points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
 
 					al_draw_line(intersection.x, intersection.y, ship.pos.x, ship.pos.y, al_map_rgb(255, 255, 0), 1.0f);
 					al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
 					al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
-					al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);
+					al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);*/
 				}
 			}
 		}
 		else 
 		{
-			if( (ship.pos.x < points[i + 1].x) &&
-				(ship.pos.x > points[i].x))
+			if( (ship.GetShipPosition().x < points[i + 1].x) &&
+				(ship.GetShipPosition().x > points[i].x))
 			{
-				if( (ship.pos.y < points[i + 1].y) &&
-					(ship.pos.y > points[i].y))
+				if( (ship.GetShipPosition().y < points[i + 1].y) &&
+					(ship.GetShipPosition().y > points[i].y))
 				{
 					
 					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
 					float slope = GetLineSlope(points[i], points[i + 1]);
 					float perpSlope = GetPerpedicularSlope(slope);
 					float lineIntercept =  GetYIntercept(points[i], slope);
-					float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
-					Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
-											points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
+					//float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
+					//Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
+					//						points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
 
-					al_draw_line(intersection.x, intersection.y, ship.pos.x, ship.pos.y, al_map_rgb(255, 255, 0), 1.0f);
-					al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
-					al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
-					al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);
+					//al_draw_line(intersection.x, intersection.y, ship.pos.x, ship.pos.y, al_map_rgb(255, 255, 0), 1.0f);
+					//al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
+					//al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
+					//al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);
 				}
 			}
 		}
@@ -758,10 +678,10 @@ bool CollideTunnelBottom(Point points[], SpaceShip &ship)
 		if(points[i + 1].y < points[i].y)
 		{
 			//This is a preliminary check. Is the ship close enough to check for collision?
-			if(( ship.pos.x > points[i].x) &&
-				(ship.pos.x < points[i + 1].x) &&
-				(ship.pos.y > points[i].y) &&
-				(ship.pos.y < points[i + 1].y))
+			if(( ship.GetShipPosition().x > points[i].x) &&
+				(ship.GetShipPosition().x < points[i + 1].x) &&
+				(ship.GetShipPosition().y > points[i].y) &&
+				(ship.GetShipPosition().y < points[i + 1].y))
 			{
 				//Collide
 				return true;
@@ -770,10 +690,10 @@ bool CollideTunnelBottom(Point points[], SpaceShip &ship)
 		else if(points[i + 1].y > points[i].y)
 		{
 			//preliminary check. Is ship close enough to check for collision?
-			if( (ship.pos.x > points[i].x) &&
-				(ship.pos.x < points[i + 1].x) &&
-				(ship.pos.y + 10 < points[i + 1].y) &&
-				(ship.pos.y - 10> points[i].y))
+			if( (ship.GetShipPosition().x > points[i].x) &&
+				(ship.GetShipPosition().x < points[i + 1].x) &&
+				(ship.GetShipPosition().y + 10 < points[i + 1].y) &&
+				(ship.GetShipPosition().y - 10> points[i].y))
 			{
 				//collide
 				return true;
