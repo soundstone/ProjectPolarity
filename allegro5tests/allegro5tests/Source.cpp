@@ -100,8 +100,8 @@ int main(void)
 	bool redraw = true;
 	const int FPS = 60;
 	
-
 	//procedual tunnel variables
+	//TODO: Remove all Point variables - delete point struct / replace all with Vector3 positions
 	Point oldP, newP;
 	Point pointsTop[NUM_POINTS] = {};
 	Point pointsBottom[NUM_POINTS] = {};
