@@ -82,6 +82,7 @@ int GetMagnetLocationX();
 int GetMagnetLocationY();
 void DrawMagnets(Magnet magnets[], Magnet magnetsBot[]);
 void SetupMagnetsTop();
+void SetUpMagnetsBottom();
 
 //Helper Functions
 Point GetPointDistance(Point p1, Point p2);
@@ -152,6 +153,9 @@ int main(void)
 	*/
 	srand(64789);
 
+	Logger::Log("Seed is 64789", Logger::logLevelInfo);
+	Logger::ShutdownLogger();
+
 	//Initialize the ship to center screen to start game.
 	InitShip(ship);
 
@@ -159,8 +163,8 @@ int main(void)
 	font = al_load_font("arial.ttf", 16, 0);
 	
 	//Initialize the magnets on the map
-	//InitMagnets(magnets, magnetsBot);
 	SetupMagnetsTop();
+	SetUpMagnetsBottom();
 
 	//Place the center obstacles
 	GenerateObsticles(obsticles);
@@ -302,6 +306,7 @@ int main(void)
 	return 0;
 }
 
+//TODO: Turn Ship into a singleton class
 #pragma region Ship
 
 //Initialize the ship's values to starting values
@@ -444,7 +449,7 @@ void PlotPointsBottom(Point oldP, Point newP, Point pointsBot[])
 			
 			pointsBot[i] = newP;
 		}
-		sprintf(logStringbuffer, "PointsBot[ %i ] = (%i,%i)", i, newP.x, newP.y);  
+		sprintf_s(logStringbuffer, "PointsBot[ %i ] = (%i,%i)", i, newP.x, newP.y);  
 		Logger::Log(logStringbuffer, Logger::logLevelInfo);
 		memset(logStringbuffer, 0, sizeof(logStringbuffer));
 	}	
@@ -498,7 +503,7 @@ void PlotPointsTop(Point oldP, Point newP, Point points[])
 			
 			points[i] = newP;
 		}
-		sprintf(logStringbuffer, "PointsTop[ %i ] = (%i,%i)", i, newP.x, newP.y);  
+		sprintf_s(logStringbuffer, "PointsTop[ %i ] = (%i,%i)", i, newP.x, newP.y);  
 		Logger::Log(logStringbuffer, Logger::logLevelInfo);
 		memset(logStringbuffer, 0, sizeof(logStringbuffer));
 	}	
@@ -574,7 +579,6 @@ Point UpdateCamera(int x, int y, SpaceShip &ship)
 
 #pragma endregion
 
-//TODO: Turn magnets into a Factory class
 #pragma region Magnets
 
 //Generate random X value for Magnet location
@@ -617,13 +621,43 @@ void SetupMagnetsTop()
 		Magnet *topMagnet = topFactory.requestMagnet();
 
 		if (i % 2 == 0)
-			polaricCharge != polaricCharge;
+			polaricCharge = !polaricCharge;
 
 		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 10, 1.9f, polaricCharge);
 		topMagnets[i] = *topMagnet;
 
 
-		sprintf(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, topMagnet->magnetX, topMagnet->magnetY);  
+		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, topMagnet->magnetX, topMagnet->magnetY);  
+		Logger::Log(logStringBuffer, Logger::logLevelInfo);
+		memset(logStringBuffer, 0, sizeof(logStringBuffer));
+	}
+
+	Logger::ShutdownLogger();
+}
+
+void SetUpMagnetsBottom()
+{
+	char logStringBuffer[50];
+	logStringBuffer[0] = 0;
+
+	bool polaricCharge = NEGATIVE;
+	
+	Logger::Log("Magnets - BOTTOM", Logger::logLevelInfo);
+
+	int magnetYPositionOffset = 370;
+
+	for (int i = 0; i < NUM_MAGNETS; i++)
+	{
+		Magnet *bottomMagnet = bottomFactory.requestMagnet();
+
+		if (i % 2 == 0)
+			polaricCharge = !polaricCharge;
+
+		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 10, 1.9f, polaricCharge);
+		botMagnets[i] = *bottomMagnet;
+
+
+		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, bottomMagnet->magnetX, bottomMagnet->magnetY);  
 		Logger::Log(logStringBuffer, Logger::logLevelInfo);
 		memset(logStringBuffer, 0, sizeof(logStringBuffer));
 	}

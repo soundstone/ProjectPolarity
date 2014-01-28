@@ -1,7 +1,7 @@
 #include "polaris.h"
 
 //Object IDs
-enum IDS {PLAYER, BULLET, ENEMY, MAGNET};
+enum IDS {PLAYER, MAGNET};
 enum Polarity {POSITIVE, NEGATIVE};
 
 
@@ -22,23 +22,5 @@ struct SpaceShip
 	int height;
 	int score;
 	bool polarity;
-
 };
 
-struct Bullet
-{
-	int ID;
-	int x, y;
-	bool live;
-	int speed;
-};
-
-struct Comet
-{
-	int ID;
-	int x, y;
-	bool live;
-	int speed;
-	int boundx;
-	int boundy;
-};
