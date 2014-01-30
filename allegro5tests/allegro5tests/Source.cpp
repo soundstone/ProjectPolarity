@@ -41,7 +41,7 @@ Magnet botMagnets[NUM_MAGNETS];
 
 //obstacle consts
 const int NUM_OBSTICLES = 2;
-const int BUTTON_TIME = 1.5f;
+const int BUTTON_TIME = 2.5f;
 
 enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE };
 bool keys[5] = {false, false, false, false, false};
@@ -57,11 +57,15 @@ BottomMagnetFactory bottomFactory;
 
 //Tunnel generation functions
 void PlotPointsTop(Point oldP, Point newP, Point points[]);
+//void PlotPointsTop(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsTop[]);
 int  GenerateNewPointTop();
 void ConnectPointsTop(Point points[]);
+//void ConnectPointsTop(Vector3 pointsTop[]);
 void PlotPointsBottom(Point oldP, Point newP, Point points[]);
+//void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsBottom[]);
 int  GenerateNewPointBottom();
 void ConnectPointsBottom(Point points[]);
+//void ConnectPointsBottom(Vector3 pointsBottom[]);
 void DrawObsticles(Point obsticles[]);
 void GenerateObsticles(Point obsticles[]);
 
@@ -79,6 +83,7 @@ void SetUpMagnetsBottom();
 
 //Helper Functions
 Point GetPointDistance(Point p1, Point p2);
+//Vector3 GetPointDistance(Vector3 firstPosition, Vector3 secondPosition);
 bool CollideTunnelTop(Point points[], SpaceShip &ship);
 bool CollideTunnelBottom(Point points[], SpaceShip &ship);
 float GetLineSlope(Point p1, Point p2);
@@ -87,6 +92,8 @@ bool IsOnLine(int boxX, int boxY, Point p1, Point p2);
 
 float GetPerpedicularSlope(float slope);
 Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept);
+//Vector3 GetLineIntersection(Vector3 originalPosition, float originalSlope, float originalEquationIntercept, Vector3 perpendicularPosition, 
+//							float perpendicularSlope, float perpendicularIntercept);
 
 
 //==========================================================================================
@@ -103,9 +110,13 @@ int main(void)
 	//procedual tunnel variables
 	//TODO: Remove all Point variables - delete point struct / replace all with Vector3 positions
 	Point oldP, newP;
+	Vector3 oldPosition, newPosition;
 	Point pointsTop[NUM_POINTS] = {};
+	Vector3 topVectorOfPoints[NUM_POINTS] = {};
 	Point pointsBottom[NUM_POINTS] = {};
+	Vector3 bottomVectorOfPoints[NUM_POINTS] = {};
 	Point obsticles[NUM_OBSTICLES];
+	Vector3 vectorObsticles[NUM_OBSTICLES];
 
 	//object variables
 	PolarisEngine::Vector3 shipStartingPosition;
@@ -162,6 +173,10 @@ int main(void)
 	GenerateObsticles(obsticles);
 
 	//set up points to initial null status
+	oldPosition.x = oldPosition.y = NULL;
+	oldPosition.z = 0;
+	newPosition.x = newPosition.y = NULL;
+	newPosition.z = 0;
 	oldP.x = NULL;
 	oldP.y = NULL;
 	newP.x = NULL;
@@ -170,6 +185,8 @@ int main(void)
 	//These two function calls generate and draw the points in the array and connect them by drawing a line to each of them.
 	PlotPointsTop(oldP, newP, pointsTop);
 	PlotPointsBottom(oldP, newP, pointsBottom);
+	//PlotPointsTop(oldPosition, newPosition, topVectorOfPoints);
+	//PlotPointsBottom(oldPosition, newPosition, bottomVectorOfPoints);
 
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
@@ -277,6 +294,8 @@ int main(void)
 
 			ConnectPointsTop(pointsTop);
 			ConnectPointsBottom(pointsBottom);
+			//ConnectPointsTop(topVectorOfPoints);
+			//ConnectPointsBottom(bottomVectorOfPoints);
 			
 			DrawMagnets(topMagnets, botMagnets);
 			
@@ -376,6 +395,61 @@ void PlotPointsBottom(Point oldP, Point newP, Point pointsBot[])
 	Logger::ShutdownLogger();
 }
 
+//void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 bottomPointsVec)
+//{
+//	char logStringBuffer[50];
+//	logStringBuffer[0] = 0;
+//
+//	if(newPosition.x >= 4000)
+//		return;
+//	
+//	//Generate the starting point. Located at the far left of screen. 
+//	if(oldPosition.x == NULL)
+//	{
+//		oldPosition.x = 0;
+//		oldPosition.y = GenerateNewPointBottom();
+//	}
+//
+////	bottomPointsVec[0] = oldPosition;
+//	newPosition.x = oldPosition.x;
+//
+//	Logger::Log("Points - BOTTOM", Logger::logLevelInfo);
+//	for (int i = 1; i < NUM_POINTS; i++)
+//	{
+//		//One in 66 the points will not vary in height. This cause flat areas, and makes the lines look more cavelike. 
+//		if(rand() % 66 == 0)
+//		{
+//			for(int j = 0; j < 3; j++)
+//			{
+//				//Move the X coord to the next PLOT_INTERVAL. Adding 12 during testing. Might need to be implemented through PLOT_INTERVAL
+//				newPosition.x = newPosition.x + PLOT_INTERVAL + 12;
+//				
+//				//Keeps the height the same. No change in slope.
+//				newPosition.y = oldPosition.y;
+//				
+//				//add the new point to the bottom of the map
+////				bottomPointsVec[i] = newPosition;
+//			}
+//		}
+//		//Generates new points until pointsBot[i] reaches 4000 points. These vary in height.
+//		else 
+//		{
+//			newPosition.x = newPosition.x + PLOT_INTERVAL;
+//
+//			oldPosition.y = GenerateNewPointBottom();
+//			newPosition.y = GenerateNewPointBottom();
+//			
+//			bottomPointsVec[i] = newPosition.x;
+//			bottomPointsVec[i] = newPosition.y;
+//			bottomPointsVec[i] = 0;
+//		}
+//		sprintf_s(logStringBuffer, "PointsBot[ %i ] = (%d,%d, %d)", i, newPosition.x, newPosition.y, newPosition.z);  
+//		Logger::Log(logStringBuffer, Logger::logLevelInfo);
+//		memset(logStringBuffer, 0, sizeof(logStringBuffer));
+//	}	
+//	Logger::ShutdownLogger();
+//}
+
 /*Main generation of top of tunnel. Sets number of points to plot, hard sets first point in level, moves the current point to the new point
   once generated. 1 in 66 points generated will result in == Y values, this creates flat spots in the tunnel design. */
 void PlotPointsTop(Point oldP, Point newP, Point points[])
@@ -430,6 +504,8 @@ void PlotPointsTop(Point oldP, Point newP, Point points[])
 	Logger::ShutdownLogger();
 }
 
+//void plotPointsTop(Vector3 oldPosition, Vector3 newPosition, Vector3 topPointsVec[]){}
+
 //Draws lines from point to point. Connects top of tunnel. Uses Allegro al_draw_line() to do it. 
 void ConnectPointsTop(Point points[])
 {
@@ -439,6 +515,8 @@ void ConnectPointsTop(Point points[])
 	}
 }
 
+//void ConnectPointsTop(Vector3 points[]){}
+
 //Draws lines from point to point. Connects bottom of tunnel. Uses Allegro al_draw_line() to do it. 
 void ConnectPointsBottom(Point pointsBot[])
 {
@@ -447,6 +525,7 @@ void ConnectPointsBottom(Point pointsBot[])
 		al_draw_line(pointsBot[i].x, pointsBot[i].y, pointsBot[i + 1].x, pointsBot[i + 1].y, al_map_rgb(255,0,255), 2);
 	}
 }
+//void ConnectPointsBottom(Vector3 pointsBot[]){}
 
 //Takes array of obsticles generated and draws them to the screen. Obsticles reside inside the tunnel for the player to dodge.
 void DrawObsticles(Point obsticles[])
