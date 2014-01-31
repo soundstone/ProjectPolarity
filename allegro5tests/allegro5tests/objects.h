@@ -5,8 +5,8 @@ enum IDS {PLAYER, MAGNET};
 enum Polarity {POSITIVE, NEGATIVE};
 
 
-struct Point
-{
-	int x, y;
-};
+//struct Point
+//{
+//	int x, y;
+//};
 

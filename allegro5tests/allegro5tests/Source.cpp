@@ -40,7 +40,7 @@ Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
 
 //obstacle consts
-const int NUM_OBSTICLES = 2;
+const int NUM_obstacles = 2;
 const int BUTTON_TIME = 2.5f;
 
 enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE };
@@ -62,12 +62,12 @@ void ConnectPointsTop(Vector3 pointsTop[]);
 void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsBottom[]);
 int  GenerateNewPointBottom();
 void ConnectPointsBottom(Vector3 pointsBottom[]);
-void DrawObsticles(Vector3 vectorObsticles[]);
-void GenerateObsticles(Vector3 vectorObsticles[]);
+void Drawobstacles(Vector3 vectorobstacles[]);
+void Generateobstacles(Vector3 vectorobstacles[]);
 
 //camera functions
-Point TranslateWorldToScreen(int objectX, int objectY, int cameraX, int cameraY);
-Point UpdateCamera(int x, int y, SpaceShip &ship);
+//Point TranslateWorldToScreen(int objectX, int objectY, int cameraX, int cameraY);
+//Point UpdateCamera(int x, int y, SpaceShip &ship);
 
 //Magnet Functions
 int GetMagnetLocationX();
@@ -78,16 +78,16 @@ void SetUpMagnetsBottom();
 
 //Helper Functions
 Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
-bool CollideTunnelTop(Point points[], SpaceShip &ship);
-bool CollideTunnelBottom(Point points[], SpaceShip &ship);
-float GetLineSlope(Point p1, Point p2);
-float GetYIntercept(Point p1, float slope);
-bool IsOnLine(int boxX, int boxY, Point p1, Point p2);
+//bool CollideTunnelTop(Point points[], SpaceShip &ship);
+//bool CollideTunnelBottom(Point points[], SpaceShip &ship);
+//float GetLineSlope(Point p1, Point p2);
+//float GetYIntercept(Point p1, float slope);
+//bool IsOnLine(int boxX, int boxY, Point p1, Point p2);
 
 float GetPerpedicularSlope(float slope);
-Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept);
-//Vector3 GetLineIntersection(Vector3 originalPosition, float originalSlope, float originalEquationIntercept, Vector3 perpendicularPosition, 
-//							float perpendicularSlope, float perpendicularIntercept);
+//Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept);
+Vector3 GetLineIntersection(Vector3 originalPosition, float originalSlope, float originalEquationIntercept, Vector3 perpendicularPosition, 
+							float perpendicularSlope, float perpendicularIntercept);
 
 
 //==========================================================================================
@@ -105,7 +105,7 @@ int main(void)
 	Vector3 oldPosition, newPosition;
 	Vector3 topPoints[NUM_POINTS] = {};
 	Vector3 bottomPoints[NUM_POINTS] = {};
-	Vector3 vectorObsticles[NUM_OBSTICLES];
+	Vector3 vectorobstacles[NUM_obstacles];
 
 	//object variables
 	PolarisEngine::Vector3 shipStartingPosition;
@@ -159,7 +159,7 @@ int main(void)
 	SetUpMagnetsBottom();
 
 	//Place the center obstacles
-	GenerateObsticles(vectorObsticles);
+	Generateobstacles(vectorobstacles);
 
 	//set up points to initial null status
 	oldPosition.x = oldPosition.y = NULL;
@@ -211,7 +211,7 @@ int main(void)
 			//collideBot = CollideTunnelBottom(bottomPoints, ship);
 
 			//CollideLineTop(ship);
-			UpdateCamera(cameraX, cameraY, ship);
+			//UpdateCamera(cameraX, cameraY, ship);
 		}
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
@@ -280,7 +280,7 @@ int main(void)
 			
 			DrawMagnets(topMagnets, botMagnets);
 			
-			DrawObsticles(vectorObsticles);
+			Drawobstacles(vectorobstacles);
 
 			al_set_target_bitmap(al_get_backbuffer(display));
 
@@ -448,22 +448,22 @@ void ConnectPointsBottom(Vector3 pointsBot[])
 	}
 }
 
-//Takes array of obsticles generated and draws them to the screen. Obsticles reside inside the tunnel for the player to dodge.
-void DrawObsticles(Vector3 obsticles[])
+//Takes array of obstacles generated and draws them to the screen. obstacles reside inside the tunnel for the player to dodge.
+void Drawobstacles(Vector3 obstacles[])
 {
-	for (int i = 0; i < NUM_OBSTICLES; i++)
+	for (int i = 0; i < NUM_obstacles; i++)
 	{
-		al_draw_filled_rectangle(obsticles[i].x, obsticles[i].y, obsticles[i].x + 20, obsticles[i].y + 20, al_map_rgb(255,0,255));
+		al_draw_filled_rectangle(obstacles[i].x, obstacles[i].y, obstacles[i].x + 20, obstacles[i].y + 20, al_map_rgb(255,0,255));
 	}
 }
 
-//Generates and populates obsticles[]. Randomly places obsticles within the level. 
-void GenerateObsticles(Vector3 obsticles[])
+//Generates and populates obstacles[]. Randomly places obstacles within the level. 
+void Generateobstacles(Vector3 obstacles[])
 {
-	for (int i = 0; i < NUM_OBSTICLES; i++)
+	for (int i = 0; i < NUM_obstacles; i++)
 	{
-		obsticles[i].x = ((rand() % (WIDTH - 30)) + 100);
-		obsticles[i].y = HEIGHT / 2 - ((rand() % 25) + 20);
+		obstacles[i].x = ((rand() % (WIDTH - 30)) + 100);
+		obstacles[i].y = HEIGHT / 2 - ((rand() % 25) + 20);
 	}
 }
 
@@ -471,31 +471,31 @@ void GenerateObsticles(Vector3 obsticles[])
 
 #pragma region Camera
 
-Point TranslateWorldToScreen(int objectX, int objectY, int cameraX, int cameraY)
-{
-	Point newPoint;
-	newPoint.x = objectX - cameraX;
-	newPoint.y = objectY - cameraY;
-
-	return newPoint;
-}
-
-Point UpdateCamera(int x, int y, SpaceShip &ship)
-{
-	x = ship.GetShipPosition().x - WIDTH / 2;
-	y = ship.GetShipPosition().y - HEIGHT / 2;
-
-	if(x < 0) x = 0;
-	if(y < 0) y = 0;
-	if(x > LEVELWIDTH - WIDTH) x = LEVELWIDTH - WIDTH;
-	if(y > LEVELHEIGHT - HEIGHT) y = LEVELHEIGHT - HEIGHT;
-
-	Point CameraPoint;
-	CameraPoint.x = x;
-	CameraPoint.y = y;
-
-	return CameraPoint;
-}
+//Point TranslateWorldToScreen(int objectX, int objectY, int cameraX, int cameraY)
+//{
+//	Point newPoint;
+//	newPoint.x = objectX - cameraX;
+//	newPoint.y = objectY - cameraY;
+//
+//	return newPoint;
+//}
+//
+//Point UpdateCamera(int x, int y, SpaceShip &ship)
+//{
+//	x = ship.GetShipPosition().x - WIDTH / 2;
+//	y = ship.GetShipPosition().y - HEIGHT / 2;
+//
+//	if(x < 0) x = 0;
+//	if(y < 0) y = 0;
+//	if(x > LEVELWIDTH - WIDTH) x = LEVELWIDTH - WIDTH;
+//	if(y > LEVELHEIGHT - HEIGHT) y = LEVELHEIGHT - HEIGHT;
+//
+//	Point CameraPoint;
+//	CameraPoint.x = x;
+//	CameraPoint.y = y;
+//
+//	return CameraPoint;
+//}
 
 #pragma endregion
 
@@ -610,32 +610,6 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 	return temp;
 }
 
-//Point GetPointDistance(Point p1, Point p2)
-//{
-//	Point temp;
-//
-//	if(p2.y > p1.y)
-//	{
-//		temp.x = abs((p2.x - p1.x));
-//		temp.x /= 2;
-//		temp.y = abs((p2.y - p1.y));
-//		temp.y /= 2;
-//		temp.x = p2.x - temp.x;
-//		temp.y = p2.y - temp.y;
-//	}
-//	else
-//	{
-//		temp.x = abs((p2.x - p1.x));
-//		temp.x /= 2;
-//		temp.y = abs((p2.y - p1.y));
-//		temp.y /= 2;
-//		temp.x = p2.x - temp.x;
-//		temp.y = p1.y - temp.y;
-//	}
-//	return temp;
-//
-//}
-
 //bool CollideTunnelTop(Point points[], SpaceShip &ship)
 //{
 //	for(int i = 0; i < NUM_POINTS; i++)
@@ -724,27 +698,27 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 //}
 
 //Returns the slope of the line based on points p1 and p2
-float GetLineSlope(Point p1, Point p2)
-{	
-	float slope;
-	float yDistance, xDistance;
-	yDistance = (p2.y - p1.y);
-	xDistance = (p2.x - p1.x);
-	slope = yDistance / xDistance;
-	
-	return slope;
-}
+//float GetLineSlope(Point p1, Point p2)
+//{	
+//	float slope;
+//	float yDistance, xDistance;
+//	yDistance = (p2.y - p1.y);
+//	xDistance = (p2.x - p1.x);
+//	slope = yDistance / xDistance;
+//	
+//	return slope;
+//}
 
 //Returns the Y intercept of line based on a point of the line and its slope
-float GetYIntercept(Point p1, float slope)
-{
-	float intercept;
-
-	intercept = (slope * p1.x) - p1.y;
-	intercept *= -1;
-
-	return intercept;
-}
+//float GetYIntercept(Point p1, float slope)
+//{
+//	float intercept;
+//
+//	intercept = (slope * p1.x) - p1.y;
+//	intercept *= -1;
+//
+//	return intercept;
+//}
 
 //returns the slope of a line that is perpendicular to slope of line passed to function.
 float GetPerpedicularSlope(float slope)
@@ -752,16 +726,30 @@ float GetPerpedicularSlope(float slope)
 	return ( -1 / slope);
 }
 
-Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept)
+//Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept)
+//{
+//	Point intersection;
+//	//y1 = slope * x1 + intercept - convert to y1 - slope * x1 = intercept
+//	intersection.y = slope * x1 + intercept;
+//	intersection.x = y2 = perpSlope * intersection.y + perpIntercept;
+//	intersection.y = slope * intersection.x + intercept;
+//
+//	return intersection;
+//
+//}
+
+
+Vector3 GetLineIntersection(Vector3 originalPosition, float originalSlope, float originalEquationIntercept, Vector3 perpendicularPosition, 
+							float perpendicularSlope, float perpendicularIntercept)
 {
-	Point intersection;
-	//y1 = slope * x1 + intercept - convert to y1 - slope * x1 = intercept
-	intersection.y = slope * x1 + intercept;
-	intersection.x = y2 = perpSlope * intersection.y + perpIntercept;
-	intersection.y = slope * intersection.x + intercept;
-
+	Vector3 intersection;
+	intersection.y = originalSlope * originalPosition.x + originalEquationIntercept;
+	intersection.x = perpendicularPosition.y = perpendicularSlope * intersection.y + perpendicularIntercept;
+	intersection.y = originalSlope * intersection.x + originalEquationIntercept;
+	intersection.z = 0;
+	
 	return intersection;
-
 }
+
 
 #pragma endregion
