@@ -56,25 +56,20 @@ BottomMagnetFactory bottomFactory;
 #pragma region Prototypes
 
 //Tunnel generation functions
-//void PlotPointsTop(Point oldP, Point newP, Point points[]);
 void PlotPointsTop(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsTop[]);
 int  GenerateNewPointTop();
-//void ConnectPointsTop(Point points[]);
 void ConnectPointsTop(Vector3 pointsTop[]);
-//void PlotPointsBottom(Point oldP, Point newP, Point points[]);
 void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsBottom[]);
 int  GenerateNewPointBottom();
-//void ConnectPointsBottom(Point points[]);
 void ConnectPointsBottom(Vector3 pointsBottom[]);
-void DrawObsticles(Point obsticles[]);
-void GenerateObsticles(Point obsticles[]);
+void DrawObsticles(Vector3 vectorObsticles[]);
+void GenerateObsticles(Vector3 vectorObsticles[]);
 
 //camera functions
 Point TranslateWorldToScreen(int objectX, int objectY, int cameraX, int cameraY);
 Point UpdateCamera(int x, int y, SpaceShip &ship);
 
 //Magnet Functions
-//void InitMagnets(Magnet magnets[], Magnet magnetsBot[]);
 int GetMagnetLocationX();
 int GetMagnetLocationY();
 void DrawMagnets(Magnet magnets[], Magnet magnetsBot[]);
@@ -82,7 +77,6 @@ void SetupMagnetsTop();
 void SetUpMagnetsBottom();
 
 //Helper Functions
-//Point GetPointDistance(Point p1, Point p2);
 Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
 bool CollideTunnelTop(Point points[], SpaceShip &ship);
 bool CollideTunnelBottom(Point points[], SpaceShip &ship);
@@ -165,7 +159,7 @@ int main(void)
 	SetUpMagnetsBottom();
 
 	//Place the center obstacles
-	//GenerateObsticles(obsticles);
+	GenerateObsticles(vectorObsticles);
 
 	//set up points to initial null status
 	oldPosition.x = oldPosition.y = NULL;
@@ -286,7 +280,7 @@ int main(void)
 			
 			DrawMagnets(topMagnets, botMagnets);
 			
-			//DrawObsticles(obsticles);
+			DrawObsticles(vectorObsticles);
 
 			al_set_target_bitmap(al_get_backbuffer(display));
 
@@ -455,7 +449,7 @@ void ConnectPointsBottom(Vector3 pointsBot[])
 }
 
 //Takes array of obsticles generated and draws them to the screen. Obsticles reside inside the tunnel for the player to dodge.
-void DrawObsticles(Point obsticles[])
+void DrawObsticles(Vector3 obsticles[])
 {
 	for (int i = 0; i < NUM_OBSTICLES; i++)
 	{
@@ -464,7 +458,7 @@ void DrawObsticles(Point obsticles[])
 }
 
 //Generates and populates obsticles[]. Randomly places obsticles within the level. 
-void GenerateObsticles(Point obsticles[])
+void GenerateObsticles(Vector3 obsticles[])
 {
 	for (int i = 0; i < NUM_OBSTICLES; i++)
 	{
