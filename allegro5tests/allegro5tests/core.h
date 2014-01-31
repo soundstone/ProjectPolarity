@@ -272,6 +272,14 @@ namespace PolarisEngine
 						   z*vec.x - x*vec.z,
 						   x*vec.y - y*vec.z);
 		}
+
+		/*Vector3 operator=(const Vector3 &vec) const
+		{
+			this->x = vec.x;
+			this->y = vec.y;
+			this->z = vec.z;
+			return this;
+		}*/
 	};
 
 #pragma endregion

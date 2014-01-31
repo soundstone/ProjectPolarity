@@ -56,16 +56,16 @@ BottomMagnetFactory bottomFactory;
 #pragma region Prototypes
 
 //Tunnel generation functions
-void PlotPointsTop(Point oldP, Point newP, Point points[]);
-//void PlotPointsTop(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsTop[]);
+//void PlotPointsTop(Point oldP, Point newP, Point points[]);
+void PlotPointsTop(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsTop[]);
 int  GenerateNewPointTop();
-void ConnectPointsTop(Point points[]);
-//void ConnectPointsTop(Vector3 pointsTop[]);
-void PlotPointsBottom(Point oldP, Point newP, Point points[]);
-//void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsBottom[]);
+//void ConnectPointsTop(Point points[]);
+void ConnectPointsTop(Vector3 pointsTop[]);
+//void PlotPointsBottom(Point oldP, Point newP, Point points[]);
+void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsBottom[]);
 int  GenerateNewPointBottom();
-void ConnectPointsBottom(Point points[]);
-//void ConnectPointsBottom(Vector3 pointsBottom[]);
+//void ConnectPointsBottom(Point points[]);
+void ConnectPointsBottom(Vector3 pointsBottom[]);
 void DrawObsticles(Point obsticles[]);
 void GenerateObsticles(Point obsticles[]);
 
@@ -82,8 +82,8 @@ void SetupMagnetsTop();
 void SetUpMagnetsBottom();
 
 //Helper Functions
-Point GetPointDistance(Point p1, Point p2);
-//Vector3 GetPointDistance(Vector3 firstPosition, Vector3 secondPosition);
+//Point GetPointDistance(Point p1, Point p2);
+Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
 bool CollideTunnelTop(Point points[], SpaceShip &ship);
 bool CollideTunnelBottom(Point points[], SpaceShip &ship);
 float GetLineSlope(Point p1, Point p2);
@@ -108,14 +108,9 @@ int main(void)
 	const int FPS = 60;
 	
 	//procedual tunnel variables
-	//TODO: Remove all Point variables - delete point struct / replace all with Vector3 positions
-	Point oldP, newP;
 	Vector3 oldPosition, newPosition;
-	Point pointsTop[NUM_POINTS] = {};
-	Vector3 topVectorOfPoints[NUM_POINTS] = {};
-	Point pointsBottom[NUM_POINTS] = {};
-	Vector3 bottomVectorOfPoints[NUM_POINTS] = {};
-	Point obsticles[NUM_OBSTICLES];
+	Vector3 topPoints[NUM_POINTS] = {};
+	Vector3 bottomPoints[NUM_POINTS] = {};
 	Vector3 vectorObsticles[NUM_OBSTICLES];
 
 	//object variables
@@ -170,24 +165,18 @@ int main(void)
 	SetUpMagnetsBottom();
 
 	//Place the center obstacles
-	GenerateObsticles(obsticles);
+	//GenerateObsticles(obsticles);
 
 	//set up points to initial null status
 	oldPosition.x = oldPosition.y = NULL;
 	oldPosition.z = 0;
 	newPosition.x = newPosition.y = NULL;
 	newPosition.z = 0;
-	oldP.x = NULL;
-	oldP.y = NULL;
-	newP.x = NULL;
-	newP.y = NULL;
 
 	//These two function calls generate and draw the points in the array and connect them by drawing a line to each of them.
-	PlotPointsTop(oldP, newP, pointsTop);
-	PlotPointsBottom(oldP, newP, pointsBottom);
-	//PlotPointsTop(oldPosition, newPosition, topVectorOfPoints);
-	//PlotPointsBottom(oldPosition, newPosition, bottomVectorOfPoints);
-
+	PlotPointsTop(oldPosition, newPosition, topPoints);
+	PlotPointsBottom(oldPosition, newPosition, bottomPoints);
+	
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 	al_register_event_source(event_queue, al_get_display_event_source(display));
@@ -224,8 +213,8 @@ int main(void)
 				}
 			}		
 
-			collide = CollideTunnelTop(pointsTop, ship);
-			collideBot = CollideTunnelBottom(pointsBottom, ship);
+			//collide = CollideTunnelTop(topPoints, ship);
+			//collideBot = CollideTunnelBottom(bottomPoints, ship);
 
 			//CollideLineTop(ship);
 			UpdateCamera(cameraX, cameraY, ship);
@@ -292,14 +281,12 @@ int main(void)
 
 			ship.DrawShip();
 
-			ConnectPointsTop(pointsTop);
-			ConnectPointsBottom(pointsBottom);
-			//ConnectPointsTop(topVectorOfPoints);
-			//ConnectPointsBottom(bottomVectorOfPoints);
+			ConnectPointsTop(topPoints);
+			ConnectPointsBottom(bottomPoints);
 			
 			DrawMagnets(topMagnets, botMagnets);
 			
-			DrawObsticles(obsticles);
+			//DrawObsticles(obsticles);
 
 			al_set_target_bitmap(al_get_backbuffer(display));
 
@@ -342,23 +329,23 @@ int GenerateNewPointBottom()
 
 /*main generation of bottom of tunnel. Sets number of points to plot, hard sets first point in level, moves the current point to the new point 
   once generated. 1 in 66 points generated will result in == Y values, this creates flat spots in the tunnel design. */
-void PlotPointsBottom(Point oldP, Point newP, Point pointsBot[])
+void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsBottom[])
 {
-	char logStringbuffer[50];
-	logStringbuffer[0] = 0;
+	char logStringBuffer[50];
+	logStringBuffer[0] = 0;
 
-	if(newP.x >= 4000)
+	if(newPosition.x >= 4000)
 		return;
 	
 	//Generate the starting point. Located at the far left of screen. 
-	if(oldP.x == NULL)
+	if(oldPosition.x == NULL)
 	{
-		oldP.x = 0;
-		oldP.y = GenerateNewPointBottom();
+		oldPosition.x = 0;
+		oldPosition.y = GenerateNewPointBottom();
 	}
 
-	pointsBot[0] = oldP;
-	newP.x = oldP.x;
+	pointsBottom[0] = oldPosition;
+	newPosition.x = oldPosition.x;
 
 	Logger::Log("Points - BOTTOM", Logger::logLevelInfo);
 	for (int i = 1; i < NUM_POINTS; i++)
@@ -369,163 +356,103 @@ void PlotPointsBottom(Point oldP, Point newP, Point pointsBot[])
 			for(int j = 0; j < 3; j++)
 			{
 				//Move the X coord to the next PLOT_INTERVAL. Adding 12 during testing. Might need to be implemented through PLOT_INTERVAL
-				newP.x = newP.x + PLOT_INTERVAL + 12;
+				newPosition.x = newPosition.x + PLOT_INTERVAL + 12;
 				
 				//Keeps the height the same. No change in slope.
-				newP.y = oldP.y;
+				newPosition.y = oldPosition.y;
 				
 				//add the new point to the bottom of the map
-				pointsBot[i] = newP;
+				pointsBottom[i] = newPosition;
 			}
 		}
 		//Generates new points until pointsBot[i] reaches 4000 points. These vary in height.
 		else 
 		{
-			newP.x = newP.x + PLOT_INTERVAL;
+			newPosition.x = newPosition.x + PLOT_INTERVAL;
 
-			oldP.y = GenerateNewPointBottom();
-			newP.y = GenerateNewPointBottom();
+			oldPosition.y = GenerateNewPointBottom();
+			newPosition.y = GenerateNewPointBottom();
 			
-			pointsBot[i] = newP;
+			pointsBottom[i] = newPosition;
 		}
-		sprintf_s(logStringbuffer, "PointsBot[ %i ] = (%i,%i)", i, newP.x, newP.y);  
-		Logger::Log(logStringbuffer, Logger::logLevelInfo);
-		memset(logStringbuffer, 0, sizeof(logStringbuffer));
+		sprintf_s(logStringBuffer, "PointsBot[ %i ] = (%d,%d, %d)", i, newPosition.x, newPosition.y, newPosition.z);  
+		Logger::Log(logStringBuffer, Logger::logLevelInfo);
+		memset(logStringBuffer, 0, sizeof(logStringBuffer));
 	}	
 	Logger::ShutdownLogger();
 }
 
-//void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 bottomPointsVec)
-//{
-//	char logStringBuffer[50];
-//	logStringBuffer[0] = 0;
-//
-//	if(newPosition.x >= 4000)
-//		return;
-//	
-//	//Generate the starting point. Located at the far left of screen. 
-//	if(oldPosition.x == NULL)
-//	{
-//		oldPosition.x = 0;
-//		oldPosition.y = GenerateNewPointBottom();
-//	}
-//
-////	bottomPointsVec[0] = oldPosition;
-//	newPosition.x = oldPosition.x;
-//
-//	Logger::Log("Points - BOTTOM", Logger::logLevelInfo);
-//	for (int i = 1; i < NUM_POINTS; i++)
-//	{
-//		//One in 66 the points will not vary in height. This cause flat areas, and makes the lines look more cavelike. 
-//		if(rand() % 66 == 0)
-//		{
-//			for(int j = 0; j < 3; j++)
-//			{
-//				//Move the X coord to the next PLOT_INTERVAL. Adding 12 during testing. Might need to be implemented through PLOT_INTERVAL
-//				newPosition.x = newPosition.x + PLOT_INTERVAL + 12;
-//				
-//				//Keeps the height the same. No change in slope.
-//				newPosition.y = oldPosition.y;
-//				
-//				//add the new point to the bottom of the map
-////				bottomPointsVec[i] = newPosition;
-//			}
-//		}
-//		//Generates new points until pointsBot[i] reaches 4000 points. These vary in height.
-//		else 
-//		{
-//			newPosition.x = newPosition.x + PLOT_INTERVAL;
-//
-//			oldPosition.y = GenerateNewPointBottom();
-//			newPosition.y = GenerateNewPointBottom();
-//			
-//			bottomPointsVec[i] = newPosition.x;
-//			bottomPointsVec[i] = newPosition.y;
-//			bottomPointsVec[i] = 0;
-//		}
-//		sprintf_s(logStringBuffer, "PointsBot[ %i ] = (%d,%d, %d)", i, newPosition.x, newPosition.y, newPosition.z);  
-//		Logger::Log(logStringBuffer, Logger::logLevelInfo);
-//		memset(logStringBuffer, 0, sizeof(logStringBuffer));
-//	}	
-//	Logger::ShutdownLogger();
-//}
-
 /*Main generation of top of tunnel. Sets number of points to plot, hard sets first point in level, moves the current point to the new point
   once generated. 1 in 66 points generated will result in == Y values, this creates flat spots in the tunnel design. */
-void PlotPointsTop(Point oldP, Point newP, Point points[])
-
+void PlotPointsTop(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsTop[])
 {
-	char logStringbuffer[50];
-	logStringbuffer[0] = 0;
+	char logStringBuffer[50];
+	logStringBuffer[0] = 0;
 
-	if(newP.x >= 4000)
+	if(newPosition.x >= 4000)
 		return;
-
-	//Generate starting point for bottomw lines. Far left of the screen. 
-	if(oldP.x == NULL)
+	
+	//Generate the starting point. Located at the far left of screen. 
+	if(oldPosition.x == NULL)
 	{
-		oldP.x = 0;
-		oldP.y = GenerateNewPointTop();
+		oldPosition.x = 0;
+		oldPosition.y = GenerateNewPointTop();
 	}
 
-	points[0] = oldP;
-	newP.x = oldP.x;
+	pointsTop[0] = oldPosition;
+	newPosition.x = oldPosition.x;
 
-	Logger::Log("Points - TOP", Logger::logLevelInfo);
-
+	Logger::Log("Points - BOTTOM", Logger::logLevelInfo);
 	for (int i = 1; i < NUM_POINTS; i++)
 	{
-
-		//One in 66, the Y coord will remain the same. This causes flat areas within the map. 
+		//One in 66 the points will not vary in height. This cause flat areas, and makes the lines look more cavelike. 
 		if(rand() % 66 == 0)
 		{
 			for(int j = 0; j < 3; j++)
 			{
-				newP.x = newP.x + PLOT_INTERVAL + 12;
-				newP.y = oldP.y;
-				points[i] = newP;
+				//Move the X coord to the next PLOT_INTERVAL. Adding 12 during testing. Might need to be implemented through PLOT_INTERVAL
+				newPosition.x = newPosition.x + PLOT_INTERVAL + 12;
+				
+				//Keeps the height the same. No change in slope.
+				newPosition.y = oldPosition.y;
+				
+				//add the new point to the bottom of the map
+				pointsTop[i] = newPosition;
 			}
-			
 		}
-		//Generate the remainder of the points to fill points[i] to 4000. Vary in height.
+		//Generates new points until pointsBot[i] reaches 4000 points. These vary in height.
 		else 
 		{
-			newP.x = newP.x + PLOT_INTERVAL;
+			newPosition.x = newPosition.x + PLOT_INTERVAL;
 
-			oldP.y = GenerateNewPointTop();
-			newP.y = GenerateNewPointTop();
+			oldPosition.y = GenerateNewPointTop();
+			newPosition.y = GenerateNewPointTop();
 			
-			points[i] = newP;
+			pointsTop[i] = newPosition;
 		}
-		sprintf_s(logStringbuffer, "PointsTop[ %i ] = (%i,%i)", i, newP.x, newP.y);  
-		Logger::Log(logStringbuffer, Logger::logLevelInfo);
-		memset(logStringbuffer, 0, sizeof(logStringbuffer));
+		sprintf_s(logStringBuffer, "PointsBot[ %i ] = (%d,%d, %d)", i, newPosition.x, newPosition.y, newPosition.z);  
+		Logger::Log(logStringBuffer, Logger::logLevelInfo);
+		memset(logStringBuffer, 0, sizeof(logStringBuffer));
 	}	
 	Logger::ShutdownLogger();
 }
 
-//void plotPointsTop(Vector3 oldPosition, Vector3 newPosition, Vector3 topPointsVec[]){}
-
-//Draws lines from point to point. Connects top of tunnel. Uses Allegro al_draw_line() to do it. 
-void ConnectPointsTop(Point points[])
-{
-	for(int i = 0; i < NUM_POINTS; i++)
-	{
-		al_draw_line(points[i].x, points[i].y, points[i+1].x, points[i + 1].y, al_map_rgb(255,0,255), 2);
-	}
-}
-
-//void ConnectPointsTop(Vector3 points[]){}
-
-//Draws lines from point to point. Connects bottom of tunnel. Uses Allegro al_draw_line() to do it. 
-void ConnectPointsBottom(Point pointsBot[])
+void ConnectPointsTop(Vector3 points[])
 {
 	for (int i = 0; i < NUM_POINTS; i++)
 	{
-		al_draw_line(pointsBot[i].x, pointsBot[i].y, pointsBot[i + 1].x, pointsBot[i + 1].y, al_map_rgb(255,0,255), 2);
+		al_draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, al_map_rgb(255,0,255), 2);
 	}
 }
-//void ConnectPointsBottom(Vector3 pointsBot[]){}
+
+//Draws lines from point to point. Connects bottom of tunnel. Uses Allegro al_draw_line() to do it. 
+void ConnectPointsBottom(Vector3 pointsBot[])
+{
+	for (int i = 0; i < NUM_POINTS; i++)
+	{
+		al_draw_line(pointsBot[i].x, pointsBot[i].y, pointsBot[i + 1].x, pointsBot[i + 1].y, al_map_rgb(255,0,255),2);
+	}
+}
 
 //Takes array of obsticles generated and draws them to the screen. Obsticles reside inside the tunnel for the player to dodge.
 void DrawObsticles(Point obsticles[])
@@ -669,118 +596,138 @@ void SetUpMagnetsBottom()
 #pragma region Helper Functions
 
 //Returns distance between two points p1 and p2
-Point GetPointDistance(Point p1, Point p2)
+Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 {
-	Point temp;
+	Vector3 temp;
 
-	if(p2.y > p1.y)
+	temp.x = abs((vectorTwo.x - vectorOne.x));
+	temp.x /= 2;
+	temp.y = abs((vectorTwo.y - vectorOne.y));
+	temp.y /= 2;
+	temp.x = vectorTwo.x - temp.x;
+	if (vectorTwo.y > vectorOne.y)
 	{
-		temp.x = abs((p2.x - p1.x));
-		temp.x /= 2;
-		temp.y = abs((p2.y - p1.y));
-		temp.y /= 2;
-		temp.x = p2.x - temp.x;
-		temp.y = p2.y - temp.y;
+		temp.y = vectorTwo.y - temp.y;
 	}
 	else
 	{
-		temp.x = abs((p2.x - p1.x));
-		temp.x /= 2;
-		temp.y = abs((p2.y - p1.y));
-		temp.y /= 2;
-		temp.x = p2.x - temp.x;
-		temp.y = p1.y - temp.y;
+		temp.y = vectorOne.y - temp.y;
 	}
 	return temp;
-
 }
 
-bool CollideTunnelTop(Point points[], SpaceShip &ship)
-{
-	for(int i = 0; i < NUM_POINTS; i++)
-	{
-		if(points[i + 1].y < points[i].y)
-		{
-			if( (ship.GetShipPosition().x > points[i].x) &&
-				(ship.GetShipPosition().x < points[i + 1].x))
-			{
-				if( (ship.GetShipPosition().y > points[i + 1].y) &&
-					(ship.GetShipPosition().y < points[i].y))
-				{
-					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
-					float slope = GetLineSlope(points[i], points[i + 1]);
-					float perpSlope = GetPerpedicularSlope(slope);
-					float lineIntercept =  GetYIntercept(points[i], slope);
-					//float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
-				//	Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
-					/*						points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
+//Point GetPointDistance(Point p1, Point p2)
+//{
+//	Point temp;
+//
+//	if(p2.y > p1.y)
+//	{
+//		temp.x = abs((p2.x - p1.x));
+//		temp.x /= 2;
+//		temp.y = abs((p2.y - p1.y));
+//		temp.y /= 2;
+//		temp.x = p2.x - temp.x;
+//		temp.y = p2.y - temp.y;
+//	}
+//	else
+//	{
+//		temp.x = abs((p2.x - p1.x));
+//		temp.x /= 2;
+//		temp.y = abs((p2.y - p1.y));
+//		temp.y /= 2;
+//		temp.x = p2.x - temp.x;
+//		temp.y = p1.y - temp.y;
+//	}
+//	return temp;
+//
+//}
 
-					al_draw_line(intersection.x, intersection.y, ship.pos.x, ship.pos.y, al_map_rgb(255, 255, 0), 1.0f);
-					al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
-					al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
-					al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);*/
-				}
-			}
-		}
-		else 
-		{
-			if( (ship.GetShipPosition().x < points[i + 1].x) &&
-				(ship.GetShipPosition().x > points[i].x))
-			{
-				if( (ship.GetShipPosition().y < points[i + 1].y) &&
-					(ship.GetShipPosition().y > points[i].y))
-				{
-					
-					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
-					float slope = GetLineSlope(points[i], points[i + 1]);
-					float perpSlope = GetPerpedicularSlope(slope);
-					float lineIntercept =  GetYIntercept(points[i], slope);
-					//float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
-					//Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
-					//						points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
-
-					//al_draw_line(intersection.x, intersection.y, ship.pos.x, ship.pos.y, al_map_rgb(255, 255, 0), 1.0f);
-					//al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
-					//al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
-					//al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool CollideTunnelBottom(Point points[], SpaceShip &ship)
-{
-	for (int i = 0; i < NUM_POINTS; i++)
-	{
-		if(points[i + 1].y < points[i].y)
-		{
-			//This is a preliminary check. Is the ship close enough to check for collision?
-			if(( ship.GetShipPosition().x > points[i].x) &&
-				(ship.GetShipPosition().x < points[i + 1].x) &&
-				(ship.GetShipPosition().y > points[i].y) &&
-				(ship.GetShipPosition().y < points[i + 1].y))
-			{
-				//Collide
-				return true;
-			}
-		}
-		else if(points[i + 1].y > points[i].y)
-		{
-			//preliminary check. Is ship close enough to check for collision?
-			if( (ship.GetShipPosition().x > points[i].x) &&
-				(ship.GetShipPosition().x < points[i + 1].x) &&
-				(ship.GetShipPosition().y + 10 < points[i + 1].y) &&
-				(ship.GetShipPosition().y - 10> points[i].y))
-			{
-				//collide
-				return true;
-			}
-		}
-	}
-	return false;
-}
+//bool CollideTunnelTop(Point points[], SpaceShip &ship)
+//{
+//	for(int i = 0; i < NUM_POINTS; i++)
+//	{
+//		if(points[i + 1].y < points[i].y)
+//		{
+//			if( (ship.GetShipPosition().x > points[i].x) &&
+//				(ship.GetShipPosition().x < points[i + 1].x))
+//			{
+//				if( (ship.GetShipPosition().y > points[i + 1].y) &&
+//					(ship.GetShipPosition().y < points[i].y))
+//				{
+//					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
+//					float slope = GetLineSlope(points[i], points[i + 1]);
+//					float perpSlope = GetPerpedicularSlope(slope);
+//					float lineIntercept =  GetYIntercept(points[i], slope);
+//					//float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
+//				//	Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
+//					/*						points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
+//
+//					al_draw_line(intersection.x, intersection.y, ship.pos.x, ship.pos.y, al_map_rgb(255, 255, 0), 1.0f);
+//					al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
+//					al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
+//					al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);*/
+//				}
+//			}
+//		}
+//		else 
+//		{
+//			if( (ship.GetShipPosition().x < points[i + 1].x) &&
+//				(ship.GetShipPosition().x > points[i].x))
+//			{
+//				if( (ship.GetShipPosition().y < points[i + 1].y) &&
+//					(ship.GetShipPosition().y > points[i].y))
+//				{
+//					
+//					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
+//					float slope = GetLineSlope(points[i], points[i + 1]);
+//					float perpSlope = GetPerpedicularSlope(slope);
+//					float lineIntercept =  GetYIntercept(points[i], slope);
+//					//float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
+//					//Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
+//					//						points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
+//
+//					//al_draw_line(intersection.x, intersection.y, ship.pos.x, ship.pos.y, al_map_rgb(255, 255, 0), 1.0f);
+//					//al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
+//					//al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
+//					//al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);
+//				}
+//			}
+//		}
+//	}
+//	return false;
+//}
+//
+//bool CollideTunnelBottom(Point points[], SpaceShip &ship)
+//{
+//	for (int i = 0; i < NUM_POINTS; i++)
+//	{
+//		if(points[i + 1].y < points[i].y)
+//		{
+//			//This is a preliminary check. Is the ship close enough to check for collision?
+//			if(( ship.GetShipPosition().x > points[i].x) &&
+//				(ship.GetShipPosition().x < points[i + 1].x) &&
+//				(ship.GetShipPosition().y > points[i].y) &&
+//				(ship.GetShipPosition().y < points[i + 1].y))
+//			{
+//				//Collide
+//				return true;
+//			}
+//		}
+//		else if(points[i + 1].y > points[i].y)
+//		{
+//			//preliminary check. Is ship close enough to check for collision?
+//			if( (ship.GetShipPosition().x > points[i].x) &&
+//				(ship.GetShipPosition().x < points[i + 1].x) &&
+//				(ship.GetShipPosition().y + 10 < points[i + 1].y) &&
+//				(ship.GetShipPosition().y - 10> points[i].y))
+//			{
+//				//collide
+//				return true;
+//			}
+//		}
+//	}
+//	return false;
+//}
 
 //Returns the slope of the line based on points p1 and p2
 float GetLineSlope(Point p1, Point p2)
