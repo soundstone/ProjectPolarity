@@ -12,10 +12,11 @@ public:
 	SpaceShip();
 	SpaceShip(PolarisEngine::Vector3 pos, int widthOfShip, int heightOfShip, float spd, int life, bool polaricCharge);
 
-	PolarisEngine::Vector3 GetShipPosition() const
-	{
-		return shipPos;
-	}	
+	//PolarisEngine::Vector3 GetShipPosition() const
+	//{
+	//	return shipPos;
+	//}	
+
 	int GetNumberOfLives() const 
 	{ 
 		return lives;
@@ -64,9 +65,11 @@ public:
 	}
 	void DrawShip();
 
+	PolarisEngine::Vector3 shipPos;
+
 private:
 
-	PolarisEngine::Vector3 shipPos;
+	
 	int lives;
 	float speed;
 	int width;

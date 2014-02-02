@@ -78,12 +78,8 @@ void SetUpMagnetsBottom();
 
 //Helper Functions
 Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
-//bool CollideTunnelTop(Point points[], SpaceShip &ship);
-//bool CollideTunnelBottom(Point points[], SpaceShip &ship);
-//float GetLineSlope(Point p1, Point p2);
-//float GetYIntercept(Point p1, float slope);
-//bool IsOnLine(int boxX, int boxY, Point p1, Point p2);
-
+bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
+bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 float GetPerpedicularSlope(float slope);
 //Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept);
 Vector3 GetLineIntersection(Vector3 originalPosition, float originalSlope, float originalEquationIntercept, Vector3 perpendicularPosition, 
@@ -207,11 +203,30 @@ int main(void)
 				}
 			}		
 
-			//collide = CollideTunnelTop(topPoints, ship);
-			//collideBot = CollideTunnelBottom(bottomPoints, ship);
-
-			//CollideLineTop(ship);
-			//UpdateCamera(cameraX, cameraY, ship);
+			if (ship.shipPos.y < 190)
+			{
+				for (int i = 0; i < NUM_POINTS; i++)
+				{
+					if (ship.shipPos.x > topPoints[i + 1].x)
+						continue;
+					if (ship.shipPos.x < topPoints[i].x)
+						continue;
+					
+					collide = CheckCollisionsTop(ship, topPoints[i], topPoints[i + 1]);
+				}
+			}
+			else if (ship.shipPos.y > HEIGHT / 2 + 60)
+			{
+				for (int i = 0; i < NUM_POINTS; i++)
+				{
+					if (ship.shipPos.x > bottomPoints[i + 1].x)
+						continue;
+					if (ship.shipPos.x < bottomPoints[i].x)
+						continue;
+					collide = CheckCollisionsBottom(ship, bottomPoints[i], bottomPoints[i + 1]);
+				}
+			}
+			
 		}
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
@@ -278,6 +293,12 @@ int main(void)
 			ConnectPointsTop(topPoints);
 			ConnectPointsBottom(bottomPoints);
 			
+			if (collide)
+			{
+				al_draw_text(font, al_map_rgb(255, 255, 110), WIDTH /2, HEIGHT / 2, 0, "COLLISION - PLEASE AND THANK YOUUU!");
+				al_draw_textf(font, al_map_rgb(255,100,100), 20, 50, 0, "ShipPos: ( %d, %d, %d)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
+			}
+
 			DrawMagnets(topMagnets, botMagnets);
 			
 			Drawobstacles(vectorobstacles);
@@ -594,149 +615,73 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 {
 	Vector3 temp;
 
-	temp.x = abs((vectorTwo.x - vectorOne.x));
-	temp.x /= 2;
-	temp.y = abs((vectorTwo.y - vectorOne.y));
-	temp.y /= 2;
-	temp.x = vectorTwo.x - temp.x;
-	if (vectorTwo.y > vectorOne.y)
-	{
-		temp.y = vectorTwo.y - temp.y;
-	}
-	else
-	{
-		temp.y = vectorOne.y - temp.y;
-	}
+	temp.x = vectorTwo.x - vectorOne.x;
+	temp.y = vectorTwo.y - vectorOne.y;
+	temp.z = vectorTwo.z - vectorOne.z;
 	return temp;
 }
 
-//bool CollideTunnelTop(Point points[], SpaceShip &ship)
-//{
-//	for(int i = 0; i < NUM_POINTS; i++)
-//	{
-//		if(points[i + 1].y < points[i].y)
-//		{
-//			if( (ship.GetShipPosition().x > points[i].x) &&
-//				(ship.GetShipPosition().x < points[i + 1].x))
-//			{
-//				if( (ship.GetShipPosition().y > points[i + 1].y) &&
-//					(ship.GetShipPosition().y < points[i].y))
-//				{
-//					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
-//					float slope = GetLineSlope(points[i], points[i + 1]);
-//					float perpSlope = GetPerpedicularSlope(slope);
-//					float lineIntercept =  GetYIntercept(points[i], slope);
-//					//float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
-//				//	Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
-//					/*						points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
-//
-//					al_draw_line(intersection.x, intersection.y, ship.pos.x, ship.pos.y, al_map_rgb(255, 255, 0), 1.0f);
-//					al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
-//					al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
-//					al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);*/
-//				}
-//			}
-//		}
-//		else 
-//		{
-//			if( (ship.GetShipPosition().x < points[i + 1].x) &&
-//				(ship.GetShipPosition().x > points[i].x))
-//			{
-//				if( (ship.GetShipPosition().y < points[i + 1].y) &&
-//					(ship.GetShipPosition().y > points[i].y))
-//				{
-//					
-//					Point distanceBetweenLinePoints = ( (GetPointDistance(points[i], points[i + 1])));
-//					float slope = GetLineSlope(points[i], points[i + 1]);
-//					float perpSlope = GetPerpedicularSlope(slope);
-//					float lineIntercept =  GetYIntercept(points[i], slope);
-//					//float perpLineIntercept = GetYIntercept(ship.pos, perpSlope);
-//					//Point intersection = GetLineIntersection(points[i].x, points[i].y, slope, lineIntercept, 
-//					//						points[i + 1].x, points[i + 1].y, perpSlope, perpLineIntercept);
-//
-//					//al_draw_line(intersection.x, intersection.y, ship.pos.x, ship.pos.y, al_map_rgb(255, 255, 0), 1.0f);
-//					//al_draw_line(points[i].x, points[i].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
-//					//al_draw_line(points[i + 1].x, points[i+1].y, ship.pos.x, ship.pos.y, al_map_rgb(0,255,255), 1.0f);
-//					//al_draw_line(distanceBetweenLinePoints.x, distanceBetweenLinePoints.y, ship.pos.x, ship.pos.y, al_map_rgb(255,0,0), 1.0f);
-//				}
-//			}
-//		}
-//	}
-//	return false;
-//}
-//
-//bool CollideTunnelBottom(Point points[], SpaceShip &ship)
-//{
-//	for (int i = 0; i < NUM_POINTS; i++)
-//	{
-//		if(points[i + 1].y < points[i].y)
-//		{
-//			//This is a preliminary check. Is the ship close enough to check for collision?
-//			if(( ship.GetShipPosition().x > points[i].x) &&
-//				(ship.GetShipPosition().x < points[i + 1].x) &&
-//				(ship.GetShipPosition().y > points[i].y) &&
-//				(ship.GetShipPosition().y < points[i + 1].y))
-//			{
-//				//Collide
-//				return true;
-//			}
-//		}
-//		else if(points[i + 1].y > points[i].y)
-//		{
-//			//preliminary check. Is ship close enough to check for collision?
-//			if( (ship.GetShipPosition().x > points[i].x) &&
-//				(ship.GetShipPosition().x < points[i + 1].x) &&
-//				(ship.GetShipPosition().y + 10 < points[i + 1].y) &&
-//				(ship.GetShipPosition().y - 10> points[i].y))
-//			{
-//				//collide
-//				return true;
-//			}
-//		}
-//	}
-//	return false;
-//}
 
-//Returns the slope of the line based on points p1 and p2
-//float GetLineSlope(Point p1, Point p2)
-//{	
-//	float slope;
-//	float yDistance, xDistance;
-//	yDistance = (p2.y - p1.y);
-//	xDistance = (p2.x - p1.x);
-//	slope = yDistance / xDistance;
-//	
-//	return slope;
-//}
+bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
+{
+	Vector3 lineSegment = GetVectorDistance(pointOne, pointTwo);
+	Vector3 shipWidthPosition(ship.shipPos.x + ship.GetWidth(), ship.shipPos.y, ship.shipPos.z);
 
-//Returns the Y intercept of line based on a point of the line and its slope
-//float GetYIntercept(Point p1, float slope)
-//{
-//	float intercept;
-//
-//	intercept = (slope * p1.x) - p1.y;
-//	intercept *= -1;
-//
-//	return intercept;
-//}
+	if (pointTwo.y < pointOne.y) //upwards line
+	{
+		Vector3 lineNormal(lineSegment.y, -lineSegment.x, 0);
+		double u = GetVectorDistance(ship.shipPos, pointTwo) * lineNormal;
+
+		if (u > 0)
+			return false;
+		else if (u < 0)
+			return true;
+	}
+	else if (pointTwo.y > pointOne.y) //downwards line
+	{
+		Vector3 lineNormal(lineSegment.y, -lineSegment.x, 0);
+		double u = GetVectorDistance(shipWidthPosition, pointOne) * lineNormal;
+
+		if (u > 0)
+			return false;
+		else if (u < 0)
+			return true;
+	}
+}
+
+bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
+{
+	Vector3 lineSegment = GetVectorDistance(pointOne, pointTwo);
+	Vector3 shipHeightPosition(ship.shipPos.x, ship.shipPos.y + ship.GetHeight(), ship.shipPos.z);
+	Vector3 shipWidthHeightPosition(ship.shipPos.x + ship.GetWidth(), ship.shipPos.y + ship.GetHeight(), ship.shipPos.z);
+
+	if (pointTwo.y < pointOne.y) //upwards line
+	{
+		Vector3 lineNormal(-lineSegment.y, lineSegment.x, 0);
+		double u = GetVectorDistance(shipWidthHeightPosition, pointTwo) * lineNormal;
+
+		if (u < 0)
+			return false;
+		else if (u > 0)
+			return true;
+	}
+	else if (pointTwo.y > pointOne.y) //downwards line
+	{
+		Vector3 lineNormal(-lineSegment.y, -lineSegment.x, 0);
+		double u = GetVectorDistance(shipHeightPosition, pointOne) * lineNormal;
+
+		if (u < 0)
+			return false;
+		else if (u > 0)
+			return true;
+	}
+}
 
 //returns the slope of a line that is perpendicular to slope of line passed to function.
 float GetPerpedicularSlope(float slope)
 {
 	return ( -1 / slope);
 }
-
-//Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept)
-//{
-//	Point intersection;
-//	//y1 = slope * x1 + intercept - convert to y1 - slope * x1 = intercept
-//	intersection.y = slope * x1 + intercept;
-//	intersection.x = y2 = perpSlope * intersection.y + perpIntercept;
-//	intersection.y = slope * intersection.x + intercept;
-//
-//	return intersection;
-//
-//}
 
 
 Vector3 GetLineIntersection(Vector3 originalPosition, float originalSlope, float originalEquationIntercept, Vector3 perpendicularPosition, 
