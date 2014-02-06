@@ -295,8 +295,8 @@ int main(void)
 			
 			if (collide)
 			{
-				al_draw_text(font, al_map_rgb(255, 255, 110), WIDTH /2, HEIGHT / 2, 0, "COLLISION - PLEASE AND THANK YOUUU!");
-				al_draw_textf(font, al_map_rgb(255,100,100), 20, 50, 0, "ShipPos: ( %d, %d, %d)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
+				al_draw_text(font, al_map_rgb(255, 255, 110), WIDTH /2, HEIGHT / 2, 0, "COLLISION ");
+				al_draw_textf(font, al_map_rgb(255,100,100), 20, 50, 0, "ShipPos: ( %i, %i, %i)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
 			}
 
 			DrawMagnets(topMagnets, botMagnets);
@@ -610,18 +610,6 @@ void SetUpMagnetsBottom()
 
 #pragma region Helper Functions
 
-//Returns distance between two points p1 and p2
-Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
-{
-	Vector3 temp;
-
-	temp.x = vectorTwo.x - vectorOne.x;
-	temp.y = vectorTwo.y - vectorOne.y;
-	temp.z = vectorTwo.z - vectorOne.z;
-	return temp;
-}
-
-
 bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 {
 	Vector3 lineSegment = GetVectorDistance(pointOne, pointTwo);
@@ -675,6 +663,17 @@ bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 		else if (u > 0)
 			return true;
 	}
+}
+
+//Returns distance between two points p1 and p2
+Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
+{
+	Vector3 temp;
+
+	temp.x = vectorTwo.x - vectorOne.x;
+	temp.y = vectorTwo.y - vectorOne.y;
+	temp.z = vectorTwo.z - vectorOne.z;
+	return temp;
 }
 
 //returns the slope of a line that is perpendicular to slope of line passed to function.
