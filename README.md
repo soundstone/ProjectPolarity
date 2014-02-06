@@ -16,17 +16,22 @@ through the tunnel. Each playthrough would be different and movement manuevers w
 played the current tunnel. 
 
 ==========================================
-Current Version: 1.03 Pre-Alpha (1/3/2014)
+Current Version: 1.04 Pre-Alpha (2/6/2014)
 ==========================================
+
+Changes in this version include the integration of collision for ceiling of random generated lines and for floor of randomly generated lines. Ship has been encapsulated, Point structure has been completely removed. All positions are now based on Vector3 structures. 
+
+-- Note * Using test seed #64789 *
+
+==================
+Previoius Versions
+==================
+- 1.03 Pre-Alpha (1/3/2014)
 
 Changes to this version included the integration of force and field caculations based on magnetism and electric current 
 has been added to the Polaris Engine. Point Charge struct has been added as well for use in magnetic calculations. 
 
 -- Note *Using test seed #24 *
-
-==================
-Previoius Versions
-==================
 
 - 1.02 Pre-Alpha (1/1/2014)
 
