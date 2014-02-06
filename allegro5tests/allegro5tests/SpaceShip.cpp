@@ -57,3 +57,5 @@ void SpaceShip::DrawShip()
 		al_draw_pixel(shipPos.x + (width / 2), shipPos.y + (height / 2), al_map_rgb(0,0,0));
 	}
 }
+
+

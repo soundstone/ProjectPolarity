@@ -20,12 +20,13 @@ public:
 					const std::string& logLevel);
 
 	static void ShutdownLogger();
+	static std::ofstream sOutputStream;
 
 protected:
 	static void InitializeLogger();
 	static const char* const logFileName;
 	static bool sInitialized;
-	static std::ofstream sOutputStream;
+	
 
 private:
 	Logger()

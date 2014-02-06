@@ -5,6 +5,7 @@
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_primitives.h>
 
+
 class SpaceShip
 {
 public:
@@ -12,10 +13,6 @@ public:
 	SpaceShip();
 	SpaceShip(PolarisEngine::Vector3 pos, int widthOfShip, int heightOfShip, float spd, int life, bool polaricCharge);
 
-	//PolarisEngine::Vector3 GetShipPosition() const
-	//{
-	//	return shipPos;
-	//}	
 
 	int GetNumberOfLives() const 
 	{ 

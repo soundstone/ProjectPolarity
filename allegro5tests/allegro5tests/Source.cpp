@@ -43,7 +43,7 @@ Magnet botMagnets[NUM_MAGNETS];
 const int NUM_obstacles = 2;
 const int BUTTON_TIME = 2.5f;
 
-enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE };
+enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE, H };
 bool keys[5] = {false, false, false, false, false};
 
 TopMagnetFactory topFactory;
@@ -103,6 +103,9 @@ int main(void)
 	Vector3 bottomPoints[NUM_POINTS] = {};
 	Vector3 vectorobstacles[NUM_obstacles];
 
+	al_init_font_addon();
+
+
 	//object variables
 	PolarisEngine::Vector3 shipStartingPosition;
 	shipStartingPosition.x = 20;
@@ -133,7 +136,7 @@ int main(void)
 
 	al_init_primitives_addon();
 	al_install_keyboard();
-	al_init_font_addon();
+
 	al_init_ttf_addon();
 	event_queue = al_create_event_queue();
 	timer = al_create_timer(1.0 / FPS);
@@ -202,7 +205,6 @@ int main(void)
 					ship.TogglePolaricCharge();	
 				}
 			}		
-
 			if (ship.shipPos.y < 190)
 			{
 				for (int i = 0; i < NUM_POINTS; i++)
@@ -225,8 +227,7 @@ int main(void)
 						continue;
 					collide = CheckCollisionsBottom(ship, bottomPoints[i], bottomPoints[i + 1]);
 				}
-			}
-			
+			}			
 		}
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
@@ -296,7 +297,7 @@ int main(void)
 			if (collide)
 			{
 				al_draw_text(font, al_map_rgb(255, 255, 110), WIDTH /2, HEIGHT / 2, 0, "COLLISION ");
-				al_draw_textf(font, al_map_rgb(255,100,100), 20, 50, 0, "ShipPos: ( %i, %i, %i)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
+				al_draw_textf(font, al_map_rgb(255,100,100), 20, 50, 0, "ShipPos: ( %g, %g, %g)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
 			}
 
 			DrawMagnets(topMagnets, botMagnets);
@@ -348,6 +349,8 @@ void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsBo
 {
 	char logStringBuffer[50];
 	logStringBuffer[0] = 0;
+	
+	Logger::Log("\n", Logger::logLevelDebug);
 
 	if(newPosition.x >= 4000)
 		return;
@@ -363,7 +366,7 @@ void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsBo
 	newPosition.x = oldPosition.x;
 
 	Logger::Log("Points - BOTTOM", Logger::logLevelInfo);
-	for (int i = 1; i < NUM_POINTS; i++)
+	for (int i = 0; i < NUM_POINTS; i++)
 	{
 		//One in 66 the points will not vary in height. This cause flat areas, and makes the lines look more cavelike. 
 		if(rand() % 66 == 0)
@@ -390,7 +393,7 @@ void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsBo
 			
 			pointsBottom[i] = newPosition;
 		}
-		sprintf_s(logStringBuffer, "PointsBot[ %i ] = (%d,%d, %d)", i, newPosition.x, newPosition.y, newPosition.z);  
+		sprintf_s(logStringBuffer, "PointsBot[ %i ] = (%g,%g)", i, newPosition.x, newPosition.y);  
 		Logger::Log(logStringBuffer, Logger::logLevelInfo);
 		memset(logStringBuffer, 0, sizeof(logStringBuffer));
 	}	
@@ -404,6 +407,8 @@ void PlotPointsTop(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsTop[]
 	char logStringBuffer[50];
 	logStringBuffer[0] = 0;
 
+	Logger::Log("\n", Logger::logLevelDebug);
+	
 	if(newPosition.x >= 4000)
 		return;
 	
@@ -417,8 +422,8 @@ void PlotPointsTop(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsTop[]
 	pointsTop[0] = oldPosition;
 	newPosition.x = oldPosition.x;
 
-	Logger::Log("Points - BOTTOM", Logger::logLevelInfo);
-	for (int i = 1; i < NUM_POINTS; i++)
+	Logger::Log("Points - TOP", Logger::logLevelInfo);
+	for (int i = 0; i < NUM_POINTS; i++)
 	{
 		//One in 66 the points will not vary in height. This cause flat areas, and makes the lines look more cavelike. 
 		if(rand() % 66 == 0)
@@ -445,7 +450,7 @@ void PlotPointsTop(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsTop[]
 			
 			pointsTop[i] = newPosition;
 		}
-		sprintf_s(logStringBuffer, "PointsBot[ %i ] = (%d,%d, %d)", i, newPosition.x, newPosition.y, newPosition.z);  
+		sprintf_s(logStringBuffer, "PointsTop[ %i ] = (%g,%g)", i, pointsTop[i].x, pointsTop[i].y);  
 		Logger::Log(logStringBuffer, Logger::logLevelInfo);
 		memset(logStringBuffer, 0, sizeof(logStringBuffer));
 	}	
@@ -457,6 +462,7 @@ void ConnectPointsTop(Vector3 points[])
 	for (int i = 0; i < NUM_POINTS; i++)
 	{
 		al_draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, al_map_rgb(255,0,255), 2);
+		al_draw_line(points[i].x, points[i].y - 20, points[i].x, points[i].y + 20, al_map_rgb(0,255,255), 3);
 	}
 }
 
@@ -466,6 +472,7 @@ void ConnectPointsBottom(Vector3 pointsBot[])
 	for (int i = 0; i < NUM_POINTS; i++)
 	{
 		al_draw_line(pointsBot[i].x, pointsBot[i].y, pointsBot[i + 1].x, pointsBot[i + 1].y, al_map_rgb(255,0,255),2);
+		al_draw_line(pointsBot[i].x, pointsBot[i].y - 20, pointsBot[i].x, pointsBot[i].y + 20, al_map_rgb(0,255,255), 3);
 	}
 }
 
@@ -553,6 +560,8 @@ void SetupMagnetsTop()
 	char logStringBuffer[50];
 	logStringBuffer[0] = 0;
 
+	Logger::Log("\n", Logger::logLevelDebug);
+
 	bool polaricCharge = POSITIVE;
 
 	Logger::Log("MAGNETS - TOP", Logger::logLevelInfo);
@@ -580,6 +589,8 @@ void SetUpMagnetsBottom()
 {
 	char logStringBuffer[50];
 	logStringBuffer[0] = 0;
+
+	Logger::Log("\n", Logger::logLevelDebug);
 
 	bool polaricCharge = NEGATIVE;
 	
@@ -648,19 +659,19 @@ bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 		Vector3 lineNormal(-lineSegment.y, lineSegment.x, 0);
 		double u = GetVectorDistance(shipWidthHeightPosition, pointTwo) * lineNormal;
 
-		if (u < 0)
+		if (u > 0)
 			return false;
-		else if (u > 0)
+		else if (u < 0)
 			return true;
 	}
 	else if (pointTwo.y > pointOne.y) //downwards line
 	{
-		Vector3 lineNormal(-lineSegment.y, -lineSegment.x, 0);
-		double u = GetVectorDistance(shipHeightPosition, pointOne) * lineNormal;
+		Vector3 lineNormal(-lineSegment.y, lineSegment.x, 0);
+		double u = GetVectorDistance(shipHeightPosition, pointTwo) * lineNormal;
 
-		if (u < 0)
+		if (u > 0)
 			return false;
-		else if (u > 0)
+		else if (u < 0)
 			return true;
 	}
 }

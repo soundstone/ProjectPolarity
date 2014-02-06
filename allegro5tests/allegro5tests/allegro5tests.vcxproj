@@ -85,7 +85,6 @@
     <ClInclude Include="polaris.h" />
     <ClInclude Include="precision.h" />
     <ClInclude Include="Spaceship.h" />
-    <ClInclude Include="sysmetrics.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

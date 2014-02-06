@@ -1,24 +1,75 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Logger.cpp" />
-    <ClCompile Include="MagnetFactory.cpp" />
-    <ClCompile Include="particle.cpp" />
-    <ClCompile Include="polaris.cpp" />
-    <ClCompile Include="Source.cpp" />
-    <ClCompile Include="SpaceShip.cpp" />
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Code\PolarisEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="particle.cpp">
+      <Filter>Source Code\PolarisEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="polaris.cpp">
+      <Filter>Source Code\PolarisEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="MagnetFactory.cpp">
+      <Filter>Source Code\Polarity</Filter>
+    </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>Source Code\Polarity</Filter>
+    </ClCompile>
+    <ClCompile Include="SpaceShip.cpp">
+      <Filter>Source Code\Polarity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="camera.h" />
-    <ClInclude Include="core.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="MagnetFactory.h" />
-    <ClInclude Include="Magnets.h" />
-    <ClInclude Include="objects.h" />
-    <ClInclude Include="particle.h" />
-    <ClInclude Include="polaris.h" />
-    <ClInclude Include="precision.h" />
-    <ClInclude Include="sysmetrics.h" />
-    <ClInclude Include="Spaceship.h" />
+    <ClInclude Include="core.h">
+      <Filter>Headers\PolarisEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Headers\PolarisEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="particle.h">
+      <Filter>Headers\PolarisEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="polaris.h">
+      <Filter>Headers\PolarisEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="precision.h">
+      <Filter>Headers\PolarisEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Spaceship.h">
+      <Filter>Headers\Polarity</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>Headers\Polarity</Filter>
+    </ClInclude>
+    <ClInclude Include="MagnetFactory.h">
+      <Filter>Headers\Polarity</Filter>
+    </ClInclude>
+    <ClInclude Include="Magnets.h">
+      <Filter>Headers\Polarity</Filter>
+    </ClInclude>
+    <ClInclude Include="objects.h">
+      <Filter>Headers\Polarity</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{bee71462-49c8-4e2a-8805-5189eff74fd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Code">
+      <UniqueIdentifier>{db00bc46-a353-4256-8df3-61201baa4a6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Code\PolarisEngine">
+      <UniqueIdentifier>{d82c625c-93e7-45e4-9193-41502f5e8c54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Code\Polarity">
+      <UniqueIdentifier>{474c6eb9-cfa9-4e24-906d-31d0aad1511a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Polarity">
+      <UniqueIdentifier>{dc50f638-257d-470f-950b-9821c2b65383}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\PolarisEngine">
+      <UniqueIdentifier>{b4c25766-c552-4a66-a274-0ac835e19470}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
