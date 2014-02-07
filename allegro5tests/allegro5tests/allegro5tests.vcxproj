@@ -71,6 +71,7 @@
     <ClCompile Include="MagnetFactory.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="polaris.cpp" />
+    <ClCompile Include="ScoreCounter.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="SpaceShip.cpp" />
   </ItemGroup>
@@ -83,6 +84,7 @@
     <ClInclude Include="particle.h" />
     <ClInclude Include="polaris.h" />
     <ClInclude Include="precision.h" />
+    <ClInclude Include="ScoreCounter.h" />
     <ClInclude Include="Spaceship.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

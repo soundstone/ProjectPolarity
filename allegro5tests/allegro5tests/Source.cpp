@@ -10,6 +10,7 @@
 #include "core.h"
 #include "MagnetFactory.h"
 #include "Spaceship.h"
+#include "ScoreCounter.h"
 
 using namespace std;
 using namespace PolarisEngine;
@@ -40,7 +41,7 @@ Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
 
 //obstacle consts
-const int NUM_obstacles = 2;
+const int NUM_OBSTACLES = 2;
 const int BUTTON_TIME = 2.5f;
 
 enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE, H };
@@ -52,6 +53,9 @@ BottomMagnetFactory bottomFactory;
 //Object IDs
 enum IDS {PLAYER, MAGNET};
 enum Polarity {POSITIVE, NEGATIVE};
+
+//Score increase per cycle amount
+const float SCORE_INCREMENT = 0.01f;
 
 //================================================================
 
@@ -84,6 +88,7 @@ void SetUpMagnetsBottom();
 Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
 bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
+void DrawScore(float score);
 
 //==========================================================================================
 
@@ -100,10 +105,7 @@ int main(void)
 	Vector3 oldPosition, newPosition;
 	Vector3 topPoints[NUM_POINTS] = {};
 	Vector3 bottomPoints[NUM_POINTS] = {};
-	Vector3 vectorobstacles[NUM_obstacles];
-
-	al_init_font_addon();
-
+	Vector3 vectorobstacles[NUM_OBSTACLES];
 
 	//object variables
 	PolarisEngine::Vector3 shipStartingPosition;
@@ -111,6 +113,10 @@ int main(void)
 	shipStartingPosition.y = HEIGHT / 2;
 	shipStartingPosition.z = 0;
 	SpaceShip ship(shipStartingPosition, 15, 15, 7, 3, NEGATIVE);
+	
+	//Setup game starting score
+	ScoreCounter gameScore(0);
+
 	bool polarity = false;
 	float buttonTimer = 0.0f;
 	bool collide = false;
@@ -135,7 +141,7 @@ int main(void)
 
 	al_init_primitives_addon();
 	al_install_keyboard();
-
+	al_init_font_addon();
 	al_init_ttf_addon();
 	event_queue = al_create_event_queue();
 	timer = al_create_timer(1.0 / FPS);
@@ -294,6 +300,11 @@ int main(void)
 			al_set_target_bitmap(backBuffer);
 			al_clear_to_color(al_map_rgb(0,0,0));
 
+			gameScore.UpdateScoreCounter(SCORE_INCREMENT);
+			
+			//Draw static position score in bottom right corner of screen
+			DrawScore(gameScore.GetScore());
+			
 			ship.DrawShip();
 
 			ConnectPointsTop(topPoints);
@@ -491,7 +502,7 @@ void ConnectPointsBottom(Vector3 pointsBot[])
 //Takes array of obstacles generated and draws them to the screen. obstacles reside inside the tunnel for the player to dodge.
 void Drawobstacles(Vector3 obstacles[])
 {
-	for (int i = 0; i < NUM_obstacles; i++)
+	for (int i = 0; i < NUM_OBSTACLES; i++)
 	{
 		al_draw_filled_rectangle(obstacles[i].x, obstacles[i].y, obstacles[i].x + 20, obstacles[i].y + 20, al_map_rgb(255,0,255));
 	}
@@ -500,7 +511,7 @@ void Drawobstacles(Vector3 obstacles[])
 //Generates and populates obstacles[]. Randomly places obstacles within the level. 
 void Generateobstacles(Vector3 obstacles[])
 {
-	for (int i = 0; i < NUM_obstacles; i++)
+	for (int i = 0; i < NUM_OBSTACLES; i++)
 	{
 		obstacles[i].x = ((rand() % (WIDTH - 30)) + 100);
 		obstacles[i].y = HEIGHT / 2 - ((rand() % 25) + 20);
@@ -697,6 +708,11 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 	temp.y = vectorTwo.y - vectorOne.y;
 	temp.z = vectorTwo.z - vectorOne.z;
 	return temp;
+}
+
+void DrawScore(float score)
+{
+	al_draw_textf(font, al_map_rgb(145,58,83), WIDTH - 100, HEIGHT - 30, 0, "Score: %i", score);
 }
 
 #pragma endregion
