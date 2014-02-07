@@ -48,9 +48,6 @@
     <ClInclude Include="Magnets.h">
       <Filter>Headers\Polarity</Filter>
     </ClInclude>
-    <ClInclude Include="objects.h">
-      <Filter>Headers\Polarity</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">

@@ -80,7 +80,6 @@
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MagnetFactory.h" />
     <ClInclude Include="Magnets.h" />
-    <ClInclude Include="objects.h" />
     <ClInclude Include="particle.h" />
     <ClInclude Include="polaris.h" />
     <ClInclude Include="precision.h" />

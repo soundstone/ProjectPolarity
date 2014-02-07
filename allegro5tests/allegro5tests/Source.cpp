@@ -2,7 +2,7 @@
 #include <allegro5\allegro_primitives.h>
 #include <allegro5\allegro_font.h>
 #include <allegro5\allegro_ttf.h>
-#include "objects.h"
+#include <stdio.h>
 #include <math.h>
 #include <string>
 #include "Logger.h"
@@ -49,6 +49,10 @@ bool keys[5] = {false, false, false, false, false};
 TopMagnetFactory topFactory;
 BottomMagnetFactory bottomFactory;
 
+//Object IDs
+enum IDS {PLAYER, MAGNET};
+enum Polarity {POSITIVE, NEGATIVE};
+
 //================================================================
 
 #pragma endregion
@@ -80,11 +84,6 @@ void SetUpMagnetsBottom();
 Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
 bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
-float GetPerpedicularSlope(float slope);
-//Point GetLineIntersection(int x1, int y1, float slope, float intercept, int x2, int y2, float perpSlope, float perpIntercept);
-Vector3 GetLineIntersection(Vector3 originalPosition, float originalSlope, float originalEquationIntercept, Vector3 perpendicularPosition, 
-							float perpendicularSlope, float perpendicularIntercept);
-
 
 //==========================================================================================
 
@@ -146,6 +145,12 @@ int main(void)
 		Seed set to 64789 for testing purposes.
 	*/
 	srand(64789);
+
+	//If log file currently exists, delete it for a fresh copy
+	if(remove("log.txt") != 0)
+		cout << "error deleting log.txt file";
+	else 
+		cout << "file successfully deleted";
 
 	Logger::Log("Seed is 64789", Logger::logLevelInfo);
 	Logger::ShutdownLogger();
@@ -366,7 +371,7 @@ void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsBo
 	newPosition.x = oldPosition.x;
 
 	Logger::Log("Points - BOTTOM", Logger::logLevelInfo);
-	for (int i = 0; i < NUM_POINTS; i++)
+	for (int i = 1; i < NUM_POINTS; i++)
 	{
 		//One in 66 the points will not vary in height. This cause flat areas, and makes the lines look more cavelike. 
 		if(rand() % 66 == 0)
@@ -423,7 +428,7 @@ void PlotPointsTop(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsTop[]
 	newPosition.x = oldPosition.x;
 
 	Logger::Log("Points - TOP", Logger::logLevelInfo);
-	for (int i = 0; i < NUM_POINTS; i++)
+	for (int i = 1; i < NUM_POINTS; i++)
 	{
 		//One in 66 the points will not vary in height. This cause flat areas, and makes the lines look more cavelike. 
 		if(rand() % 66 == 0)
@@ -462,7 +467,11 @@ void ConnectPointsTop(Vector3 points[])
 	for (int i = 0; i < NUM_POINTS; i++)
 	{
 		al_draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, al_map_rgb(255,0,255), 2);
+		/*
+			The line below is only used for debugging to visually see where each point is located throughout the ceiling.
 		al_draw_line(points[i].x, points[i].y - 20, points[i].x, points[i].y + 20, al_map_rgb(0,255,255), 3);
+
+		*/
 	}
 }
 
@@ -472,7 +481,10 @@ void ConnectPointsBottom(Vector3 pointsBot[])
 	for (int i = 0; i < NUM_POINTS; i++)
 	{
 		al_draw_line(pointsBot[i].x, pointsBot[i].y, pointsBot[i + 1].x, pointsBot[i + 1].y, al_map_rgb(255,0,255),2);
+		/*
+			The line below is only used for visually displaying where each point is on the floor. 
 		al_draw_line(pointsBot[i].x, pointsBot[i].y - 20, pointsBot[i].x, pointsBot[i].y + 20, al_map_rgb(0,255,255), 3);
+		*/
 	}
 }
 
@@ -686,25 +698,5 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 	temp.z = vectorTwo.z - vectorOne.z;
 	return temp;
 }
-
-//returns the slope of a line that is perpendicular to slope of line passed to function.
-float GetPerpedicularSlope(float slope)
-{
-	return ( -1 / slope);
-}
-
-
-Vector3 GetLineIntersection(Vector3 originalPosition, float originalSlope, float originalEquationIntercept, Vector3 perpendicularPosition, 
-							float perpendicularSlope, float perpendicularIntercept)
-{
-	Vector3 intersection;
-	intersection.y = originalSlope * originalPosition.x + originalEquationIntercept;
-	intersection.x = perpendicularPosition.y = perpendicularSlope * intersection.y + perpendicularIntercept;
-	intersection.y = originalSlope * intersection.x + originalEquationIntercept;
-	intersection.z = 0;
-	
-	return intersection;
-}
-
 
 #pragma endregion
