@@ -55,7 +55,9 @@ enum IDS {PLAYER, MAGNET};
 enum Polarity {POSITIVE, NEGATIVE};
 
 //Score increase per cycle amount
-const float SCORE_INCREMENT = 0.01f;
+const float SCORE_INCREMENT = 1.0f;
+const float timeDelayLimit = 1.0f;
+float timeDelay = 0.0f;
 
 //================================================================
 
@@ -238,7 +240,14 @@ int main(void)
 						continue;
 					collide = CheckCollisionsBottom(ship, bottomPoints[i], bottomPoints[i + 1]);
 				}
-			}			
+			}		
+			
+			timeDelay += 0.1f;
+			if (timeDelay >= timeDelayLimit)
+			{
+				gameScore.UpdateScoreCounter(SCORE_INCREMENT);
+				timeDelay = 0.0f;
+			}
 		}
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
@@ -299,8 +308,6 @@ int main(void)
 
 			al_set_target_bitmap(backBuffer);
 			al_clear_to_color(al_map_rgb(0,0,0));
-
-			gameScore.UpdateScoreCounter(SCORE_INCREMENT);
 			
 			//Draw static position score in bottom right corner of screen
 			DrawScore(gameScore.GetScore());
@@ -596,9 +603,10 @@ void SetupMagnetsTop()
 		if (i % 2 == 0)
 			polaricCharge = !polaricCharge;
 
+		
 		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 10, 1.9f, polaricCharge);
 		topMagnets[i] = *topMagnet;
-
+		
 
 		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, topMagnet->magnetX, topMagnet->magnetY);  
 		Logger::Log(logStringBuffer, Logger::logLevelInfo);
@@ -627,11 +635,11 @@ void SetUpMagnetsBottom()
 
 		if (i % 2 == 0)
 			polaricCharge = !polaricCharge;
-
+		
+		int position = bottomMagnet[i - 1].magnetX;
 		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 10, 1.9f, polaricCharge);
 		botMagnets[i] = *bottomMagnet;
-
-
+		
 		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, bottomMagnet->magnetX, bottomMagnet->magnetY);  
 		Logger::Log(logStringBuffer, Logger::logLevelInfo);
 		memset(logStringBuffer, 0, sizeof(logStringBuffer));
@@ -712,7 +720,7 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 
 void DrawScore(float score)
 {
-	al_draw_textf(font, al_map_rgb(145,58,83), WIDTH - 100, HEIGHT - 30, 0, "Score: %i", score);
+	al_draw_textf(font, al_map_rgb(145,58,83), WIDTH - 100, HEIGHT - 30, 0, "Score: %g", score);
 }
 
 #pragma endregion

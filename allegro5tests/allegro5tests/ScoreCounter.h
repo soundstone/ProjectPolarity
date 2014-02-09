@@ -19,6 +19,6 @@ public:
 	}
 
 private:
-	float score;
+	int score;
 
 };

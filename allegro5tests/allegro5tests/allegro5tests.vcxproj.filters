@@ -19,7 +19,9 @@
     <ClCompile Include="SpaceShip.cpp">
       <Filter>Source Code\Polarity</Filter>
     </ClCompile>
-    <ClCompile Include="ScoreCounter.cpp" />
+    <ClCompile Include="ScoreCounter.cpp">
+      <Filter>Source Code\Polarity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core.h">
