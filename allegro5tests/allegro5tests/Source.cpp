@@ -18,8 +18,11 @@ using namespace PolarisEngine;
 #pragma region Globals
 
 //screen dimensions
-const int WIDTH = 1280;
-const int HEIGHT = 500;
+int Width = 1280;
+int Height = 500;
+
+const int SCREENWIDTH = 1280;
+const int SCREENHEIGHT = 500;
 
 ALLEGRO_FONT *font;
 
@@ -98,6 +101,7 @@ void DrawScore(float score);
 
 int main(void)
 {
+	#pragma region GameVariables
 	//primitive variable
 	bool done = false;
 	bool redraw = true;
@@ -112,7 +116,7 @@ int main(void)
 	//object variables
 	PolarisEngine::Vector3 shipStartingPosition;
 	shipStartingPosition.x = 20;
-	shipStartingPosition.y = HEIGHT / 2;
+	shipStartingPosition.y = SCREENHEIGHT / 2;
 	shipStartingPosition.z = 0;
 	SpaceShip ship(shipStartingPosition, 15, 15, 7, 3, NEGATIVE);
 	
@@ -123,7 +127,7 @@ int main(void)
 	float buttonTimer = 0.0f;
 	bool collide = false;
 	bool collideBot = false;
-	
+#pragma endregion
 
 	//allegro variables
 	ALLEGRO_DISPLAY *display = NULL;
@@ -135,8 +139,8 @@ int main(void)
 	if(!al_init())
 		return -1;
 
-	display = al_create_display(WIDTH, HEIGHT);
-	backBuffer = al_create_bitmap(WIDTH, HEIGHT);
+	display = al_create_display(SCREENWIDTH, SCREENHEIGHT);
+	backBuffer = al_create_bitmap(Width, Height);
 	
 	if(!display)
 		return -1;
@@ -154,6 +158,7 @@ int main(void)
 	*/
 	srand(64789);
 
+	#pragma region LoggerInitialize
 	//If log file currently exists, delete it for a fresh copy
 	if(remove("log.txt") != 0)
 		cout << "error deleting log.txt file";
@@ -163,6 +168,9 @@ int main(void)
 	Logger::Log("Seed is 64789", Logger::logLevelInfo);
 	Logger::ShutdownLogger();
 	
+#pragma endregion
+
+	#pragma region GameInitialize
 	//Font used for Debug display
 	font = al_load_font("arial.ttf", 16, 0);
 	
@@ -188,14 +196,16 @@ int main(void)
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 
 	al_start_timer(timer);
+#pragma endregion
 
-#pragma region Game Loop
+	#pragma region Game Loop
 
 	while(!done)
 	{
 		ALLEGRO_EVENT ev;
 		al_wait_for_event(event_queue, &ev);
 
+		#pragma region Update Loop
 		if(ev.type == ALLEGRO_EVENT_TIMER)
 		{
 			buttonTimer += 0.1f;
@@ -230,7 +240,7 @@ int main(void)
 					collide = CheckCollisionsTop(ship, topPoints[i], topPoints[i + 1]);
 				}
 			}
-			else if (ship.shipPos.y > HEIGHT / 2 + 60)
+			else if (ship.shipPos.y > SCREENHEIGHT / 2 + 60)
 			{
 				for (int i = 0; i < NUM_POINTS; i++)
 				{
@@ -249,10 +259,14 @@ int main(void)
 				timeDelay = 0.0f;
 			}
 		}
+#pragma endregion
+
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
 			done = true;
 		}
+
+		#pragma region Keysets
 		if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
 		{
 			switch(ev.keyboard.keycode)
@@ -301,7 +315,9 @@ int main(void)
 				break;
 			}
 		}
+#pragma endregion
 
+		#pragma region DrawLoop
 		if(redraw && al_event_queue_is_empty(event_queue))
 		{
 			redraw = false;
@@ -319,7 +335,7 @@ int main(void)
 			
 			if (collide)
 			{
-				al_draw_text(font, al_map_rgb(255, 255, 110), WIDTH /2, HEIGHT / 2, 0, "COLLISION ");
+				al_draw_text(font, al_map_rgb(255, 255, 110), SCREENWIDTH /2, SCREENHEIGHT / 2, 0, "COLLISION ");
 				al_draw_textf(font, al_map_rgb(255,100,100), 20, 50, 0, "ShipPos: ( %g, %g, %g)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
 			}
 
@@ -333,6 +349,7 @@ int main(void)
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(0,0,0));
 		}
+#pragma endregion
 	}
 
 #pragma endregion
@@ -520,8 +537,8 @@ void Generateobstacles(Vector3 obstacles[])
 {
 	for (int i = 0; i < NUM_OBSTACLES; i++)
 	{
-		obstacles[i].x = ((rand() % (WIDTH - 30)) + 100);
-		obstacles[i].y = HEIGHT / 2 - ((rand() % 25) + 20);
+		obstacles[i].x = ((rand() % (Width - 30)) + 100);
+		obstacles[i].y = Height / 2 - ((rand() % 25) + 20);
 	}
 }
 
@@ -562,7 +579,7 @@ void Generateobstacles(Vector3 obstacles[])
 //Generate random X value for Magnet location
 int GetMagnetLocationX()
 {
-	int x = (rand() % WIDTH) + 30;
+	int x = (rand() % Width) + 30;
 
 	return x;
 }
@@ -720,7 +737,7 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 
 void DrawScore(float score)
 {
-	al_draw_textf(font, al_map_rgb(145,58,83), WIDTH - 100, HEIGHT - 30, 0, "Score: %g", score);
+	al_draw_textf(font, al_map_rgb(145,58,83), SCREENWIDTH - 100, SCREENHEIGHT - 30, 0, "Score: %g", score);
 }
 
 #pragma endregion
