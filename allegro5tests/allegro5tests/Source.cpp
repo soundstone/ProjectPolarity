@@ -36,7 +36,7 @@ int cameraY = 0;
 
 //how many points and spacing between points for lines drawn
 const int PLOT_INTERVAL = 36;
-const int NUM_POINTS = 333;
+const int NUM_POINTS = 220;
 
 //Magnet consts
 const int NUM_MAGNETS = 3;
@@ -221,9 +221,17 @@ int main(void)
 			if(keys[DOWN])
 				ship.MoveShipDown();
 			if(keys[LEFT])
+			{
 				ship.MoveShipLeft();
+				if (ship.shipPos.x <= 20)
+					ship.shipPos.x = 20;
+			}
 			if(keys[RIGHT])
+			{
 				ship.MoveShipRight();
+				if (ship.shipPos.x >= LEVELWIDTH)
+					ship.shipPos.x = LEVELWIDTH;
+			}
 			if(keys[SPACE])
 			{
 				if(buttonTimer >= BUTTON_TIME)
@@ -269,17 +277,14 @@ int main(void)
 			}
 			else if (ship.shipPos.x < currentX + (SCREENWIDTH / 2) && keys[LEFT])
 			{
-				if (currentX < SCREENWIDTH / 2)
-					currentX = currentX;
+				if (currentX <= 0)
+					currentX = 0;
 				else
 					currentX -= ship.GetSpeed();
 			}
 
-			if (currentX <= 0)
-				currentX = 0;
-
-			if (LEVELWIDTH - SCREENWIDTH < currentX)
-				currentX = LEVELWIDTH - SCREENWIDTH;
+			if (LEVELWIDTH - (SCREENWIDTH / 2) < currentX)
+				currentX = LEVELWIDTH - (SCREENWIDTH / 2);
 		}
 #pragma endregion
 

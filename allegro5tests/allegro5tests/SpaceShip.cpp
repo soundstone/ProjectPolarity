@@ -33,15 +33,11 @@ void SpaceShip::MoveShipDown()
 void SpaceShip::MoveShipLeft()
 {
 	shipPos.x -= speed;
-	if (shipPos.x < 20)
-		shipPos.x = 20;
 }
 
 void SpaceShip::MoveShipRight()
 {
 	shipPos.x += speed;
-	/*if (shipPos.x > SCREENWIDTH - width)
-		shipPos.x = SCREENWIDTH - width;*/
 }
 
 void SpaceShip::DrawShip()
