@@ -16,16 +16,28 @@ through the tunnel. Each playthrough would be different and movement manuevers w
 played the current tunnel. 
 
 ==========================================
-Current Version: 1.04 Pre-Alpha (2/6/2014)
+Current Version: 1.05 ALPHA (2/9/2014)
 ==========================================
+
+Changes in this version finish up pre-alpha goals. Camera is implemented with full scrolling both left and right. NUM_POINTS for both top and bottom of tunnel have been shaved to fit maximum bitmap size for level. Collision Detection works perfectly throughout level for both top and bottom of tunnel. 
+
+Main goals of version are:
+1) Implement physical collision with ceiling and floor based on detection.
+2) Implement forces on magnets to pull and push ship based on current polarity. Remove arrow movement.
+3) Implement a spacing algorithm for both the magnets (top and bottom) and the obstacles. This will ensure that they are    not overly close or too far apart. As well as equally spread throughout the level.
+4) Implement game startup screen (Splash, Game Menu, Options, Pause?)
+      - This involves creating gameStates and a gameState Manager to control it. 
+5) Implement end of level flash in polaric colors (1/2 screen - WHITE, 1/2 screen - RED).
+
+==================
+Previoius Versions
+==================
+- 1.04 Pre-Alpha (2/6/2014)
 
 Changes in this version include the integration of collision for ceiling of random generated lines and for floor of randomly generated lines. Ship has been encapsulated, Point structure has been completely removed. All positions are now based on Vector3 structures. 
 
 -- Note * Using test seed #64789 *
 
-==================
-Previoius Versions
-==================
 - 1.03 Pre-Alpha (1/3/2014)
 
 Changes to this version included the integration of force and field caculations based on magnetism and electric current 
