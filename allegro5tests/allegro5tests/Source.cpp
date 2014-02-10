@@ -27,7 +27,7 @@ const int SCREENHEIGHT = 500;
 ALLEGRO_FONT *font;
 
 //level dimensions
-const int LEVELWIDTH = 4000;
+const int LEVELWIDTH = 8190;
 const int LEVELHEIGHT = 500;
 
 //Camera position
@@ -93,7 +93,7 @@ void SetUpMagnetsBottom();
 Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
 bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
-void DrawScore(float score);
+void DrawScore(float score, int currentX);
 
 //==========================================================================================
 
@@ -127,6 +127,9 @@ int main(void)
 	float buttonTimer = 0.0f;
 	bool collide = false;
 	bool collideBot = false;
+
+	int currentX = 0;
+	int currentY = 0;
 #pragma endregion
 
 	//allegro variables
@@ -140,8 +143,8 @@ int main(void)
 		return -1;
 
 	display = al_create_display(SCREENWIDTH, SCREENHEIGHT);
-	backBuffer = al_create_bitmap(Width, Height);
-	
+	backBuffer = al_create_bitmap(LEVELWIDTH, LEVELHEIGHT);
+
 	if(!display)
 		return -1;
 
@@ -208,6 +211,7 @@ int main(void)
 		#pragma region Update Loop
 		if(ev.type == ALLEGRO_EVENT_TIMER)
 		{
+
 			buttonTimer += 0.1f;
 			
 			collide = false;
@@ -258,6 +262,24 @@ int main(void)
 				gameScore.UpdateScoreCounter(SCORE_INCREMENT);
 				timeDelay = 0.0f;
 			}
+
+			if (ship.shipPos.x > SCREENWIDTH / 2 && keys[RIGHT])
+			{
+				currentX += ship.GetSpeed();
+			}
+			else if (ship.shipPos.x < currentX + (SCREENWIDTH / 2) && keys[LEFT])
+			{
+				if (currentX < SCREENWIDTH / 2)
+					currentX = currentX;
+				else
+					currentX -= ship.GetSpeed();
+			}
+
+			if (currentX <= 0)
+				currentX = 0;
+
+			if (LEVELWIDTH - SCREENWIDTH < currentX)
+				currentX = LEVELWIDTH - SCREENWIDTH;
 		}
 #pragma endregion
 
@@ -326,7 +348,7 @@ int main(void)
 			al_clear_to_color(al_map_rgb(0,0,0));
 			
 			//Draw static position score in bottom right corner of screen
-			DrawScore(gameScore.GetScore());
+			DrawScore(gameScore.GetScore(), currentX);
 			
 			ship.DrawShip();
 
@@ -335,9 +357,13 @@ int main(void)
 			
 			if (collide)
 			{
-				al_draw_text(font, al_map_rgb(255, 255, 110), SCREENWIDTH /2, SCREENHEIGHT / 2, 0, "COLLISION ");
-				al_draw_textf(font, al_map_rgb(255,100,100), 20, 50, 0, "ShipPos: ( %g, %g, %g)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
+				al_draw_text(font, al_map_rgb(255, 255, 110), currentX + (SCREENWIDTH / 2), SCREENHEIGHT / 2, 0, "COLLISION ");
+				al_draw_textf(font, al_map_rgb(255,100,100), currentX + 20, 50, 0, "ShipPos: ( %g, %g, %g)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
 			}
+
+			al_draw_textf(font, al_map_rgb(45, 120, 200), currentX + 20, SCREENHEIGHT - 100, 0, "currentX = %i", currentX);
+			al_draw_line(currentX, 10, currentX, SCREENHEIGHT, al_map_rgb(255,0,0), 3);
+			al_draw_line(LEVELWIDTH, 0, LEVELWIDTH, LEVELHEIGHT, al_map_rgb(0,0,255), 10);
 
 			DrawMagnets(topMagnets, botMagnets);
 			
@@ -345,7 +371,8 @@ int main(void)
 
 			al_set_target_bitmap(al_get_backbuffer(display));
 
-			al_draw_bitmap(backBuffer, 0, 0, 0);
+			//al_draw_bitmap(backBuffer, 0, 0, 0);
+			al_draw_bitmap_region(backBuffer, currentX, currentY, currentX + SCREENWIDTH, currentY + SCREENHEIGHT, 0, 0, 0);
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(0,0,0));
 		}
@@ -735,9 +762,9 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 	return temp;
 }
 
-void DrawScore(float score)
+void DrawScore(float score, int currentX)
 {
-	al_draw_textf(font, al_map_rgb(145,58,83), SCREENWIDTH - 100, SCREENHEIGHT - 30, 0, "Score: %g", score);
+	al_draw_textf(font, al_map_rgb(145,58,83), currentX + (SCREENWIDTH - 100), SCREENHEIGHT - 30, 0, "Score: %g", score);
 }
 
 #pragma endregion

@@ -34,6 +34,11 @@ public:
 	{
 		return polarity;
 	}
+	float GetSpeed() const 
+	{
+		return speed; 
+	}
+
 
 	void MoveShipUp();
 	void MoveShipDown();
