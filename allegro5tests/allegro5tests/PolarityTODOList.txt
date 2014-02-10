@@ -1,29 +1,24 @@
 Polarity – TODO List
 
 Generate Forces to move ship automatically based on magnetic forces.
-Magnets need large enough radius of effect.
-Magnets need to output a force.
-Magnets need to be spaced properly.
-Remove Left, Right, Up, Down movements for ship.
+-Magnets need large enough radius of effect.
+-Magnets need to output a force.
+-Magnets need to be spaced properly.
+-Remove Left, Right, Up, Down movements for ship.
 
-Get Camera working with scrolling.
-Create allegro bitmap to hold current screen
-Every frame clear bitmap to black
-Redraw all coordinates on bitmap for floor, ceiling, obstacles, and magnets based on ship speed and direction. 
+Camera Implemented!
 
-Implement Score Counter  Add Life Counter
-Draw a static position score counter (Bottom – Right of screen)
-Draw a static position life counter (Bottom – Left of screen)
-Score updates over time based on length of current life. 
-Collectables (to effect score – would need implementation)
+Score Implemented!
 
-Design Finish Line for End of Level.
-Place at last points of ceiling and floor
+Primitive FinishLine Implemented!
 
 Obstacles Need To Be Spaced Correctly Throughout Level.
-Use magnet spacing code to generate similar results with obstacles.
+-Use magnet spacing code to generate similar results with  obstacles.
 
 Code in Opening Credits / Menu / GUI
-Insert Red team code – start-up splash screen
-Create game menu with graphics
-Implement Pause feature?
+-Insert Red team code – start-up splash screen
+-Create game menu with graphics
+-Implement Pause feature?
+
+-Game Flashing in Polaric colors at finish line crossing. 
+(White / Red)
