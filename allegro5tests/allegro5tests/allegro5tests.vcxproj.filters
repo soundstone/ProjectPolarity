@@ -22,6 +22,9 @@
     <ClCompile Include="ScoreCounter.cpp">
       <Filter>Source Code\Polarity</Filter>
     </ClCompile>
+    <ClCompile Include="GameManager.cpp">
+      <Filter>Source Code\Polarity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core.h">
@@ -48,10 +51,13 @@
     <ClInclude Include="MagnetFactory.h">
       <Filter>Headers\Polarity</Filter>
     </ClInclude>
+    <ClInclude Include="ScoreCounter.h">
+      <Filter>Headers\Polarity</Filter>
+    </ClInclude>
     <ClInclude Include="Magnets.h">
       <Filter>Headers\Polarity</Filter>
     </ClInclude>
-    <ClInclude Include="ScoreCounter.h">
+    <ClInclude Include="GameManager.h">
       <Filter>Headers\Polarity</Filter>
     </ClInclude>
   </ItemGroup>

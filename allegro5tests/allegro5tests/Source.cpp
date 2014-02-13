@@ -11,6 +11,7 @@
 #include "MagnetFactory.h"
 #include "Spaceship.h"
 #include "ScoreCounter.h"
+#include "GameManager.h"
 
 using namespace std;
 using namespace PolarisEngine;
@@ -47,8 +48,8 @@ Magnet botMagnets[NUM_MAGNETS];
 const int NUM_OBSTACLES = 2;
 const int BUTTON_TIME = 2.5f;
 
-enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE, H };
-bool keys[5] = {false, false, false, false, false};
+enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE, H, ENTER };
+bool keys[7] = {false, false, false, false, false, false, false};
 
 TopMagnetFactory topFactory;
 BottomMagnetFactory bottomFactory;
@@ -119,6 +120,7 @@ int main(void)
 	shipStartingPosition.y = SCREENHEIGHT / 2;
 	shipStartingPosition.z = 0;
 	SpaceShip ship(shipStartingPosition, 15, 15, 7, 3, NEGATIVE);
+	GameManager gameManager;
 	
 	//Setup game starting score
 	ScoreCounter gameScore(0);
@@ -130,7 +132,7 @@ int main(void)
 
 	int currentX = 0;
 	int currentY = 0;
-#pragma endregion
+	#pragma endregion
 
 	//allegro variables
 	ALLEGRO_DISPLAY *display = NULL;
@@ -171,7 +173,7 @@ int main(void)
 	Logger::Log("Seed is 64789", Logger::logLevelInfo);
 	Logger::ShutdownLogger();
 	
-#pragma endregion
+	#pragma endregion
 
 	#pragma region GameInitialize
 	//Font used for Debug display
@@ -199,101 +201,16 @@ int main(void)
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 
 	al_start_timer(timer);
-#pragma endregion
+	#pragma endregion
 
 	#pragma region Game Loop
-
+	
 	while(!done)
 	{
 		ALLEGRO_EVENT ev;
 		al_wait_for_event(event_queue, &ev);
 
-		#pragma region Update Loop
-		if(ev.type == ALLEGRO_EVENT_TIMER)
-		{
-
-			buttonTimer += 0.1f;
-			
-			collide = false;
-			redraw = true;
-			if(keys[UP])
-				ship.MoveShipUp();
-			if(keys[DOWN])
-				ship.MoveShipDown();
-			if(keys[LEFT])
-			{
-				ship.MoveShipLeft();
-				if (ship.shipPos.x <= 20)
-					ship.shipPos.x = 20;
-			}
-			if(keys[RIGHT])
-			{
-				ship.MoveShipRight();
-				if (ship.shipPos.x >= LEVELWIDTH)
-					ship.shipPos.x = LEVELWIDTH;
-			}
-			if(keys[SPACE])
-			{
-				if(buttonTimer >= BUTTON_TIME)
-				{
-					buttonTimer = 0.0f;
-					ship.TogglePolaricCharge();	
-				}
-			}		
-			if (ship.shipPos.y < 190)
-			{
-				for (int i = 0; i < NUM_POINTS; i++)
-				{
-					if (ship.shipPos.x > topPoints[i + 1].x)
-						continue;
-					if (ship.shipPos.x < topPoints[i].x)
-						continue;
-					
-					collide = CheckCollisionsTop(ship, topPoints[i], topPoints[i + 1]);
-				}
-			}
-			else if (ship.shipPos.y > SCREENHEIGHT / 2 + 60)
-			{
-				for (int i = 0; i < NUM_POINTS; i++)
-				{
-					if (ship.shipPos.x > bottomPoints[i + 1].x)
-						continue;
-					if (ship.shipPos.x < bottomPoints[i].x)
-						continue;
-					collide = CheckCollisionsBottom(ship, bottomPoints[i], bottomPoints[i + 1]);
-				}
-			}		
-			
-			timeDelay += 0.1f;
-			if (timeDelay >= timeDelayLimit)
-			{
-				gameScore.UpdateScoreCounter(SCORE_INCREMENT);
-				timeDelay = 0.0f;
-			}
-
-			if (ship.shipPos.x > SCREENWIDTH / 2 && keys[RIGHT])
-			{
-				currentX += ship.GetSpeed();
-			}
-			else if (ship.shipPos.x < currentX + (SCREENWIDTH / 2) && keys[LEFT])
-			{
-				if (currentX <= 0)
-					currentX = 0;
-				else
-					currentX -= ship.GetSpeed();
-			}
-
-			if (LEVELWIDTH - (SCREENWIDTH / 2) < currentX)
-				currentX = LEVELWIDTH - (SCREENWIDTH / 2);
-		}
-#pragma endregion
-
-		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-		{
-			done = true;
-		}
-
-		#pragma region Keysets
+		#pragma region Receive_Input
 		if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
 		{
 			switch(ev.keyboard.keycode)
@@ -315,6 +232,9 @@ int main(void)
 				break;
 			case ALLEGRO_KEY_SPACE:
 				keys[SPACE] = true;
+				break;
+			case ALLEGRO_KEY_ENTER:
+				keys[ENTER] = true;
 				break;
 			}
 		}
@@ -340,9 +260,113 @@ int main(void)
 			case ALLEGRO_KEY_SPACE:
 				keys[SPACE] = false;
 				break;
+			case ALLEGRO_KEY_ENTER:
+				keys[ENTER] = false;
 			}
 		}
 #pragma endregion
+
+		#pragma region Playing
+		if (gameManager.GetGameState() == PLAYING)
+		{
+			#pragma region Update Loop
+			if(ev.type == ALLEGRO_EVENT_TIMER)
+			{
+
+				buttonTimer += 0.1f;
+				
+				collide = false;
+				redraw = true;
+				if(keys[UP])
+					ship.MoveShipUp();
+				if(keys[DOWN])
+					ship.MoveShipDown();
+				if(keys[LEFT])
+				{
+					ship.MoveShipLeft();
+					if (ship.shipPos.x <= 20)
+						ship.shipPos.x = 20;
+				}
+				if(keys[RIGHT])
+				{
+					ship.MoveShipRight();
+					if (ship.shipPos.x >= LEVELWIDTH)
+						ship.shipPos.x = LEVELWIDTH;
+				}
+				if(keys[SPACE])
+				{
+					if(buttonTimer >= BUTTON_TIME)
+					{
+						buttonTimer = 0.0f;
+						ship.TogglePolaricCharge();	
+					}
+				}		
+				if(keys[ENTER])
+					gameManager.SetGameState(PAUSED);
+				
+				if (gameManager.GetGameState() != PLAYING)
+					continue;
+
+				if (ship.shipPos.y < 190)
+				{
+					for (int i = 0; i < NUM_POINTS; i++)
+					{
+						if (ship.shipPos.x > topPoints[i + 1].x)
+							continue;
+						if (ship.shipPos.x < topPoints[i].x)
+							continue;
+						
+						collide = CheckCollisionsTop(ship, topPoints[i], topPoints[i + 1]);
+					}
+				}
+				else if (ship.shipPos.y > SCREENHEIGHT / 2 + 60)
+				{
+					for (int i = 0; i < NUM_POINTS; i++)
+					{
+						if (ship.shipPos.x > bottomPoints[i + 1].x)
+							continue;
+						if (ship.shipPos.x < bottomPoints[i].x)
+							continue;
+						collide = CheckCollisionsBottom(ship, bottomPoints[i], bottomPoints[i + 1]);
+					}
+				}		
+				
+				timeDelay += 0.1f;
+				if (timeDelay >= timeDelayLimit)
+				{
+					gameScore.UpdateScoreCounter(SCORE_INCREMENT);
+					timeDelay = 0.0f;
+				}
+
+				if (ship.shipPos.x > SCREENWIDTH / 2 && keys[RIGHT])
+				{
+					currentX += ship.GetSpeed();
+				}
+				else if (ship.shipPos.x < currentX + (SCREENWIDTH / 2) && keys[LEFT])
+				{
+					if (currentX <= 0)
+						currentX = 0;
+					else
+						currentX -= ship.GetSpeed();
+				}
+
+				if (LEVELWIDTH - (SCREENWIDTH / 2) < currentX)
+					currentX = LEVELWIDTH - (SCREENWIDTH / 2);
+			}
+			#pragma endregion
+
+			else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+			{
+				done = true;
+			}
+		}
+		#pragma endregion
+		else if (gameManager.GetGameState() == PAUSED)
+		{
+			al_draw_text(font, al_map_rgb(203,194,80), SCREENWIDTH / 2, SCREENHEIGHT / 2, 0, "P A U S E D");
+			if (keys[ENTER])
+				gameManager.SetGameState(PLAYING);
+		}
 
 		#pragma region DrawLoop
 		if(redraw && al_event_queue_is_empty(event_queue))
@@ -351,28 +375,35 @@ int main(void)
 
 			al_set_target_bitmap(backBuffer);
 			al_clear_to_color(al_map_rgb(0,0,0));
-			
-			//Draw static position score in bottom right corner of screen
-			DrawScore(gameScore.GetScore(), currentX);
-			
-			ship.DrawShip();
 
-			ConnectPointsTop(topPoints);
-			ConnectPointsBottom(bottomPoints);
-			
-			if (collide)
+			if (gameManager.GetGameState() == PLAYING)
 			{
-				al_draw_text(font, al_map_rgb(255, 255, 110), currentX + (SCREENWIDTH / 2), SCREENHEIGHT / 2, 0, "COLLISION ");
-				al_draw_textf(font, al_map_rgb(255,100,100), currentX + 20, 50, 0, "ShipPos: ( %g, %g, %g)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
+				//Draw static position score in bottom right corner of screen
+				DrawScore(gameScore.GetScore(), currentX);
+				
+				ship.DrawShip();
+
+				ConnectPointsTop(topPoints);
+				ConnectPointsBottom(bottomPoints);
+				
+				if (collide)
+				{
+					al_draw_text(font, al_map_rgb(255, 255, 110), currentX + (SCREENWIDTH / 2), SCREENHEIGHT / 2, 0, "COLLISION ");
+					al_draw_textf(font, al_map_rgb(255,100,100), currentX + 20, 50, 0, "ShipPos: ( %g, %g, %g)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
+				}
+
+				al_draw_textf(font, al_map_rgb(45, 120, 200), currentX + 20, SCREENHEIGHT - 100, 0, "currentX = %i", currentX);
+				al_draw_line(currentX, 10, currentX, SCREENHEIGHT, al_map_rgb(255,0,0), 3);
+				al_draw_line(LEVELWIDTH, 0, LEVELWIDTH, LEVELHEIGHT, al_map_rgb(0,0,255), 10);
+
+				DrawMagnets(topMagnets, botMagnets);
+				
+				Drawobstacles(vectorobstacles);
 			}
-
-			al_draw_textf(font, al_map_rgb(45, 120, 200), currentX + 20, SCREENHEIGHT - 100, 0, "currentX = %i", currentX);
-			al_draw_line(currentX, 10, currentX, SCREENHEIGHT, al_map_rgb(255,0,0), 3);
-			al_draw_line(LEVELWIDTH, 0, LEVELWIDTH, LEVELHEIGHT, al_map_rgb(0,0,255), 10);
-
-			DrawMagnets(topMagnets, botMagnets);
-			
-			Drawobstacles(vectorobstacles);
+			if (gameManager.GetGameState() == PAUSED)
+			{
+				al_draw_text(font, al_map_rgb(405, 120, 200), currentX + 200, SCREENHEIGHT / 2, 0, "P A U S E D");
+			}
 
 			al_set_target_bitmap(al_get_backbuffer(display));
 
@@ -384,7 +415,7 @@ int main(void)
 #pragma endregion
 	}
 
-#pragma endregion
+	#pragma endregion
 
 	al_destroy_timer(timer);
 	al_destroy_display(display);
