@@ -12,6 +12,7 @@
 #include "Spaceship.h"
 #include "ScoreCounter.h"
 #include "GameManager.h"
+#include "MenuManager.h"
 
 using namespace std;
 using namespace PolarisEngine;
@@ -26,6 +27,9 @@ const int SCREENWIDTH = 1280;
 const int SCREENHEIGHT = 500;
 
 ALLEGRO_FONT *font;
+
+#define COLORSTANDARD al_map_rgb(255,255,255);
+#define COLORSELCTED  al_map_rgb(35, 200, 178);
 
 //level dimensions
 const int LEVELWIDTH = 8190;
@@ -121,6 +125,7 @@ int main(void)
 	shipStartingPosition.z = 0;
 	SpaceShip ship(shipStartingPosition, 15, 15, 7, 3, NEGATIVE);
 	GameManager gameManager;
+	MenuManager menuManager;
 	
 	//Setup game starting score
 	ScoreCounter gameScore(0);
@@ -264,10 +269,42 @@ int main(void)
 				keys[ENTER] = false;
 			}
 		}
-#pragma endregion
+		#pragma endregion
+
+		#pragma region MainMenu
+		if (gameManager.GetGameState() == MAINMENU)
+		{
+			if (keys[UP])
+			{
+				menuManager.currentMenuItem--;
+				if (menuManager.currentMenuItem < 0)
+					menuManager.currentMenuItem = 1;
+			}
+			if (keys[DOWN])
+			{
+				menuManager.currentMenuItem++;
+				if (menuManager.currentMenuItem > 1)
+					menuManager.currentMenuItem = 0;
+			}
+
+			if (keys[ENTER])
+			{
+				switch (menuManager.currentMenuItem)
+				{
+				case 0:
+					//begin Game
+					gameManager.SetGameState(PLAYING);
+					break;
+				case 1:
+					//exit game
+					return 0;
+				}
+			}
+		}
+		#pragma endregion
 
 		#pragma region Playing
-		if (gameManager.GetGameState() == PLAYING)
+		else if (gameManager.GetGameState() == PLAYING)
 		{
 			#pragma region Update Loop
 			if(ev.type == ALLEGRO_EVENT_TIMER)
@@ -376,7 +413,21 @@ int main(void)
 			al_set_target_bitmap(backBuffer);
 			al_clear_to_color(al_map_rgb(0,0,0));
 
-			if (gameManager.GetGameState() == PLAYING)
+			if (gameManager.GetGameState() == MAINMENU)
+			{
+				al_draw_filled_rectangle(0, 0, SCREENWIDTH, SCREENHEIGHT, al_map_rgb(14, 50, 200));
+				if (menuManager.currentMenuItem == 0)
+				{
+					al_draw_text(font, al_map_rgb(34, 178, 134), 45, 50, 0, "BEGIN GAME");
+					al_draw_text(font, al_map_rgb(255,255,255), 45, 120, 0, "EXIT GAME");
+				}
+				else if (menuManager.currentMenuItem == 1)
+				{
+					al_draw_text(font, al_map_rgb(255, 255, 255), 45, 50, 0, "BEGIN GAME");
+					al_draw_text(font, al_map_rgb(34, 178, 134), 45, 120, 0, "EXIT GAME");
+				}
+			}
+			else if (gameManager.GetGameState() == PLAYING)
 			{
 				//Draw static position score in bottom right corner of screen
 				DrawScore(gameScore.GetScore(), currentX);
@@ -737,7 +788,7 @@ bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 	Vector3 lineSegment = GetVectorDistance(pointOne, pointTwo);
 	Vector3 shipWidthPosition(ship.shipPos.x + ship.GetWidth(), ship.shipPos.y, ship.shipPos.z);
 
-	if (pointTwo.y < pointOne.y) //upwards line
+	if (pointTwo.y <= pointOne.y) //upwards line
 	{
 		Vector3 lineNormal(lineSegment.y, -lineSegment.x, 0);
 		double u = GetVectorDistance(ship.shipPos, pointTwo) * lineNormal;
@@ -747,7 +798,7 @@ bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 		else if (u < 0)
 			return true;
 	}
-	else if (pointTwo.y > pointOne.y) //downwards line
+	else if (pointTwo.y >= pointOne.y) //downwards line
 	{
 		Vector3 lineNormal(lineSegment.y, -lineSegment.x, 0);
 		double u = GetVectorDistance(shipWidthPosition, pointOne) * lineNormal;
@@ -765,7 +816,7 @@ bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 	Vector3 shipHeightPosition(ship.shipPos.x, ship.shipPos.y + ship.GetHeight(), ship.shipPos.z);
 	Vector3 shipWidthHeightPosition(ship.shipPos.x + ship.GetWidth(), ship.shipPos.y + ship.GetHeight(), ship.shipPos.z);
 
-	if (pointTwo.y < pointOne.y) //upwards line
+	if (pointTwo.y <= pointOne.y) //upwards line
 	{
 		Vector3 lineNormal(-lineSegment.y, lineSegment.x, 0);
 		double u = GetVectorDistance(shipWidthHeightPosition, pointTwo) * lineNormal;
@@ -775,7 +826,7 @@ bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 		else if (u < 0)
 			return true;
 	}
-	else if (pointTwo.y > pointOne.y) //downwards line
+	else if (pointTwo.y >= pointOne.y) //downwards line
 	{
 		Vector3 lineNormal(-lineSegment.y, lineSegment.x, 0);
 		double u = GetVectorDistance(shipHeightPosition, pointTwo) * lineNormal;

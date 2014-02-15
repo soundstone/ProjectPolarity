@@ -70,6 +70,7 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MagnetFactory.cpp" />
+    <ClCompile Include="MenuManager.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="polaris.cpp" />
     <ClCompile Include="ScoreCounter.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MagnetFactory.h" />
     <ClInclude Include="Magnets.h" />
+    <ClInclude Include="MenuManager.h" />
     <ClInclude Include="particle.h" />
     <ClInclude Include="polaris.h" />
     <ClInclude Include="precision.h" />
