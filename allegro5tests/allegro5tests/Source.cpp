@@ -150,7 +150,8 @@ int main(void)
 		return -1;
 
 	display = al_create_display(SCREENWIDTH, SCREENHEIGHT);
-	backBuffer = al_create_bitmap(LEVELWIDTH, LEVELHEIGHT);
+	backBuffer = al_create_bitmap(4000, LEVELHEIGHT);
+	 
 
 	if(!display)
 		return -1;
