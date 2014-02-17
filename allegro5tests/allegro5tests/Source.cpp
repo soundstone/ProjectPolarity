@@ -49,7 +49,7 @@ Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
 
 //obstacle consts
-const int NUM_OBSTACLES = 2;
+const int NUM_OBSTACLES = 10;
 const int BUTTON_TIME = 2.5f;
 
 enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE, H, ENTER };
