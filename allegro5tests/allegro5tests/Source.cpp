@@ -29,8 +29,8 @@ const int SCREENHEIGHT = 500;
 
 ALLEGRO_FONT *font;
 
-#define COLORSTANDARD al_map_rgb(255,255,255);
-#define COLORSELCTED  al_map_rgb(35, 200, 178);
+//#define COLORSTANDARD al_map_rgb(255,255,255);
+//#define COLORSELCTED  al_map_rgb(35, 200, 178);
 
 //level dimensions
 const int LEVELWIDTH = 8190;

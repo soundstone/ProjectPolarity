@@ -6,19 +6,8 @@ Generate Forces to move ship automatically based on magnetic forces.
 -Magnets need to be spaced properly.
 -Remove Left, Right, Up, Down movements for ship.
 
-Camera Implemented!
-
-Score Implemented!
-
-Primitive FinishLine Implemented!
-
 Obstacles Need To Be Spaced Correctly Throughout Level.
 -Use magnet spacing code to generate similar results with  obstacles.
-
-Code in Opening Credits / Menu / GUI
--Insert Red team code – start-up splash screen
--Create game menu with graphics
--Implement Pause feature?
 
 -Game Flashing in Polaric colors at finish line crossing. 
 (White / Red)
