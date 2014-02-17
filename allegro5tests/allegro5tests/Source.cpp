@@ -49,7 +49,7 @@ Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
 
 //obstacle consts
-const int NUM_OBSTACLES = 2;
+const int NUM_OBSTACLES = 10;
 const int BUTTON_TIME = 2.5f;
 
 enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE, H, ENTER };
@@ -650,9 +650,13 @@ void Drawobstacles(Vector3 obstacles[])
 //Generates and populates obstacles[]. Randomly places obstacles within the level. 
 void Generateobstacles(Vector3 obstacles[])
 {
+	srand(time(0));
 	for (int i = 0; i < NUM_OBSTACLES; i++)
 	{
-		obstacles[i].x = ((rand() % (Width - 30)) + 100);
+		//obstacles[i].x = ((rand() % (Width - 30)) + 200);
+		//obstacles[i].x = i * 200;
+		obstacles[i].x = (rand()% 10 + i) * 200;
+		cout << obstacles[i].x<< " "<<endl; 
 		obstacles[i].y = Height / 2 - ((rand() % 25) + 20);
 	}
 }
