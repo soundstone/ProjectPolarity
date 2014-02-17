@@ -2,6 +2,7 @@
 #include <allegro5\allegro_primitives.h>
 #include <allegro5\allegro_font.h>
 #include <allegro5\allegro_ttf.h>
+#include <allegro5\allegro_image.h>
 #include <stdio.h>
 #include <math.h>
 #include <string>
@@ -127,6 +128,16 @@ int main(void)
 	SpaceShip ship(shipStartingPosition, 15, 15, 7, 3, NEGATIVE);
 	GameManager gameManager;
 	MenuManager menuManager;
+
+	//Logo - SPLASH variables
+	ALLEGRO_BITMAP *splashScreen = NULL;
+	PolarisEngine::Vector3 logoCenter(SCREENWIDTH / 2, SCREENHEIGHT /2, 0);
+	int alphaValue = 1;
+	int fadeIncrement = 1;
+	double fadeDelay = .030;
+	int delayer = 200;
+	int checkIntro = 0;
+	double frameTime;
 	
 	//Setup game starting score
 	ScoreCounter gameScore(0);
@@ -145,13 +156,14 @@ int main(void)
 	ALLEGRO_BITMAP *backBuffer = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer = NULL;	
+	
 
 	//Initialization functions
 	if(!al_init())
 		return -1;
 
 	display = al_create_display(SCREENWIDTH, SCREENHEIGHT);
-	backBuffer = al_create_bitmap(LEVELWIDTH, LEVELHEIGHT);
+	backBuffer = al_create_bitmap(LEVELWIDTH, LEVELHEIGHT);	
 
 	if(!display)
 		return -1;
@@ -160,8 +172,14 @@ int main(void)
 	al_install_keyboard();
 	al_init_font_addon();
 	al_init_ttf_addon();
+	al_init_image_addon();
 	event_queue = al_create_event_queue();
 	timer = al_create_timer(1.0 / FPS);
+
+	//Image for splash screen fade in.
+	splashScreen = al_load_bitmap("RedTeam.png");
+	if (!splashScreen)
+		return -1;
 
 	//srand(time(NULL));
 	/*
@@ -269,6 +287,34 @@ int main(void)
 			case ALLEGRO_KEY_ENTER:
 				keys[ENTER] = false;
 			}
+		}
+		#pragma endregion
+
+		#pragma region Splash
+		if (gameManager.GetGameState() == SPLASH)
+		{
+			//fade in logo
+			fadeDelay -= al_get_timer_count(timer);
+
+			if (fadeDelay <= 0)
+			{
+				//reset fade delay
+				fadeDelay = .045;
+
+				//increment/decrement the fade value
+				alphaValue += fadeIncrement;
+
+				if (alphaValue <= 0)
+					fadeIncrement *= -1;
+			}
+
+			if (delayer <= 400)
+				delayer++;
+			else 
+				delayer = 401;
+
+			frameTime = al_get_timer_count(timer);
+			redraw = true;
 		}
 		#pragma endregion
 
@@ -413,6 +459,8 @@ int main(void)
 			}
 		}
 		#pragma endregion
+
+		#pragma region Paused
 		else if (gameManager.GetGameState() == PAUSED)
 		{
 			buttonTimer += 0.1f;
@@ -426,6 +474,7 @@ int main(void)
 				}
 			}
 		}
+		#pragma endregion
 
 		#pragma region DrawLoop
 		if(redraw && al_event_queue_is_empty(event_queue))
@@ -434,6 +483,16 @@ int main(void)
 
 			al_set_target_bitmap(backBuffer);
 			al_clear_to_color(al_map_rgb(0,0,0));
+
+			if (gameManager.GetGameState() == SPLASH)
+			{
+				if (delayer >= 400)
+					gameManager.SetGameState(MAINMENU);
+				else
+				{
+					al_draw_tinted_bitmap(splashScreen, al_map_rgba_f(255 * alphaValue, 255 * alphaValue, 255 * alphaValue, alphaValue), 0, 0, 0);
+				}
+			}
 
 			if (gameManager.GetGameState() == MAINMENU)
 			{

@@ -25,7 +25,9 @@
     <ClCompile Include="GameManager.cpp">
       <Filter>Source Code\Polarity</Filter>
     </ClCompile>
-    <ClCompile Include="MenuManager.cpp" />
+    <ClCompile Include="MenuManager.cpp">
+      <Filter>Source Code\Polarity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core.h">
@@ -46,9 +48,6 @@
     <ClInclude Include="Spaceship.h">
       <Filter>Headers\Polarity</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
-      <Filter>Headers\Polarity</Filter>
-    </ClInclude>
     <ClInclude Include="MagnetFactory.h">
       <Filter>Headers\Polarity</Filter>
     </ClInclude>
@@ -61,8 +60,9 @@
     <ClInclude Include="GameManager.h">
       <Filter>Headers\Polarity</Filter>
     </ClInclude>
-    <ClInclude Include="MenuManager.h" />
-    <ClInclude Include="Inputhelper.h" />
+    <ClInclude Include="MenuManager.h">
+      <Filter>Headers\Polarity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">

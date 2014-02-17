@@ -78,10 +78,8 @@
     <ClCompile Include="SpaceShip.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="camera.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="GameManager.h" />
-    <ClInclude Include="Inputhelper.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MagnetFactory.h" />
     <ClInclude Include="Magnets.h" />
