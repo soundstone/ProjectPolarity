@@ -62,6 +62,7 @@
       <Filter>Headers\Polarity</Filter>
     </ClInclude>
     <ClInclude Include="MenuManager.h" />
+    <ClInclude Include="Inputhelper.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">

@@ -51,6 +51,7 @@ Magnet botMagnets[NUM_MAGNETS];
 //obstacle consts
 const int NUM_OBSTACLES = 10;
 const int BUTTON_TIME = 2.5f;
+const int PAUSE_BUTTON_TIME = 1.0f;
 
 enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE, H, ENTER };
 bool keys[7] = {false, false, false, false, false, false, false};
@@ -274,30 +275,39 @@ int main(void)
 		#pragma region MainMenu
 		if (gameManager.GetGameState() == MAINMENU)
 		{
-			if (keys[UP])
+			buttonTimer += 0.1f;
+			if (buttonTimer >= BUTTON_TIME)
 			{
-				menuManager.currentMenuItem--;
-				if (menuManager.currentMenuItem < 0)
-					menuManager.currentMenuItem = 1;
-			}
-			if (keys[DOWN])
-			{
-				menuManager.currentMenuItem++;
-				if (menuManager.currentMenuItem > 1)
-					menuManager.currentMenuItem = 0;
-			}
-
-			if (keys[ENTER])
-			{
-				switch (menuManager.currentMenuItem)
+				if (keys[UP])
 				{
-				case 0:
-					//begin Game
-					gameManager.SetGameState(PLAYING);
-					break;
-				case 1:
-					//exit game
-					return 0;
+					buttonTimer = 0.0f;
+					menuManager.currentMenuItem--;
+					if (menuManager.currentMenuItem < 0)
+						menuManager.currentMenuItem = 1;
+					redraw = true;
+				}
+				if (keys[DOWN])
+				{
+					buttonTimer = 0.0f;
+					menuManager.currentMenuItem++;
+					if (menuManager.currentMenuItem > 1)
+						menuManager.currentMenuItem = 0;
+					redraw = true;
+				}
+
+				if (keys[ENTER])
+				{
+					buttonTimer = 0.0f;
+					switch (menuManager.currentMenuItem)
+					{
+					case 0:
+						//begin Game
+						gameManager.SetGameState(PLAYING);
+						break;
+					case 1:
+						//exit game
+						return 0;
+					}
 				}
 			}
 		}
@@ -339,8 +349,13 @@ int main(void)
 					}
 				}		
 				if(keys[ENTER])
-					gameManager.SetGameState(PAUSED);
-				
+				{
+					if (buttonTimer >= PAUSE_BUTTON_TIME)
+					{
+						buttonTimer = 0.0f;
+						gameManager.SetGameState(PAUSED);
+					}
+				}
 				if (gameManager.GetGameState() != PLAYING)
 					continue;
 
@@ -400,9 +415,16 @@ int main(void)
 		#pragma endregion
 		else if (gameManager.GetGameState() == PAUSED)
 		{
+			buttonTimer += 0.1f;
 			al_draw_text(font, al_map_rgb(203,194,80), SCREENWIDTH / 2, SCREENHEIGHT / 2, 0, "P A U S E D");
 			if (keys[ENTER])
-				gameManager.SetGameState(PLAYING);
+			{
+				if (buttonTimer >= PAUSE_BUTTON_TIME)
+				{
+					buttonTimer = 0.0f;
+					gameManager.SetGameState(PLAYING);
+				}
+			}
 		}
 
 		#pragma region DrawLoop
