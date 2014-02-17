@@ -29,9 +29,6 @@ const int SCREENHEIGHT = 500;
 
 ALLEGRO_FONT *font;
 
-//#define COLORSTANDARD al_map_rgb(255,255,255);
-//#define COLORSELCTED  al_map_rgb(35, 200, 178);
-
 //level dimensions
 const int LEVELWIDTH = 8190;
 const int LEVELHEIGHT = 500;
@@ -101,6 +98,8 @@ Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
 bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 void DrawScore(float score, int currentX);
+void SortObstacles(float obstacleOne, float obstacleTwo);
+void my_Swap(float obstacleOne, float obstacleTwo);
 
 //==========================================================================================
 
@@ -730,11 +729,33 @@ void Drawobstacles(Vector3 obstacles[])
 //Generates and populates obstacles[]. Randomly places obstacles within the level. 
 void Generateobstacles(Vector3 obstacles[])
 {
+	char logStringBuffer[50];
+	logStringBuffer[0] = 0;
+	
+	Logger::Log("\n", Logger::logLevelDebug);
+
+	Logger::Log("Obstacles", Logger::logLevelInfo);
 	for (int i = 0; i < NUM_OBSTACLES; i++)
 	{
-		obstacles[i].x = ((rand() % (Width - 30)) + 100);
+		obstacles[i].x = ((rand() % (LEVELWIDTH - 30)) + 250);
 		obstacles[i].y = Height / 2 - ((rand() % 25) + 20);
 	}
+
+	for (int i = 0; i < NUM_OBSTACLES; i++)
+	{
+		if (i == NUM_OBSTACLES - 1)
+			continue;
+		else
+			SortObstacles(obstacles[i].x, obstacles[i + 1].x);
+	}
+
+	for (int i = 0; i < NUM_OBSTACLES; i++)
+	{
+		sprintf_s(logStringBuffer, "Obstacles[ %i ] = (%g,%g)", i, obstacles[i].x, obstacles[i].y);  
+		Logger::Log(logStringBuffer, Logger::logLevelInfo);
+		memset(logStringBuffer, 0, sizeof(logStringBuffer));
+	}
+	Logger::ShutdownLogger();
 }
 
 #pragma endregion
@@ -933,6 +954,21 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 void DrawScore(float score, int currentX)
 {
 	al_draw_textf(font, al_map_rgb(145,58,83), currentX + (SCREENWIDTH - 100), SCREENHEIGHT - 30, 0, "Score: %g", score);
+}
+
+void SortObstacles(float obstacleOne, float obstacleTwo)
+{
+	if (obstacleTwo < obstacleOne)
+	{
+		my_Swap(obstacleTwo, obstacleOne);
+	}
+}
+
+void my_Swap(float obstacleOne, float obstacleTwo)
+{
+	float temp = obstacleTwo;
+	obstacleTwo = obstacleOne;
+	obstacleOne = temp;
 }
 
 #pragma endregion

@@ -20,7 +20,7 @@ class GameManager
 {
 public:
 	GameManager()
-		: gameState(SPLASH)
+		: gameState(PLAYING)
 	{};
 
 	int GetGameState();
