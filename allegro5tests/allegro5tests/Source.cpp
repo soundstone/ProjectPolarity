@@ -49,7 +49,7 @@ Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
 
 //obstacle consts
-const int NUM_OBSTACLES = 10;
+const int NUM_OBSTACLES = 20;
 const int BUTTON_TIME = 2.5f;
 
 enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE, H, ENTER };
@@ -650,13 +650,30 @@ void Drawobstacles(Vector3 obstacles[])
 //Generates and populates obstacles[]. Randomly places obstacles within the level. 
 void Generateobstacles(Vector3 obstacles[])
 {
-	srand(time(0));
+	srand((int)time(NULL));
+	int storeRandom[40]; 
 	for (int i = 0; i < NUM_OBSTACLES; i++)
 	{
-		//obstacles[i].x = ((rand() % (Width - 30)) + 200);
-		//obstacles[i].x = i * 200;
-		obstacles[i].x = (rand()% 10 + i) * 200;
-		cout << obstacles[i].x<< " "<<endl; 
+
+		//if number repeats discard and draw random again
+		bool isRepeating; //variable to check or number is already used
+		int random; //variable to store the number in
+		do
+		{
+			random = (rand()% 20) * 200;
+			//check or number is already used:
+			isRepeating = true;
+			for (int j=0;j<i;j++)
+				//set isRepeating to false if number is already used
+				if (random == storeRandom[j])
+				{
+					isRepeating = false;
+					break; //once found break out of for loop
+				}
+		} while (!isRepeating); //Do-while loop run infinitely
+		storeRandom[i]=random; //store the generated number in the array
+		obstacles[i].x = storeRandom[i];
+		//cout << obstacles[i].x<< " "<<endl; 
 		obstacles[i].y = Height / 2 - ((rand() % 25) + 20);
 	}
 }
