@@ -30,7 +30,7 @@ const int SCREENHEIGHT = 500;
 ALLEGRO_FONT *font;
 
 //level dimensions
-const int LEVELWIDTH = 8190;
+const int LEVELWIDTH = 4000;
 const int LEVELHEIGHT = 500;
 
 //Camera position
@@ -39,7 +39,7 @@ int cameraY = 0;
 
 //how many points and spacing between points for lines drawn
 const int PLOT_INTERVAL = 36;
-const int NUM_POINTS = 220;
+const int NUM_POINTS = 110;
 
 //Magnet consts
 const int NUM_MAGNETS = 3;
@@ -47,7 +47,7 @@ Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
 
 //obstacle consts
-const int NUM_OBSTACLES = 10;
+const int NUM_OBSTACLES = 20;
 const int BUTTON_TIME = 2.5f;
 const int PAUSE_BUTTON_TIME = 1.0f;
 
@@ -729,26 +729,37 @@ void Drawobstacles(Vector3 obstacles[])
 //Generates and populates obstacles[]. Randomly places obstacles within the level. 
 void Generateobstacles(Vector3 obstacles[])
 {
+	//srand((int)time(NULL));
 	char logStringBuffer[50];
 	logStringBuffer[0] = 0;
 	
 	Logger::Log("\n", Logger::logLevelDebug);
 
 	Logger::Log("Obstacles", Logger::logLevelInfo);
+
+	int storeRandom[40];
 	for (int i = 0; i < NUM_OBSTACLES; i++)
 	{
-		obstacles[i].x = ((rand() % (LEVELWIDTH - 30)) + 250);
+		bool isRepeating;
+		int random;
+		do
+		{
+			random = (rand() % 50) * 200;
+			isRepeating = true;
+			for (int j = 0; j < i; j++)
+			{
+				if (random == storeRandom[j])
+				{
+					isRepeating = false;
+					break;
+				}
+			}
+		} while(!isRepeating);
+		storeRandom[i] = random;
+		obstacles[i].x = storeRandom[i];
 		obstacles[i].y = Height / 2 - ((rand() % 25) + 20);
 	}
-
-	for (int i = 0; i < NUM_OBSTACLES; i++)
-	{
-		if (i == NUM_OBSTACLES - 1)
-			continue;
-		else
-			SortObstacles(obstacles[i].x, obstacles[i + 1].x);
-	}
-
+	
 	for (int i = 0; i < NUM_OBSTACLES; i++)
 	{
 		sprintf_s(logStringBuffer, "Obstacles[ %i ] = (%g,%g)", i, obstacles[i].x, obstacles[i].y);  
