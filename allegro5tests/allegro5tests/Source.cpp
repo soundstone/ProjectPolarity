@@ -729,7 +729,6 @@ void Drawobstacles(Vector3 obstacles[])
 //Generates and populates obstacles[]. Randomly places obstacles within the level. 
 void Generateobstacles(Vector3 obstacles[])
 {
-	//srand((int)time(NULL));
 	char logStringBuffer[50];
 	logStringBuffer[0] = 0;
 	
