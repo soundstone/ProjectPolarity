@@ -654,7 +654,6 @@ void Generateobstacles(Vector3 obstacles[])
 	int storeRandom[40]; 
 	for (int i = 0; i < NUM_OBSTACLES; i++)
 	{
-
 		//if number repeats discard and draw random again
 		bool isRepeating; //variable to check or number is already used
 		int random; //variable to store the number in
@@ -673,7 +672,7 @@ void Generateobstacles(Vector3 obstacles[])
 		} while (!isRepeating); //Do-while loop run infinitely
 		storeRandom[i]=random; //store the generated number in the array
 		obstacles[i].x = storeRandom[i];
-		//cout << obstacles[i].x<< " "<<endl; 
+		//cout << obstacles[i].x<< " "<<endl; //used to check each values of obstacles[i].x
 		obstacles[i].y = Height / 2 - ((rand() % 25) + 20);
 	}
 }
