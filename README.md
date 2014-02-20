@@ -16,8 +16,15 @@ through the tunnel. Each playthrough would be different and movement manuevers w
 played the current tunnel. 
 
 ==========================================
-Current Version: 1.05 ALPHA (2/9/2014)
+Current Version: 1.06 ALPHA (2/19/2014)
 ==========================================
+
+This version brings about spacing in the obstacles throughout the level. Reduction in level overall size to support older PCs and a game start up sequence. The sequence now shows intro splash screen and has working basic menu to start and exit game. 
+
+==================
+Previoius Versions
+==================
+-1.05 ALPHA (2/9/2014)
 
 Changes in this version finish up pre-alpha goals. Camera is implemented with full scrolling both left and right. NUM_POINTS for both top and bottom of tunnel have been shaved to fit maximum bitmap size for level. Collision Detection works perfectly throughout level for both top and bottom of tunnel. 
 
@@ -29,9 +36,6 @@ Main goals of version are:
       - This involves creating gameStates and a gameState Manager to control it. 
 5) Implement end of level flash in polaric colors (1/2 screen - WHITE, 1/2 screen - RED).
 
-==================
-Previoius Versions
-==================
 - 1.04 Pre-Alpha (2/6/2014)
 
 Changes in this version include the integration of collision for ceiling of random generated lines and for floor of randomly generated lines. Ship has been encapsulated, Point structure has been completely removed. All positions are now based on Vector3 structures. 
