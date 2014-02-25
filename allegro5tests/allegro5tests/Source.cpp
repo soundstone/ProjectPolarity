@@ -153,6 +153,7 @@ int main(void)
 	//allegro variables
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_BITMAP *backBuffer = NULL;
+	ALLEGRO_BITMAP *victoryFlash = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer = NULL;	
 	
@@ -178,6 +179,10 @@ int main(void)
 	//Image for splash screen fade in.
 	splashScreen = al_load_bitmap("RedTeam.png");
 	if (!splashScreen)
+		return -1;
+
+	victoryFlash = al_load_bitmap("polaricFlash.png");
+	if (!victoryFlash)
 		return -1;
 
 	//srand(time(NULL));
