@@ -367,6 +367,14 @@ int main(void)
 		else if (gameManager.GetGameState() == PLAYING)
 		{
 			#pragma region Update Loop
+			
+			//check victory condition
+			if (ship.shipPos.x >= LEVELWIDTH)
+			{
+				gameManager.SetGameState(VICTORY);
+				delayer = 0;
+			}
+
 			if(ev.type == ALLEGRO_EVENT_TIMER)
 			{
 
@@ -480,10 +488,35 @@ int main(void)
 		}
 		#pragma endregion
 
+		if (gameManager.GetGameState() == VICTORY)
+		{
+			fadeDelay -= al_get_timer_count(timer);
+
+			if (fadeDelay <= 0)
+			{
+				//reset fade delay
+				fadeDelay = .045;
+
+				//increment/decrement the fade value
+				alphaValue += fadeIncrement;
+
+				if (alphaValue <= 0)
+					fadeIncrement *= -1;
+			}
+
+			if (delayer <= 400)
+				delayer++;
+			else 
+				delayer = 401;
+
+			frameTime = al_get_timer_count(timer);
+			redraw = true;
+		}
+
 		#pragma region DrawLoop
 		if(redraw && al_event_queue_is_empty(event_queue))
 		{
-			redraw = false;
+			redraw = false; 
 
 			al_set_target_bitmap(backBuffer);
 			al_clear_to_color(al_map_rgb(0,0,0));
@@ -500,6 +533,7 @@ int main(void)
 
 			if (gameManager.GetGameState() == MAINMENU)
 			{
+				delayer = 0;
 				al_draw_filled_rectangle(0, 0, SCREENWIDTH, SCREENHEIGHT, al_map_rgb(14, 50, 200));
 				if (menuManager.currentMenuItem == 0)
 				{
@@ -539,6 +573,16 @@ int main(void)
 			if (gameManager.GetGameState() == PAUSED)
 			{
 				al_draw_text(font, al_map_rgb(405, 120, 200), currentX + 200, SCREENHEIGHT / 2, 0, "P A U S E D");
+			}
+
+			if (gameManager.GetGameState() == VICTORY)
+			{
+				if (delayer >= 400)
+					gameManager.SetGameState(MAINMENU);
+				else
+				{
+					al_draw_tinted_bitmap(victoryFlash, al_map_rgba_f(255 * alphaValue, 255 * alphaValue, 255 * alphaValue, alphaValue), 0, 0, 0);
+				}
 			}
 
 			al_set_target_bitmap(al_get_backbuffer(display));

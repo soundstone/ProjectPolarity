@@ -13,7 +13,8 @@ enum GameState
 	MAINMENU,
 	PLAYING,
 	PAUSED,
-	GAMEOVER
+	GAMEOVER, 
+	VICTORY
 };
 
 class GameManager
