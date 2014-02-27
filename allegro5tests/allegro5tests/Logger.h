@@ -1,5 +1,6 @@
 //Logger.h
 //Class declaration for static Logger
+#pragma once
 
 #include <iostream>
 #include <fstream>

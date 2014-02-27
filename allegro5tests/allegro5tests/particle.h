@@ -1,5 +1,6 @@
 //particle.h
 //class represents smallest object that can be simulated in the engine
+#pragma once
 #include "core.h"
 
 namespace PolarisEngine

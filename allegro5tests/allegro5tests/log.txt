@@ -2,15 +2,15 @@ INFO: Seed is 64789
 DEBUG: 
 
 INFO: MAGNETS - TOP
-INFO: MagnetTop[ 0 ] = (714,19)
-INFO: MagnetTop[ 1 ] = (756,50)
-INFO: MagnetTop[ 2 ] = (1017,60)
+INFO: MagnetTop[ 0 ] = (0,1083871232)
+INFO: MagnetTop[ 1 ] = (0,1082720256)
+INFO: MagnetTop[ 2 ] = (0,1084382208)
 DEBUG: 
 
 INFO: Magnets - BOTTOM
-INFO: MagnetTop[ 0 ] = (399,406)
-INFO: MagnetTop[ 1 ] = (570,422)
-INFO: MagnetTop[ 2 ] = (333,389)
+INFO: MagnetTop[ 0 ] = (0,1084127232)
+INFO: MagnetTop[ 1 ] = (0,1082081280)
+INFO: MagnetTop[ 2 ] = (0,1083308032)
 DEBUG: 
 
 INFO: Obstacles

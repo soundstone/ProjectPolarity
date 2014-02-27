@@ -1,6 +1,6 @@
 //Magnet Factory.h
 //Contains Declarations for the Magnet Factory
-
+#pragma once
 #include "Magnets.h"
 
 class MagnetFactory

@@ -1,3 +1,4 @@
+
 #include "Spaceship.h"
 
 SpaceShip::SpaceShip()
@@ -13,6 +14,7 @@ SpaceShip::SpaceShip(PolarisEngine::Vector3 pos, int widthOfShip, int heightOfSh
 	lives = life;
 	polarity = polaricCharge;
 	score = 0;
+	
 	buttonTimer = 0.0f;
 }
 

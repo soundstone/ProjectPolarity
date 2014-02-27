@@ -1,6 +1,6 @@
 //Spaceship.h
 //Contains header declarations of the player's avatar - a ship
-
+#pragma once
 #include "polaris.h"
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_primitives.h>

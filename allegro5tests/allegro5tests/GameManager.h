@@ -7,6 +7,8 @@
 *	   Paused, and Game Over.
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#pragma once
+
 enum GameState
 {
 	SPLASH,
@@ -21,7 +23,7 @@ class GameManager
 {
 public:
 	GameManager()
-		: gameState(SPLASH)
+		: gameState(PLAYING)
 	{};
 
 	int GetGameState();

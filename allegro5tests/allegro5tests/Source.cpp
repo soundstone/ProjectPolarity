@@ -45,6 +45,8 @@ const int NUM_POINTS = 110;
 const int NUM_MAGNETS = 3;
 Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
+PointCharge *topPointCharges[NUM_MAGNETS];
+PointCharge *botPointCharges[NUM_MAGNETS];
 
 //obstacle consts
 const int NUM_OBSTACLES = 20;
@@ -125,6 +127,7 @@ int main(void)
 	shipStartingPosition.y = SCREENHEIGHT / 2;
 	shipStartingPosition.z = 0;
 	SpaceShip ship(shipStartingPosition, 15, 15, 7, 3, NEGATIVE);
+	PointCharge shipPointCharge(shipStartingPosition.x, shipStartingPosition.y, 0.10);
 	GameManager gameManager;
 	MenuManager menuManager;
 
@@ -383,6 +386,35 @@ int main(void)
 				collide = false;
 				redraw = true;
 
+				//update shipPointCharge for magnet calculations
+				shipPointCharge.pos.x = ship.shipPos.x;
+				shipPointCharge.pos.y = ship.shipPos.y;
+
+
+				for ( int i = 0; i < NUM_MAGNETS; i++)
+				{
+					if ((topMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - topMagnets[i].magnetPosition.y)
+						< topMagnets[i].radius)
+					{
+						if (ship.GetPolarity() != topMagnets[i].magnetPolarity)
+						{
+							double distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+							double force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
+							ship.shipPos += distanceVec * (force * 2);
+							
+						}
+						else 
+						{
+							double distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+							double force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
+							ship.shipPos -= distanceVec * force;
+						}
+						
+					}
+				}
+
 				if(keys[UP])
 					ship.MoveShipUp();
 				if(keys[DOWN])
@@ -489,6 +521,7 @@ int main(void)
 		}
 		#pragma endregion
 
+		#pragma region Victory
 		if (gameManager.GetGameState() == VICTORY)
 		{
 			fadeDelay -= al_get_timer_count(timer);
@@ -513,6 +546,7 @@ int main(void)
 			frameTime = al_get_timer_count(timer);
 			redraw = true;
 		}
+		#pragma endregion
 
 		#pragma region DrawLoop
 		if(redraw && al_event_queue_is_empty(event_queue))
@@ -568,6 +602,11 @@ int main(void)
 				al_draw_line(LEVELWIDTH, 0, LEVELWIDTH, LEVELHEIGHT, al_map_rgb(0,0,255), 10);
 
 				DrawMagnets(topMagnets, botMagnets);
+
+				for (int i = 0; i < NUM_MAGNETS; i++)
+				{
+					al_draw_circle(topMagnets[i].magnetPosition.x, topMagnets[i].magnetPosition.y, topMagnets[i].radius, al_map_rgb(100,167, 99), 2);
+				}
 				
 				Drawobstacles(vectorobstacles);
 			}
@@ -855,7 +894,7 @@ void Generateobstacles(Vector3 obstacles[])
 //Generate random X value for Magnet location
 int GetMagnetLocationX()
 {
-	int x = (rand() % Width) + 30;
+	int x = (rand() % 50) * 50;
 
 	return x;
 }
@@ -873,8 +912,8 @@ void DrawMagnets(Magnet magnets[], Magnet magnetsBot[])
 {
 	for(int i = 0; i < NUM_MAGNETS; ++i)
 	{
-		al_draw_filled_rectangle(magnets[i].magnetX, magnets[i].magnetY, magnets[i].magnetX + 20, magnets[i].magnetY + 20, al_map_rgb(0,255,255));
-		al_draw_filled_rectangle(magnetsBot[i].magnetX, magnetsBot[i].magnetY, magnetsBot[i].magnetX + 20, magnetsBot[i].magnetY + 20, al_map_rgb(0, 255, 255));
+		al_draw_filled_rectangle(magnets[i].magnetPosition.x, magnets[i].magnetPosition.y, magnets[i].magnetPosition.x + 20, magnets[i].magnetPosition.y + 20, al_map_rgb(0,255,255));
+		al_draw_filled_rectangle(magnetsBot[i].magnetPosition.x, magnetsBot[i].magnetPosition.y, magnetsBot[i].magnetPosition.x + 20, magnetsBot[i].magnetPosition.y + 20, al_map_rgb(0, 255, 255));
 	}
 }
 
@@ -897,11 +936,11 @@ void SetupMagnetsTop()
 			polaricCharge = !polaricCharge;
 
 		
-		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 10, 1.9f, polaricCharge);
+		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 300, 2.5f, polaricCharge);
 		topMagnets[i] = *topMagnet;
-		
+		topPointCharges[i] = new PointCharge(topMagnet->magnetPosition.x - 5, topMagnet->magnetPosition.y - 5, topMagnet->force);
 
-		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, topMagnet->magnetX, topMagnet->magnetY);  
+		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, topMagnet->magnetPosition.x, topMagnet->magnetPosition.y);  
 		Logger::Log(logStringBuffer, Logger::logLevelInfo);
 		memset(logStringBuffer, 0, sizeof(logStringBuffer));
 	}
@@ -929,11 +968,13 @@ void SetUpMagnetsBottom()
 		if (i % 2 == 0)
 			polaricCharge = !polaricCharge;
 		
-		int position = bottomMagnet[i - 1].magnetX;
-		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 10, 1.9f, polaricCharge);
+		int position = bottomMagnet[i - 1].magnetPosition.x;
+		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 200, 7.9f, polaricCharge);
 		botMagnets[i] = *bottomMagnet;
 		
-		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, bottomMagnet->magnetX, bottomMagnet->magnetY);  
+		botPointCharges[i] = new PointCharge(bottomMagnet->magnetPosition.x, bottomMagnet->magnetPosition.y, bottomMagnet->force);
+
+		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, bottomMagnet->magnetPosition.x, bottomMagnet->magnetPosition.y);  
 		Logger::Log(logStringBuffer, Logger::logLevelInfo);
 		memset(logStringBuffer, 0, sizeof(logStringBuffer));
 	}
