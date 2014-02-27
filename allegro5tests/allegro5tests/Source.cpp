@@ -395,13 +395,15 @@ int main(void)
 				{
 					if ((topMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - topMagnets[i].magnetPosition.y)
 						< topMagnets[i].radius)
-					{
+					{ 
+						//move ship based on polarity
 						if (ship.GetPolarity() != topMagnets[i].magnetPolarity)
 						{
 							double distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
 							double force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
 							ship.shipPos += distanceVec * (force * 2);
+							
 							
 						}
 						else 
