@@ -382,6 +382,7 @@ int main(void)
 				
 				collide = false;
 				redraw = true;
+
 				if(keys[UP])
 					ship.MoveShipUp();
 				if(keys[DOWN])

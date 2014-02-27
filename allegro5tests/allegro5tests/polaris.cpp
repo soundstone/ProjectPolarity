@@ -8,9 +8,6 @@ using namespace std;
 
 namespace PolarisEngine
 {
-	//const double kConst = 8.99;
-	//const double pi = 3.1415926;
-
 	double Polaris::Get_Force(PointCharge p1, PointCharge p2, double dist)
 	{
 		//Hold force of calculation
@@ -81,11 +78,11 @@ namespace PolarisEngine
 		double distance;
 		double x, y, z;
 
-		x = (v2.x - v1.x) * (v2.x - v1.x);
-		y = (v2.y - v1.y) * (v2.y - v1.y);
-		z = (v2.z - v1.z) * (v2.z - v1.z);
+		x = (v2.x - v1.x);
+		y = (v2.y - v1.y);
+		z = (v2.z - v1.z);
 
-		distance = sqrt(x + y + z);
+		distance = x + y + z;
 
 		return distance;
 	}
@@ -95,10 +92,10 @@ namespace PolarisEngine
 		double distance;
 		double x, y;
 
-		x = (p2.pos->x - p1.pos->x) * (p2.pos->x - p1.pos->x);
-		y = (p2.pos->y - p1.pos->y) * (p2.pos->y - p1.pos->y);
+		x = (p2.pos->x - p1.pos->x);
+		y = (p2.pos->y - p1.pos->y);
 		
-		distance = sqrt(x + y);
+		distance = x + y;
 
 		return distance;
 	}
