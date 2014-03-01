@@ -127,7 +127,7 @@ int main(void)
 	shipStartingPosition.y = SCREENHEIGHT / 2;
 	shipStartingPosition.z = 0;
 	SpaceShip ship(shipStartingPosition, 15, 15, 7, 3, NEGATIVE);
-	PointCharge shipPointCharge(shipStartingPosition.x, shipStartingPosition.y, 0.10);
+	PointCharge shipPointCharge(shipStartingPosition.x, shipStartingPosition.y, 1);
 	GameManager gameManager;
 	MenuManager menuManager;
 
@@ -938,7 +938,7 @@ void SetupMagnetsTop()
 			polaricCharge = !polaricCharge;
 
 		
-		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 300, 2.5f, polaricCharge);
+		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 400, 3.5f, polaricCharge);
 		topMagnets[i] = *topMagnet;
 		topPointCharges[i] = new PointCharge(topMagnet->magnetPosition.x - 5, topMagnet->magnetPosition.y - 5, topMagnet->force);
 
