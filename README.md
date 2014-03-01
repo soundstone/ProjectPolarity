@@ -16,8 +16,22 @@ through the tunnel. Each playthrough would be different and movement manuevers w
 played the current tunnel. 
 
 ==========================================
-Current Version: 1.05 ALPHA (2/9/2014)
+Current Version: 1.06 ALPHA (2/28/2014)
 ==========================================
+
+Changes in this version include: 
+- Changed total level width from 8100 to 4000 to allow for older pcs to play. 
+- Shaved off more NUM_POINTS for ceiling and floor to allot for smaller level size
+- Implemented draft spacing algorthim for obstacles. 
+- Implemented Game Manager class to control game states, Menu manager to control menu selections.
+- Game startup screens implemented : Splash (animated), title, main menu, and victory screens.
+- Implemented draft magnetic force eminating from magnets to pull and push player avatar. 
+- Implemented draft level flash in polaric colors for victory screen. 
+
+==================
+Previoius Versions
+==================
+- 1.05 ALPHA (2/9/2014)
 
 Changes in this version finish up pre-alpha goals. Camera is implemented with full scrolling both left and right. NUM_POINTS for both top and bottom of tunnel have been shaved to fit maximum bitmap size for level. Collision Detection works perfectly throughout level for both top and bottom of tunnel. 
 
@@ -29,9 +43,7 @@ Main goals of version are:
       - This involves creating gameStates and a gameState Manager to control it. 
 5) Implement end of level flash in polaric colors (1/2 screen - WHITE, 1/2 screen - RED).
 
-==================
-Previoius Versions
-==================
+
 - 1.04 Pre-Alpha (2/6/2014)
 
 Changes in this version include the integration of collision for ceiling of random generated lines and for floor of randomly generated lines. Ship has been encapsulated, Point structure has been completely removed. All positions are now based on Vector3 structures. 
