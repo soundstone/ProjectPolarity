@@ -84,16 +84,13 @@ void ConnectPointsBottom(Vector3 pointsBottom[]);
 void Drawobstacles(Vector3 vectorobstacles[]);
 void Generateobstacles(Vector3 vectorobstacles[]);
 
-//camera functions
-//Point TranslateWorldToScreen(int objectX, int objectY, int cameraX, int cameraY);
-//Point UpdateCamera(int x, int y, SpaceShip &ship);
-
 //Magnet Functions
 int GetMagnetLocationX();
 int GetMagnetLocationY();
 void DrawMagnets(Magnet magnets[], Magnet magnetsBot[]);
 void SetupMagnetsTop();
 void SetUpMagnetsBottom();
+
 
 //Helper Functions
 Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
@@ -130,6 +127,9 @@ int main(void)
 	PointCharge shipPointCharge(shipStartingPosition.x, shipStartingPosition.y, 1);
 	GameManager gameManager;
 	MenuManager menuManager;
+	double distance  = 0;
+	double force = 0;
+
 
 	//Logo - SPLASH variables
 	ALLEGRO_BITMAP *splashScreen = NULL;
@@ -393,14 +393,28 @@ int main(void)
 
 				for ( int i = 0; i < NUM_MAGNETS; i++)
 				{
+					if ( (ship.shipPos.x < topMagnets[i].magnetPosition.x - topMagnets[i].radius) || (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius) )
+					{
+							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, Vector3(LEVELWIDTH, LEVELHEIGHT / 2, 0));
+							ship.shipPos += distanceVec * 0.0015f;
+							continue;
+					}
+
 					if ((topMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - topMagnets[i].magnetPosition.y)
 						< topMagnets[i].radius)
 					{ 
 						//move ship based on polarity
 						if (ship.GetPolarity() != topMagnets[i].magnetPolarity)
 						{
-							double distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
-							double force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+							distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+							if (abs(distance) < 15)
+								continue;
+
+							force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+							if (force < 0.007)
+								force = 0.007;
+							else if (force > 0.07)
+								force = 0.07;
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
 							ship.shipPos += distanceVec * (force * 2);
 							
@@ -408,8 +422,12 @@ int main(void)
 						}
 						else 
 						{
-							double distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
-							double force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+						    distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+						    force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+							if (force < 0.007)
+								force = 0.007;
+							else if (force > 0.07)
+								force = 0.07;
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
 							ship.shipPos -= distanceVec * force;
 						}
@@ -483,16 +501,18 @@ int main(void)
 					timeDelay = 0.0f;
 				}
 
-				if (ship.shipPos.x > SCREENWIDTH / 2 && keys[RIGHT])
+				if (ship.shipPos.x > SCREENWIDTH / 2)
 				{
 					currentX += ship.GetSpeed();
+					if (currentX >= ship.shipPos.x - 300)
+						currentX = ship.shipPos.x - 300;						
 				}
-				else if (ship.shipPos.x < currentX + (SCREENWIDTH / 2) && keys[LEFT])
+				else if (ship.shipPos.x < currentX + (SCREENWIDTH / 2))
 				{
 					if (currentX <= 0)
 						currentX = 0;
 					else
-						currentX -= ship.GetSpeed();
+						currentX = ship.shipPos.x - 300;
 				}
 
 				if (LEVELWIDTH - (SCREENWIDTH / 2) < currentX)
@@ -593,6 +613,11 @@ int main(void)
 				ConnectPointsTop(topPoints);
 				ConnectPointsBottom(bottomPoints);
 				
+				
+					al_draw_textf(font, al_map_rgb(255, 255, 110), currentX + 75, 30, 0, "Force = %g", force);
+				
+					al_draw_textf(font, al_map_rgb(255,255,100), currentX + 75, 60, 0, "Distance = %g", distance);
+
 				if (collide)
 				{
 					al_draw_text(font, al_map_rgb(255, 255, 110), currentX + (SCREENWIDTH / 2), SCREENHEIGHT / 2, 0, "COLLISION ");
