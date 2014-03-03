@@ -97,8 +97,6 @@ Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
 bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 void DrawScore(float score, int currentX);
-void SortObstacles(float obstacleOne, float obstacleTwo);
-void my_Swap(float obstacleOne, float obstacleTwo);
 
 //==========================================================================================
 
@@ -886,36 +884,6 @@ void Generateobstacles(Vector3 obstacles[])
 
 #pragma endregion
 
-#pragma region Camera
-
-//Point TranslateWorldToScreen(int objectX, int objectY, int cameraX, int cameraY)
-//{
-//	Point newPoint;
-//	newPoint.x = objectX - cameraX;
-//	newPoint.y = objectY - cameraY;
-//
-//	return newPoint;
-//}
-//
-//Point UpdateCamera(int x, int y, SpaceShip &ship)
-//{
-//	x = ship.GetShipPosition().x - WIDTH / 2;
-//	y = ship.GetShipPosition().y - HEIGHT / 2;
-//
-//	if(x < 0) x = 0;
-//	if(y < 0) y = 0;
-//	if(x > LEVELWIDTH - WIDTH) x = LEVELWIDTH - WIDTH;
-//	if(y > LEVELHEIGHT - HEIGHT) y = LEVELHEIGHT - HEIGHT;
-//
-//	Point CameraPoint;
-//	CameraPoint.x = x;
-//	CameraPoint.y = y;
-//
-//	return CameraPoint;
-//}
-
-#pragma endregion
-
 #pragma region Magnets
 
 //Generate random X value for Magnet location
@@ -965,7 +933,7 @@ void SetupMagnetsTop()
 		
 		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 400, 3.5f, polaricCharge);
 		topMagnets[i] = *topMagnet;
-		topPointCharges[i] = new PointCharge(topMagnet->magnetPosition.x - 5, topMagnet->magnetPosition.y - 5, topMagnet->force);
+		topPointCharges[i] = new PointCharge(topMagnet->magnetPosition.x + 5, topMagnet->magnetPosition.y + 5, topMagnet->force);
 
 		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, topMagnet->magnetPosition.x, topMagnet->magnetPosition.y);  
 		Logger::Log(logStringBuffer, Logger::logLevelInfo);
@@ -998,8 +966,8 @@ void SetUpMagnetsBottom()
 		int position = bottomMagnet[i - 1].magnetPosition.x;
 		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 200, 7.9f, polaricCharge);
 		botMagnets[i] = *bottomMagnet;
-		
-		botPointCharges[i] = new PointCharge(bottomMagnet->magnetPosition.x, bottomMagnet->magnetPosition.y, bottomMagnet->force);
+		 
+		botPointCharges[i] = new PointCharge(bottomMagnet->magnetPosition.x + 5, bottomMagnet->magnetPosition.y - 5, bottomMagnet->force);
 
 		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, bottomMagnet->magnetPosition.x, bottomMagnet->magnetPosition.y);  
 		Logger::Log(logStringBuffer, Logger::logLevelInfo);
@@ -1082,21 +1050,6 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 void DrawScore(float score, int currentX)
 {
 	al_draw_textf(font, al_map_rgb(145,58,83), currentX + (SCREENWIDTH - 100), SCREENHEIGHT - 30, 0, "Score: %g", score);
-}
-
-void SortObstacles(float obstacleOne, float obstacleTwo)
-{
-	if (obstacleTwo < obstacleOne)
-	{
-		my_Swap(obstacleTwo, obstacleOne);
-	}
-}
-
-void my_Swap(float obstacleOne, float obstacleTwo)
-{
-	float temp = obstacleTwo;
-	obstacleTwo = obstacleOne;
-	obstacleOne = temp;
 }
 
 #pragma endregion
