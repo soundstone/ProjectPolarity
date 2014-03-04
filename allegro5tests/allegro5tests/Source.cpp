@@ -39,14 +39,16 @@ int cameraY = 0;
 
 //how many points and spacing between points for lines drawn
 const int PLOT_INTERVAL = 36;
-const int NUM_POINTS = 110;
+const int NUM_POINTS = 120;
 
 //Magnet consts
-const int NUM_MAGNETS = 3;
+const int NUM_MAGNETS = 4;
 Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
 PointCharge *topPointCharges[NUM_MAGNETS];
 PointCharge *botPointCharges[NUM_MAGNETS];
+bool inMagneticFieldTop;
+bool inMagneticFieldBot;
 
 //obstacle consts
 const int NUM_OBSTACLES = 20;
@@ -388,13 +390,14 @@ int main(void)
 				shipPointCharge.pos.x = ship.shipPos.x;
 				shipPointCharge.pos.y = ship.shipPos.y;
 
-
 				for ( int i = 0; i < NUM_MAGNETS; i++)
 				{
-					if ( (ship.shipPos.x < topMagnets[i].magnetPosition.x - topMagnets[i].radius) || (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius) )
+					#pragma region TopMagnets
+					if ( (ship.shipPos.x < topMagnets[i].magnetPosition.x - topMagnets[i].radius) || (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius) &&
+						(ship.shipPos.x < botMagnets[i].magnetPosition.x - botMagnets[i].radius) || (ship.shipPos.x > botMagnets[i].magnetPosition.x + botMagnets[i].radius))
 					{
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, Vector3(LEVELWIDTH, LEVELHEIGHT / 2, 0));
-							ship.shipPos += distanceVec * 0.0015f;
+							ship.shipPos += distanceVec * 0.0005f;
 							continue;
 					}
 
@@ -414,23 +417,54 @@ int main(void)
 							else if (force > 0.07)
 								force = 0.07;
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
-							ship.shipPos += distanceVec * (force * 2);
-							
-							
+							ship.shipPos += distanceVec * (force);
 						}
-						else 
+					}
+					else 
+					{
+					    distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+					    force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+						if (force < 0.007)
+							force = 0.007;
+						else if (force > 0.07)
+							force = 0.07;
+						Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
+						ship.shipPos -= distanceVec * force;
+					}
+					#pragma endregion
+
+					#pragma region Bottom Magnets
+					if ((botMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - botMagnets[i].magnetPosition.y)
+						< botMagnets[i].radius)
+					{ 
+						//move ship based on polarity
+						if (ship.GetPolarity() != botMagnets[i].magnetPolarity)
 						{
-						    distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
-						    force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+							distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
+							if (abs(distance) < 15)
+								continue;
+
+							force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
 							if (force < 0.007)
 								force = 0.007;
 							else if (force > 0.07)
 								force = 0.07;
-							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
-							ship.shipPos -= distanceVec * force;
+							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
+							ship.shipPos += distanceVec * (force);
 						}
-						
 					}
+					else 
+					{
+					    distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
+					    force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
+						if (force < 0.007)
+							force = 0.007;
+						else if (force > 0.07)
+							force = 0.07;
+						Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
+						ship.shipPos -= distanceVec * force;
+					}
+					#pragma endregion
 				}
 
 				if(keys[UP])
@@ -631,6 +665,7 @@ int main(void)
 				for (int i = 0; i < NUM_MAGNETS; i++)
 				{
 					al_draw_circle(topMagnets[i].magnetPosition.x, topMagnets[i].magnetPosition.y, topMagnets[i].radius, al_map_rgb(100,167, 99), 2);
+					al_draw_circle(botMagnets[i].magnetPosition.x, botMagnets[i].magnetPosition.y, botMagnets[i].radius, al_map_rgb(100, 167,99), 2);
 				}
 				
 				Drawobstacles(vectorobstacles);
@@ -931,7 +966,7 @@ void SetupMagnetsTop()
 			polaricCharge = !polaricCharge;
 
 		
-		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 400, 3.5f, polaricCharge);
+		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 300, 3.5f, polaricCharge);
 		topMagnets[i] = *topMagnet;
 		topPointCharges[i] = new PointCharge(topMagnet->magnetPosition.x + 5, topMagnet->magnetPosition.y + 5, topMagnet->force);
 
@@ -964,7 +999,7 @@ void SetUpMagnetsBottom()
 			polaricCharge = !polaricCharge;
 		
 		int position = bottomMagnet[i - 1].magnetPosition.x;
-		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 200, 7.9f, polaricCharge);
+		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 300, 3.5f, polaricCharge);
 		botMagnets[i] = *bottomMagnet;
 		 
 		botPointCharges[i] = new PointCharge(bottomMagnet->magnetPosition.x + 5, bottomMagnet->magnetPosition.y - 5, bottomMagnet->force);
