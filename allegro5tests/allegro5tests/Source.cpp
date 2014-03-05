@@ -52,6 +52,7 @@ bool inMagneticFieldBot;
 
 //obstacle consts
 const int NUM_OBSTACLES = 20;
+
 const int BUTTON_TIME = 2.5f;
 const int PAUSE_BUTTON_TIME = 1.0f;
 
@@ -70,6 +71,25 @@ const float SCORE_INCREMENT = 1.0f;
 const float timeDelayLimit = 1.0f;
 float timeDelay = 0.0f;
 
+struct BoundingBox
+{
+	int x1, x2;
+	int y1, y2;
+
+	BoundingBox()
+	{
+	}
+
+	BoundingBox(int x, int y, int width, int height)
+	{
+		x1 = x;
+		x2 = width;
+		y1 = y;
+		y2 = height;
+	}
+};
+
+
 //================================================================
 
 #pragma endregion
@@ -84,7 +104,7 @@ void PlotPointsBottom(Vector3 oldPosition, Vector3 newPosition, Vector3 pointsBo
 int  GenerateNewPointBottom();
 void ConnectPointsBottom(Vector3 pointsBottom[]);
 void Drawobstacles(Vector3 vectorobstacles[]);
-void Generateobstacles(Vector3 vectorobstacles[]);
+void Generateobstacles(Vector3 vectorobstacles[], BoundingBox boxes[]);
 
 //Magnet Functions
 int GetMagnetLocationX();
@@ -98,6 +118,8 @@ void SetUpMagnetsBottom();
 Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
 bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
+bool CheckObstacleCollision(BoundingBox shipBox, BoundingBox obstacle);
+
 void DrawScore(float score, int currentX);
 
 //==========================================================================================
@@ -117,6 +139,7 @@ int main(void)
 	Vector3 topPoints[NUM_POINTS] = {};
 	Vector3 bottomPoints[NUM_POINTS] = {};
 	Vector3 vectorobstacles[NUM_OBSTACLES];
+	BoundingBox obstacleBoxes[NUM_OBSTACLES];
 
 	//object variables
 	PolarisEngine::Vector3 shipStartingPosition;
@@ -125,6 +148,7 @@ int main(void)
 	shipStartingPosition.z = 0;
 	SpaceShip ship(shipStartingPosition, 15, 15, 7, 3, NEGATIVE);
 	PointCharge shipPointCharge(shipStartingPosition.x, shipStartingPosition.y, 1);
+	BoundingBox shipBoundingBox;
 	GameManager gameManager;
 	MenuManager menuManager;
 	double distance  = 0;
@@ -148,6 +172,7 @@ int main(void)
 	float buttonTimer = 0.0f;
 	bool collide = false;
 	bool collideBot = false;
+	bool collideObstacle = false;
 
 	int currentX = 0;
 	int currentY = 0;
@@ -215,7 +240,7 @@ int main(void)
 	SetUpMagnetsBottom();
 
 	//Place the center obstacles
-	Generateobstacles(vectorobstacles);
+	Generateobstacles(vectorobstacles, obstacleBoxes);
 
 	//set up points to initial null status
 	oldPosition.x = oldPosition.y = NULL;
@@ -384,88 +409,95 @@ int main(void)
 				buttonTimer += 0.1f;
 				
 				collide = false;
+				collideObstacle = false;
 				redraw = true;
 
 				//update shipPointCharge for magnet calculations
 				shipPointCharge.pos.x = ship.shipPos.x;
 				shipPointCharge.pos.y = ship.shipPos.y;
 
-				for ( int i = 0; i < NUM_MAGNETS; i++)
-				{
-					#pragma region TopMagnets
-					if ( (ship.shipPos.x < topMagnets[i].magnetPosition.x - topMagnets[i].radius) || (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius) &&
-						(ship.shipPos.x < botMagnets[i].magnetPosition.x - botMagnets[i].radius) || (ship.shipPos.x > botMagnets[i].magnetPosition.x + botMagnets[i].radius))
-					{
-							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, Vector3(LEVELWIDTH, LEVELHEIGHT / 2, 0));
-							ship.shipPos += distanceVec * 0.0005f;
-							continue;
-					}
+				//update shipBoundingBox for collision calculations
+				shipBoundingBox.x1 = ship.shipPos.x;
+				shipBoundingBox.x2 = ship.shipPos.x + ship.GetWidth();
+				shipBoundingBox.y1 = ship.shipPos.y;
+				shipBoundingBox.y2 = ship.shipPos.y + ship.GetHeight();
 
-					if ((topMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - topMagnets[i].magnetPosition.y)
-						< topMagnets[i].radius)
-					{ 
-						//move ship based on polarity
-						if (ship.GetPolarity() != topMagnets[i].magnetPolarity)
-						{
-							distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
-							if (abs(distance) < 15)
-								continue;
+				//for ( int i = 0; i < NUM_MAGNETS; i++)
+				//{
+				//	#pragma region TopMagnets
+				//	if ( (ship.shipPos.x < topMagnets[i].magnetPosition.x - topMagnets[i].radius) || (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius) &&
+				//		(ship.shipPos.x < botMagnets[i].magnetPosition.x - botMagnets[i].radius) || (ship.shipPos.x > botMagnets[i].magnetPosition.x + botMagnets[i].radius))
+				//	{
+				//			Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, Vector3(LEVELWIDTH, LEVELHEIGHT / 2, 0));
+				//			ship.shipPos += distanceVec * 0.0005f;
+				//			continue;
+				//	}
 
-							force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
-							if (force < 0.007)
-								force = 0.007;
-							else if (force > 0.07)
-								force = 0.07;
-							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
-							ship.shipPos += distanceVec * (force);
-						}
-					}
-					else 
-					{
-					    distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
-					    force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
-						if (force < 0.007)
-							force = 0.007;
-						else if (force > 0.07)
-							force = 0.07;
-						Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
-						ship.shipPos -= distanceVec * force;
-					}
-					#pragma endregion
+				//	if ((topMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - topMagnets[i].magnetPosition.y)
+				//		< topMagnets[i].radius)
+				//	{ 
+				//		//move ship based on polarity
+				//		if (ship.GetPolarity() != topMagnets[i].magnetPolarity)
+				//		{
+				//			distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+				//			if (abs(distance) < 15)
+				//				continue;
 
-					#pragma region Bottom Magnets
-					if ((botMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - botMagnets[i].magnetPosition.y)
-						< botMagnets[i].radius)
-					{ 
-						//move ship based on polarity
-						if (ship.GetPolarity() != botMagnets[i].magnetPolarity)
-						{
-							distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
-							if (abs(distance) < 15)
-								continue;
+				//			force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+				//			if (force < 0.007)
+				//				force = 0.007;
+				//			else if (force > 0.07)
+				//				force = 0.07;
+				//			Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
+				//			ship.shipPos += distanceVec * (force);
+				//		}
+				//	}
+				//	else 
+				//	{
+				//	    distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+				//	    force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+				//		if (force < 0.007)
+				//			force = 0.007;
+				//		else if (force > 0.07)
+				//			force = 0.07;
+				//		Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
+				//		ship.shipPos -= distanceVec * force;
+				//	}
+				//	#pragma endregion
 
-							force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
-							if (force < 0.007)
-								force = 0.007;
-							else if (force > 0.07)
-								force = 0.07;
-							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
-							ship.shipPos += distanceVec * (force);
-						}
-					}
-					else 
-					{
-					    distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
-					    force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
-						if (force < 0.007)
-							force = 0.007;
-						else if (force > 0.07)
-							force = 0.07;
-						Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
-						ship.shipPos -= distanceVec * force;
-					}
-					#pragma endregion
-				}
+				//	#pragma region Bottom Magnets
+				//	if ((botMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - botMagnets[i].magnetPosition.y)
+				//		< botMagnets[i].radius)
+				//	{ 
+				//		//move ship based on polarity
+				//		if (ship.GetPolarity() != botMagnets[i].magnetPolarity)
+				//		{
+				//			distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
+				//			if (abs(distance) < 15)
+				//				continue;
+
+				//			force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
+				//			if (force < 0.007)
+				//				force = 0.007;
+				//			else if (force > 0.07)
+				//				force = 0.07;
+				//			Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
+				//			ship.shipPos += distanceVec * (force);
+				//		}
+				//	}
+				//	else 
+				//	{
+				//	    distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
+				//	    force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
+				//		if (force < 0.007)
+				//			force = 0.007;
+				//		else if (force > 0.07)
+				//			force = 0.07;
+				//		Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
+				//		ship.shipPos -= distanceVec * force;
+				//	}
+				//	#pragma endregion
+				//}
 
 				if(keys[UP])
 					ship.MoveShipUp();
@@ -524,7 +556,17 @@ int main(void)
 							continue;
 						collide = CheckCollisionsBottom(ship, bottomPoints[i], bottomPoints[i + 1]);
 					}
-				}		
+				}
+				
+				for (int i = 0; i < NUM_OBSTACLES; i++)
+				{
+					if (shipBoundingBox.x1 > obstacleBoxes[i].x2)
+						continue;
+					if (shipBoundingBox.x2 < obstacleBoxes[i].x1)
+						continue;
+
+					collideObstacle = CheckObstacleCollision(shipBoundingBox, obstacleBoxes[i]);
+				}
 				
 				timeDelay += 0.1f;
 				if (timeDelay >= timeDelayLimit)
@@ -656,6 +698,11 @@ int main(void)
 					al_draw_textf(font, al_map_rgb(255,100,100), currentX + 20, 50, 0, "ShipPos: ( %g, %g, %g)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
 				}
 
+				if (collideObstacle)
+				{
+					al_draw_text(font, al_map_rgb(255,255,255), currentX + 200, 300, 0, "Collide obstacles");
+				}
+
 				al_draw_textf(font, al_map_rgb(45, 120, 200), currentX + 20, SCREENHEIGHT - 100, 0, "currentX = %i", currentX);
 				al_draw_line(currentX, 10, currentX, SCREENHEIGHT, al_map_rgb(255,0,0), 3);
 				al_draw_line(LEVELWIDTH, 0, LEVELWIDTH, LEVELHEIGHT, al_map_rgb(0,0,255), 10);
@@ -669,6 +716,11 @@ int main(void)
 				}
 				
 				Drawobstacles(vectorobstacles);
+
+				for (int i = 0; i < NUM_OBSTACLES; i++)
+				{
+					al_draw_rectangle(obstacleBoxes[i].x1, obstacleBoxes[i].y1, obstacleBoxes[i].x2, obstacleBoxes[i].y2, al_map_rgb(255,255,255), 2);
+				}
 			}
 			if (gameManager.GetGameState() == PAUSED)
 			{
@@ -876,7 +928,7 @@ void Drawobstacles(Vector3 obstacles[])
 }
 
 //Generates and populates obstacles[]. Randomly places obstacles within the level. 
-void Generateobstacles(Vector3 obstacles[])
+void Generateobstacles(Vector3 obstacles[], BoundingBox boxes[])
 {
 	char logStringBuffer[50];
 	logStringBuffer[0] = 0;
@@ -906,6 +958,11 @@ void Generateobstacles(Vector3 obstacles[])
 		storeRandom[i] = random;
 		obstacles[i].x = storeRandom[i];
 		obstacles[i].y = Height / 2 - ((rand() % 25) + 20);
+	
+		boxes[i].x1 = obstacles[i].x;
+		boxes[i].x2 = obstacles[i].x + 20;
+		boxes[i].y1 = obstacles[i].y;
+		boxes[i].y2 = obstacles[i].y + 20;
 	}
 	
 	for (int i = 0; i < NUM_OBSTACLES; i++)
@@ -1069,6 +1126,23 @@ bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 		else if (u < 0)
 			return true;
 	}
+}
+
+
+bool CheckObstacleCollision(BoundingBox ship, BoundingBox obstacle)
+{
+  /*return (abs(ship.x1 - obstacle.x1) * 2 < (ship.x2 + obstacle.x2)) &&
+         (abs(ship.y1 - obstacle.y1) * 2 < (ship.y2 + obstacle.y2));*/
+	if ( ((ship.x2 > obstacle.x1) && (ship.x2 < obstacle.x2)) &&
+			(ship.y1 > obstacle.y1) && (ship.y1 < obstacle.y2) ||
+			(ship.y2 > obstacle.y1) && (ship.y2 < obstacle.y2))
+			return true;
+	else if ( ((ship.x1 > obstacle.x1) && (ship.x1 < obstacle.x2)) &&
+				(ship.y1 > obstacle.y1) && (ship.y1 < obstacle.y2) ||
+				(ship.y2 > obstacle.y1) && (ship.y2 < obstacle.y2))
+				return true;
+	else
+		return false;
 }
 
 //Returns distance between two points p1 and p2
