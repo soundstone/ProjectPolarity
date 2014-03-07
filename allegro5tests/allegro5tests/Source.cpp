@@ -427,8 +427,12 @@ int main(void)
 				for ( int i = 0; i < NUM_MAGNETS; i++)
 				{
 					#pragma region TopMagnets
-					if ( (ship.shipPos.x < topMagnets[i].magnetPosition.x - topMagnets[i].radius) || (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius) &&
-						(ship.shipPos.x < botMagnets[i].magnetPosition.x - botMagnets[i].radius) || (ship.shipPos.x > botMagnets[i].magnetPosition.x + botMagnets[i].radius))
+					if ( ((ship.shipPos.x < topMagnets[i].magnetPosition.x - topMagnets[i].radius) || 
+						 (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius) &&
+						 (ship.shipPos.y > topMagnets[i].magnetPosition.y + topMagnets[i].radius)) ||
+								( (ship.shipPos.x < botMagnets[i].magnetPosition.x - botMagnets[i].radius) || 
+								(ship.shipPos.x > botMagnets[i].magnetPosition.x + botMagnets[i].radius) ) &&
+								(ship.shipPos.y < botMagnets[i].magnetPosition.y - botMagnets[i].radius) )
 					{
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, Vector3(LEVELWIDTH, LEVELHEIGHT / 2, 0));
 							ship.shipPos += distanceVec * 0.0005f;
