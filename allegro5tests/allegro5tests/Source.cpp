@@ -112,6 +112,7 @@ int GetMagnetLocationY();
 void DrawMagnets(Magnet magnets[], Magnet magnetsBot[]);
 void SetupMagnetsTop();
 void SetUpMagnetsBottom();
+void LogMagnet(Magnet magnet);
 
 
 //Helper Functions
@@ -119,6 +120,8 @@ Vector3 GetVectorDistance(Vector3 firstPosition, Vector3 secondPosition);
 bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 bool CheckObstacleCollision(BoundingBox shipBox, BoundingBox obstacle);
+void SortMagnets(Magnet magnets[]);
+void Sort(Vector3 arr[], int size);
 
 void DrawScore(float score, int currentX);
 
@@ -153,7 +156,6 @@ int main(void)
 	MenuManager menuManager;
 	double distance  = 0;
 	double force = 0;
-
 
 	//Logo - SPLASH variables
 	ALLEGRO_BITMAP *splashScreen = NULL;
@@ -713,6 +715,7 @@ int main(void)
 				{
 					al_draw_circle(topMagnets[i].magnetPosition.x, topMagnets[i].magnetPosition.y, topMagnets[i].radius, al_map_rgb(100,167, 99), 2);
 					al_draw_circle(botMagnets[i].magnetPosition.x, botMagnets[i].magnetPosition.y, botMagnets[i].radius, al_map_rgb(100, 167,99), 2);
+					al_draw_circle(topPointCharges[i]->pos.x + 5, topPointCharges[i]->pos.y + 5, 10, al_map_rgb(255,255,255), 2);
 				}
 				
 				Drawobstacles(vectorobstacles);
@@ -724,6 +727,7 @@ int main(void)
 			}
 			if (gameManager.GetGameState() == PAUSED)
 			{
+
 				al_draw_text(font, al_map_rgb(405, 120, 200), currentX + 200, SCREENHEIGHT / 2, 0, "P A U S E D");
 			}
 
@@ -965,6 +969,8 @@ void Generateobstacles(Vector3 obstacles[], BoundingBox boxes[])
 		boxes[i].y2 = obstacles[i].y + 20;
 	}
 	
+	Sort(obstacles, NUM_OBSTACLES);
+
 	for (int i = 0; i < NUM_OBSTACLES; i++)
 	{
 		sprintf_s(logStringBuffer, "Obstacles[ %i ] = (%g,%g)", i, obstacles[i].x, obstacles[i].y);  
@@ -1006,14 +1012,13 @@ void DrawMagnets(Magnet magnets[], Magnet magnetsBot[])
 
 void SetupMagnetsTop()
 {
-	char logStringBuffer[50];
-	logStringBuffer[0] = 0;
+	bool polaricCharge = POSITIVE;
 
 	Logger::Log("\n", Logger::logLevelDebug);
 
-	bool polaricCharge = POSITIVE;
-
 	Logger::Log("MAGNETS - TOP", Logger::logLevelInfo);
+
+	Logger::ShutdownLogger();
 
 	for (int i = 0; i < NUM_MAGNETS; i++)
 	{
@@ -1021,30 +1026,40 @@ void SetupMagnetsTop()
 
 		if (i % 2 == 0)
 			polaricCharge = !polaricCharge;
-
 		
 		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 300, 3.5f, polaricCharge);
 		topMagnets[i] = *topMagnet;
+		
 		topPointCharges[i] = new PointCharge(topMagnet->magnetPosition.x + 5, topMagnet->magnetPosition.y + 5, topMagnet->force);
-
-		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, topMagnet->magnetPosition.x, topMagnet->magnetPosition.y);  
-		Logger::Log(logStringBuffer, Logger::logLevelInfo);
-		memset(logStringBuffer, 0, sizeof(logStringBuffer));
 	}
+	SortMagnets(topMagnets);
+
+	for (int i = 0; i < NUM_MAGNETS; i++)
+	{
+		LogMagnet(topMagnets[i]);
+	}
+}
+
+void LogMagnet(Magnet magnet)
+{
+	char logStringBuffer[50];
+	logStringBuffer[0] = 0;
+
+	sprintf_s(logStringBuffer, "Magnet = (%g,%g)", magnet.magnetPosition.x, magnet.magnetPosition.y);  
+	Logger::Log(logStringBuffer, Logger::logLevelInfo);
+	memset(logStringBuffer, 0, sizeof(logStringBuffer));
 
 	Logger::ShutdownLogger();
 }
 
 void SetUpMagnetsBottom()
 {
-	char logStringBuffer[50];
-	logStringBuffer[0] = 0;
-
 	Logger::Log("\n", Logger::logLevelDebug);
 
 	bool polaricCharge = NEGATIVE;
 	
 	Logger::Log("Magnets - BOTTOM", Logger::logLevelInfo);
+	Logger::ShutdownLogger();
 
 	int magnetYPositionOffset = 370;
 
@@ -1055,18 +1070,19 @@ void SetUpMagnetsBottom()
 		if (i % 2 == 0)
 			polaricCharge = !polaricCharge;
 		
-		int position = bottomMagnet[i - 1].magnetPosition.x;
+		//int position = bottomMagnet[i - 1].magnetPosition.x;
 		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 300, 3.5f, polaricCharge);
 		botMagnets[i] = *bottomMagnet;
 		 
 		botPointCharges[i] = new PointCharge(bottomMagnet->magnetPosition.x + 5, bottomMagnet->magnetPosition.y - 5, bottomMagnet->force);
-
-		sprintf_s(logStringBuffer, "MagnetTop[ %i ] = (%i,%i)", i, bottomMagnet->magnetPosition.x, bottomMagnet->magnetPosition.y);  
-		Logger::Log(logStringBuffer, Logger::logLevelInfo);
-		memset(logStringBuffer, 0, sizeof(logStringBuffer));
 	}
+	SortMagnets(botMagnets);
 
-	Logger::ShutdownLogger();
+	for (int i = 0; i < NUM_MAGNETS; i++)
+	{
+		LogMagnet(botMagnets[i]);
+	}
+	
 }
 
 #pragma endregion
@@ -1098,6 +1114,7 @@ bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 		else if (u < 0)
 			return true;
 	}
+	return false;
 }
 
 bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
@@ -1126,6 +1143,7 @@ bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 		else if (u < 0)
 			return true;
 	}
+	return false;
 }
 
 
@@ -1159,6 +1177,50 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 void DrawScore(float score, int currentX)
 {
 	al_draw_textf(font, al_map_rgb(145,58,83), currentX + (SCREENWIDTH - 100), SCREENHEIGHT - 30, 0, "Score: %g", score);
+}
+
+void SortMagnets(Magnet magnets[])
+{
+	bool sorted = false;
+	while(!sorted)
+	{
+		for (int i = 0; i < NUM_MAGNETS; i++)
+		{
+			if (i + 1 < NUM_MAGNETS)
+			{
+				if (magnets[i + 1].magnetPosition.x < magnets[i].magnetPosition.x)
+				{
+					swap(magnets[i], magnets[i+1]);
+					sorted = false;
+				}
+				else
+					sorted = true;
+			}
+		}
+	}
+}
+
+void Sort(Vector3 arr[], int size)
+{
+	bool sorted = true;
+	int swapped = 0;
+	while(true)
+	{
+		swapped = 0;
+		for (int i = 0; i < size; i++)
+		{
+			if (i + 1 < size)
+			{
+				if (arr[i + 1].x < arr[i].x)
+				{
+					swap(arr[i], arr[i+1]);
+					swapped++;
+				}
+			}
+		}
+		if (!(swapped > 0))
+			break;
+	}
 }
 
 #pragma endregion
