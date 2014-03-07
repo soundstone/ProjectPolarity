@@ -422,82 +422,82 @@ int main(void)
 				shipBoundingBox.y1 = ship.shipPos.y;
 				shipBoundingBox.y2 = ship.shipPos.y + ship.GetHeight();
 
-				//for ( int i = 0; i < NUM_MAGNETS; i++)
-				//{
-				//	#pragma region TopMagnets
-				//	if ( (ship.shipPos.x < topMagnets[i].magnetPosition.x - topMagnets[i].radius) || (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius) &&
-				//		(ship.shipPos.x < botMagnets[i].magnetPosition.x - botMagnets[i].radius) || (ship.shipPos.x > botMagnets[i].magnetPosition.x + botMagnets[i].radius))
-				//	{
-				//			Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, Vector3(LEVELWIDTH, LEVELHEIGHT / 2, 0));
-				//			ship.shipPos += distanceVec * 0.0005f;
-				//			continue;
-				//	}
+				for ( int i = 0; i < NUM_MAGNETS; i++)
+				{
+					#pragma region TopMagnets
+					if ( (ship.shipPos.x < topMagnets[i].magnetPosition.x - topMagnets[i].radius) || (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius) &&
+						(ship.shipPos.x < botMagnets[i].magnetPosition.x - botMagnets[i].radius) || (ship.shipPos.x > botMagnets[i].magnetPosition.x + botMagnets[i].radius))
+					{
+							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, Vector3(LEVELWIDTH, LEVELHEIGHT / 2, 0));
+							ship.shipPos += distanceVec * 0.0005f;
+							continue;
+					}
 
-				//	if ((topMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - topMagnets[i].magnetPosition.y)
-				//		< topMagnets[i].radius)
-				//	{ 
-				//		//move ship based on polarity
-				//		if (ship.GetPolarity() != topMagnets[i].magnetPolarity)
-				//		{
-				//			distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
-				//			if (abs(distance) < 15)
-				//				continue;
+					if ((topMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - topMagnets[i].magnetPosition.y)
+						< topMagnets[i].radius)
+					{ 
+						//move ship based on polarity
+						if (ship.GetPolarity() != topMagnets[i].magnetPolarity)
+						{
+							distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+							if (abs(distance) < 15)
+								continue;
 
-				//			force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
-				//			if (force < 0.007)
-				//				force = 0.007;
-				//			else if (force > 0.07)
-				//				force = 0.07;
-				//			Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
-				//			ship.shipPos += distanceVec * (force);
-				//		}
-				//	}
-				//	else 
-				//	{
-				//	    distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
-				//	    force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
-				//		if (force < 0.007)
-				//			force = 0.007;
-				//		else if (force > 0.07)
-				//			force = 0.07;
-				//		Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
-				//		ship.shipPos -= distanceVec * force;
-				//	}
-				//	#pragma endregion
+							force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+							if (force < 0.007)
+								force = 0.007;
+							else if (force > 0.07)
+								force = 0.07;
+							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
+							ship.shipPos += distanceVec * (force);
+						}
+					}
+					else 
+					{
+					    distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+					    force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+						if (force < 0.007)
+							force = 0.007;
+						else if (force > 0.07)
+							force = 0.07;
+						Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
+						ship.shipPos -= distanceVec * force;
+					}
+					#pragma endregion
 
-				//	#pragma region Bottom Magnets
-				//	if ((botMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - botMagnets[i].magnetPosition.y)
-				//		< botMagnets[i].radius)
-				//	{ 
-				//		//move ship based on polarity
-				//		if (ship.GetPolarity() != botMagnets[i].magnetPolarity)
-				//		{
-				//			distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
-				//			if (abs(distance) < 15)
-				//				continue;
+					#pragma region Bottom Magnets
+					if ((botMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - botMagnets[i].magnetPosition.y)
+						< botMagnets[i].radius)
+					{ 
+						//move ship based on polarity
+						if (ship.GetPolarity() != botMagnets[i].magnetPolarity)
+						{
+							distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
+							if (abs(distance) < 15)
+								continue;
 
-				//			force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
-				//			if (force < 0.007)
-				//				force = 0.007;
-				//			else if (force > 0.07)
-				//				force = 0.07;
-				//			Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
-				//			ship.shipPos += distanceVec * (force);
-				//		}
-				//	}
-				//	else 
-				//	{
-				//	    distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
-				//	    force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
-				//		if (force < 0.007)
-				//			force = 0.007;
-				//		else if (force > 0.07)
-				//			force = 0.07;
-				//		Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
-				//		ship.shipPos -= distanceVec * force;
-				//	}
-				//	#pragma endregion
-				//}
+							force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
+							if (force < 0.007)
+								force = 0.007;
+							else if (force > 0.07)
+								force = 0.07;
+							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
+							ship.shipPos += distanceVec * (force);
+						}
+					}
+					else 
+					{
+					    distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
+					    force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
+						if (force < 0.007)
+							force = 0.007;
+						else if (force > 0.07)
+							force = 0.07;
+						Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
+						ship.shipPos -= distanceVec * force;
+					}
+					#pragma endregion
+				}
 
 				if(keys[UP])
 					ship.MoveShipUp();
