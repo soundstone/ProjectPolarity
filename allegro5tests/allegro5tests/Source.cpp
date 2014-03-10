@@ -42,7 +42,7 @@ const int PLOT_INTERVAL = 36;
 const int NUM_POINTS = 120;
 
 //Magnet consts
-const int NUM_MAGNETS = 4;
+const int NUM_MAGNETS = 6;
 Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
 PointCharge *topPointCharges[NUM_MAGNETS];
@@ -121,6 +121,7 @@ bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 bool CheckObstacleCollision(BoundingBox shipBox, BoundingBox obstacle);
 void SortMagnets(Magnet magnets[]);
+void SpaceMagnets(Magnet magnets[], int size);
 void Sort(Vector3 arr[], int size);
 
 void DrawScore(float score, int currentX);
@@ -455,7 +456,8 @@ int main(void)
 							else if (force > 0.07)
 								force = 0.07;
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
-							ship.shipPos += distanceVec * (force);
+							if (!collide)
+								ship.shipPos += distanceVec * (force);
 						}
 					}
 					else 
@@ -467,7 +469,8 @@ int main(void)
 						else if (force > 0.07)
 							force = 0.07;
 						Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
-						ship.shipPos -= distanceVec * force;
+						if (!collide)
+							ship.shipPos -= distanceVec * force;
 					}
 					#pragma endregion
 
@@ -488,7 +491,8 @@ int main(void)
 							else if (force > 0.07)
 								force = 0.07;
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
-							ship.shipPos += distanceVec * (force);
+							if (!collide)
+								ship.shipPos += distanceVec * (force);
 						}
 					}
 					else 
@@ -500,7 +504,8 @@ int main(void)
 						else if (force > 0.07)
 							force = 0.07;
 						Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
-						ship.shipPos -= distanceVec * force;
+						if (!collide)
+							ship.shipPos -= distanceVec * force;
 					}
 					#pragma endregion
 				}
@@ -1017,6 +1022,7 @@ void DrawMagnets(Magnet magnets[], Magnet magnetsBot[])
 void SetupMagnetsTop()
 {
 	bool polaricCharge = POSITIVE;
+	bool sorted = false;
 
 	Logger::Log("\n", Logger::logLevelDebug);
 
@@ -1031,15 +1037,21 @@ void SetupMagnetsTop()
 		if (i % 2 == 0)
 			polaricCharge = !polaricCharge;
 		
-		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 300, 3.5f, polaricCharge);
+		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 200, 1.5f, polaricCharge);
 		topMagnets[i] = *topMagnet;
-		
-		topPointCharges[i] = new PointCharge(topMagnet->magnetPosition.x + 5, topMagnet->magnetPosition.y + 5, topMagnet->force);
 	}
-	SortMagnets(topMagnets);
+
+	if (!sorted)
+		{
+			SortMagnets(topMagnets);
+			sorted = true;
+		}
+	
+	SpaceMagnets(topMagnets, NUM_MAGNETS);
 
 	for (int i = 0; i < NUM_MAGNETS; i++)
 	{
+		topPointCharges[i] = new PointCharge(topMagnets[i].magnetPosition.x + 5, topMagnets[i].magnetPosition.y + 5, topMagnets[i].force);
 		LogMagnet(topMagnets[i]);
 	}
 }
@@ -1061,6 +1073,7 @@ void SetUpMagnetsBottom()
 	Logger::Log("\n", Logger::logLevelDebug);
 
 	bool polaricCharge = NEGATIVE;
+	bool sorted = false;
 	
 	Logger::Log("Magnets - BOTTOM", Logger::logLevelInfo);
 	Logger::ShutdownLogger();
@@ -1074,19 +1087,23 @@ void SetUpMagnetsBottom()
 		if (i % 2 == 0)
 			polaricCharge = !polaricCharge;
 		
-		//int position = bottomMagnet[i - 1].magnetPosition.x;
-		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 300, 3.5f, polaricCharge);
+		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 200, 1.5f, polaricCharge);
 		botMagnets[i] = *bottomMagnet;
-		 
-		botPointCharges[i] = new PointCharge(bottomMagnet->magnetPosition.x + 5, bottomMagnet->magnetPosition.y - 5, bottomMagnet->force);
 	}
-	SortMagnets(botMagnets);
+
+	if (!sorted)
+	{
+		SortMagnets(botMagnets);
+		sorted = true;
+	}
+
+	SpaceMagnets(botMagnets, NUM_MAGNETS);
 
 	for (int i = 0; i < NUM_MAGNETS; i++)
 	{
+		botPointCharges[i] = new PointCharge(botMagnets[i].magnetPosition.x + 5, botMagnets[i].magnetPosition.y - 5, botMagnets[i].force);
 		LogMagnet(botMagnets[i]);
-	}
-	
+	}	
 }
 
 #pragma endregion
@@ -1224,6 +1241,17 @@ void Sort(Vector3 arr[], int size)
 		}
 		if (!(swapped > 0))
 			break;
+	}
+}
+
+void SpaceMagnets(Magnet m[], int size)
+{
+	for (int i = 0; i < size; i++)
+	{
+		if (m[i + 1].magnetPosition.x > (m[i].magnetPosition.x + (m[i].radius * 2) + 100) )
+		{
+			m[i + 1].magnetPosition.x = (m[i].magnetPosition.x + (m[i].radius * 2) + rand() % 100 );
+		}
 	}
 }
 
