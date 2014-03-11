@@ -696,11 +696,18 @@ int main(void)
 				{
 					al_draw_text(font, al_map_rgb(255, 255, 110), currentX + (SCREENWIDTH / 2), SCREENHEIGHT / 2, 0, "COLLISION ");
 					al_draw_textf(font, al_map_rgb(255,100,100), currentX + 20, 50, 0, "ShipPos: ( %g, %g, %g)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
+					gameScore = 0;  
+					ship.shipPos.x = 20; 
+					ship.shipPos.y = SCREENHEIGHT / 2; 
+					//here
 				}
 
 				if (collideObstacle)
 				{
 					al_draw_text(font, al_map_rgb(255,255,255), currentX + 200, 300, 0, "Collide obstacles");
+					gameScore = 0;
+					ship.shipPos.x = 20; 
+					ship.shipPos.y = SCREENHEIGHT / 2; 
 				}
 
 				al_draw_textf(font, al_map_rgb(45, 120, 200), currentX + 20, SCREENHEIGHT - 100, 0, "currentX = %i", currentX);
@@ -1073,6 +1080,7 @@ void SetUpMagnetsBottom()
 
 #pragma region Helper Functions
 
+
 bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 {
 	Vector3 lineSegment = GetVectorDistance(pointOne, pointTwo);
@@ -1082,7 +1090,7 @@ bool CheckCollisionsTop(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 	{
 		Vector3 lineNormal(lineSegment.y, -lineSegment.x, 0);
 		double u = GetVectorDistance(ship.shipPos, pointTwo) * lineNormal;
-
+		
 		if (u > 0)
 			return false;
 		else if (u < 0)
