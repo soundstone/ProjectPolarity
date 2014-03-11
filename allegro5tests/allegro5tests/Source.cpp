@@ -616,6 +616,22 @@ int main(void)
 			}
 		}
 		#pragma endregion
+		//here
+		#pragma region Game_Over
+		else if (gameManager.GetGameState() == GAMEOVER)
+		{
+			buttonTimer += 0.1f;
+			al_draw_text(font, al_map_rgb(203,194,80), SCREENWIDTH / 2, SCREENHEIGHT / 2, 0, "G A M E O V E R");
+			if (keys[ENTER])
+			{
+				if (buttonTimer >= PAUSE_BUTTON_TIME)
+				{
+					buttonTimer = 0.0f;
+					gameManager.SetGameState(PLAYING);
+				}
+			}
+		}
+		#pragma endregion 
 
 		#pragma region Victory
 		if (gameManager.GetGameState() == VICTORY)
@@ -699,6 +715,7 @@ int main(void)
 					gameScore = 0;  
 					ship.shipPos.x = 20; 
 					ship.shipPos.y = SCREENHEIGHT / 2; 
+					gameManager.SetGameState(GAMEOVER);
 					//here
 				}
 
@@ -734,6 +751,7 @@ int main(void)
 				al_draw_text(font, al_map_rgb(405, 120, 200), currentX + 200, SCREENHEIGHT / 2, 0, "P A U S E D");
 			}
 
+			
 			if (gameManager.GetGameState() == VICTORY)
 			{
 				if (delayer >= 400)
