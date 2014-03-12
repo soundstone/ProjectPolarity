@@ -621,7 +621,6 @@ int main(void)
 		else if (gameManager.GetGameState() == GAMEOVER)
 		{
 			buttonTimer += 0.1f;
-			al_draw_text(font, al_map_rgb(203,194,80), SCREENWIDTH / 2, SCREENHEIGHT / 2, 0, "G A M E O V E R");
 			if (keys[ENTER])
 			{
 				if (buttonTimer >= PAUSE_BUTTON_TIME)
@@ -750,7 +749,11 @@ int main(void)
 			{
 				al_draw_text(font, al_map_rgb(405, 120, 200), currentX + 200, SCREENHEIGHT / 2, 0, "P A U S E D");
 			}
-
+			if (gameManager.GetGameState() == GAMEOVER)
+			{
+				al_draw_tinted_bitmap(victoryFlash, al_map_rgba_f(255 * alphaValue, 255 * alphaValue, 255 * alphaValue, alphaValue), 0, 0, 0);
+				al_draw_text(font, al_map_rgb(405, 120, 200), currentX + 200, SCREENHEIGHT / 2, 0, "G A M E O V E R");
+			}
 			
 			if (gameManager.GetGameState() == VICTORY)
 			{
