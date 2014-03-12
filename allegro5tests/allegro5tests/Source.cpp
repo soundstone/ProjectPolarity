@@ -41,7 +41,7 @@ int cameraY = 0;
 const int PLOT_INTERVAL = 36;
 const int NUM_POINTS = 120;
 
-//Magnet consts
+//Magnet variables
 const int NUM_MAGNETS = 6;
 Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
@@ -602,6 +602,13 @@ int main(void)
 
 				if (LEVELWIDTH - (SCREENWIDTH / 2) < currentX)
 					currentX = LEVELWIDTH - (SCREENWIDTH / 2);
+
+				if (collide || collideObstacle)
+				{
+					gameScore = 0;
+					ship.shipPos.x = 20;
+					ship.shipPos.y = SCREENHEIGHT / 2;
+				}
 			}
 			#pragma endregion
 
