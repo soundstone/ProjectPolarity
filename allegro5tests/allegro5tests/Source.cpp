@@ -49,6 +49,8 @@ PointCharge *topPointCharges[NUM_MAGNETS];
 PointCharge *botPointCharges[NUM_MAGNETS];
 bool inMagneticFieldTop;
 bool inMagneticFieldBot;
+#define positiveMagnetColor = al_map_rgb(255,0,0)
+#define negativeMagnetColor = al_map_rgb(255,255,255)
 
 //obstacle consts
 const int NUM_OBSTACLES = 20;
@@ -1021,8 +1023,15 @@ void DrawMagnets(Magnet magnets[], Magnet magnetsBot[])
 {
 	for(int i = 0; i < NUM_MAGNETS; ++i)
 	{
-		al_draw_filled_rectangle(magnets[i].magnetPosition.x, magnets[i].magnetPosition.y, magnets[i].magnetPosition.x + 20, magnets[i].magnetPosition.y + 20, al_map_rgb(0,255,255));
-		al_draw_filled_rectangle(magnetsBot[i].magnetPosition.x, magnetsBot[i].magnetPosition.y, magnetsBot[i].magnetPosition.x + 20, magnetsBot[i].magnetPosition.y + 20, al_map_rgb(0, 255, 255));
+		if (magnets[i].magnetPolarity == POSITIVE)
+			al_draw_filled_rectangle(magnets[i].magnetPosition.x, magnets[i].magnetPosition.y, magnets[i].magnetPosition.x + 20, magnets[i].magnetPosition.y + 20, al_map_rgb(255,0,0));
+		else
+			al_draw_filled_rectangle(magnets[i].magnetPosition.x, magnets[i].magnetPosition.y, magnets[i].magnetPosition.x + 20, magnets[i].magnetPosition.y + 20, al_map_rgb(255,255,255));
+
+		if (magnetsBot[i].magnetPolarity == POSITIVE)
+			al_draw_filled_rectangle(magnetsBot[i].magnetPosition.x, magnetsBot[i].magnetPosition.y, magnetsBot[i].magnetPosition.x + 20, magnetsBot[i].magnetPosition.y + 20, al_map_rgb(255, 0, 0));
+		else 
+			al_draw_filled_rectangle(magnets[i].magnetPosition.x, magnets[i].magnetPosition.y, magnets[i].magnetPosition.x + 20, magnets[i].magnetPosition.y + 20, al_map_rgb(255,255,255));
 	}
 }
 
@@ -1044,7 +1053,7 @@ void SetupMagnetsTop()
 		if (i % 2 == 0)
 			polaricCharge = !polaricCharge;
 		
-		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 200, 1.5f, polaricCharge);
+		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 200, 0.9f, polaricCharge);
 		topMagnets[i] = *topMagnet;
 	}
 
@@ -1094,7 +1103,7 @@ void SetUpMagnetsBottom()
 		if (i % 2 == 0)
 			polaricCharge = !polaricCharge;
 		
-		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 200, 1.5f, polaricCharge);
+		bottomMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY() + magnetYPositionOffset, 200, 0.9f, polaricCharge);
 		botMagnets[i] = *bottomMagnet;
 	}
 
@@ -1210,8 +1219,10 @@ void DrawScore(float score, int currentX)
 void SortMagnets(Magnet magnets[])
 {
 	bool sorted = false;
+	int swapped = 0;
 	while(!sorted)
 	{
+		swapped = 0;
 		for (int i = 0; i < NUM_MAGNETS; i++)
 		{
 			if (i + 1 < NUM_MAGNETS)
@@ -1220,11 +1231,21 @@ void SortMagnets(Magnet magnets[])
 				{
 					swap(magnets[i], magnets[i+1]);
 					sorted = false;
+					++swapped;
 				}
 				else
-					sorted = true;
+					continue;
+			}
+			if (swapped == 0)
+			{
+				sorted = true;
 			}
 		}
+	}
+	for (int i = 0; i < NUM_MAGNETS; i++)
+	{
+		if (i + 1 < NUM_MAGNETS)
+			magnets[i + 1].magnetPolarity = (!(magnets[i].magnetPolarity));
 	}
 }
 
@@ -1255,9 +1276,12 @@ void SpaceMagnets(Magnet m[], int size)
 {
 	for (int i = 0; i < size; i++)
 	{
-		if (m[i + 1].magnetPosition.x > (m[i].magnetPosition.x + (m[i].radius * 2) + 100) )
+		if (i + 1 < size)
 		{
-			m[i + 1].magnetPosition.x = (m[i].magnetPosition.x + (m[i].radius * 2) + rand() % 100 );
+			if (m[i + 1].magnetPosition.x > (m[i].magnetPosition.x + (m[i].radius * 2) + 100) )
+			{
+				m[i + 1].magnetPosition.x = (m[i].magnetPosition.x + (m[i].radius * 2) + rand() % 100 );
+			}
 		}
 	}
 }
