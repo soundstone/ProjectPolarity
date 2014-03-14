@@ -30,7 +30,7 @@ const int SCREENHEIGHT = 500;
 ALLEGRO_FONT *font;
 
 //level dimensions
-const int LEVELWIDTH = 4000;
+const int LEVELWIDTH = 4000 - SCREENWIDTH / 2;
 const int LEVELHEIGHT = 500;
 
 //Camera position
@@ -42,7 +42,7 @@ const int PLOT_INTERVAL = 36;
 const int NUM_POINTS = 120;
 
 //Magnet variables
-const int NUM_MAGNETS = 6;
+const int NUM_MAGNETS = 12;
 Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
 PointCharge *topPointCharges[NUM_MAGNETS];
@@ -51,7 +51,7 @@ bool inMagneticFieldTop;
 bool inMagneticFieldBot;
 
 //obstacle consts
-const int NUM_OBSTACLES = 20;
+const int NUM_OBSTACLES = 14;
 
 const int BUTTON_TIME = 2.5f;
 const int PAUSE_BUTTON_TIME = 1.0f;
@@ -195,7 +195,7 @@ int main(void)
 		return -1;
 
 	display = al_create_display(SCREENWIDTH, SCREENHEIGHT);
-	backBuffer = al_create_bitmap(LEVELWIDTH, LEVELHEIGHT);	
+	backBuffer = al_create_bitmap(LEVELWIDTH + SCREENWIDTH / 2, LEVELHEIGHT);	
 
 	if(!display)
 		return -1;
@@ -770,10 +770,6 @@ int main(void)
 				
 				Drawobstacles(vectorobstacles);
 
-				for (int i = 0; i < NUM_OBSTACLES; i++)
-				{
-					al_draw_rectangle(obstacleBoxes[i].x1, obstacleBoxes[i].y1, obstacleBoxes[i].x2, obstacleBoxes[i].y2, al_map_rgb(255,255,255), 2);
-				}
 			}
 			if (gameManager.GetGameState() == PAUSED)
 			{
@@ -788,7 +784,7 @@ int main(void)
 				else
 				{
 					//al_draw_text(font, al_map_rgb(405, 120, 200), currentX + 200, SCREENHEIGHT / 2, 0, "V I C T O R Y");
-					al_draw_tinted_bitmap(victoryFlash, al_map_rgba_f(255 * alphaValue, 255 * alphaValue, 255 * alphaValue, alphaValue), currentX, 0, 0);
+					al_draw_tinted_bitmap(victoryFlash, al_map_rgba_f(255 * alphaValue, 255 * alphaValue, 255 * alphaValue, alphaValue), currentX, currentY, 0);
 					//al_draw_tinted_bitmap(victoryFlash, al_map_rgba_f(255 * alphaValue, 255 * alphaValue, 255 * alphaValue, alphaValue), 0, 0, 0);
 				}
 			}
@@ -952,7 +948,8 @@ void ConnectPointsTop(Vector3 points[])
 {
 	for (int i = 0; i < NUM_POINTS; i++)
 	{
-		al_draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, al_map_rgb(255,0,255), 2);
+		if (points[i + 1].x < LEVELWIDTH)
+			al_draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, al_map_rgb(255,0,255), 2);
 		/*
 			The line below is only used for debugging to visually see where each point is located throughout the ceiling.
 		al_draw_line(points[i].x, points[i].y - 20, points[i].x, points[i].y + 20, al_map_rgb(0,255,255), 3);
@@ -966,7 +963,8 @@ void ConnectPointsBottom(Vector3 pointsBot[])
 {
 	for (int i = 0; i < NUM_POINTS; i++)
 	{
-		al_draw_line(pointsBot[i].x, pointsBot[i].y, pointsBot[i + 1].x, pointsBot[i + 1].y, al_map_rgb(255,0,255),2);
+		if (pointsBot[i + 1].x < LEVELWIDTH)
+			al_draw_line(pointsBot[i].x, pointsBot[i].y, pointsBot[i + 1].x, pointsBot[i + 1].y, al_map_rgb(255,0,255),2);
 		/*
 			The line below is only used for visually displaying where each point is on the floor. 
 		al_draw_line(pointsBot[i].x, pointsBot[i].y - 20, pointsBot[i].x, pointsBot[i].y + 20, al_map_rgb(0,255,255), 3);
@@ -979,7 +977,8 @@ void Drawobstacles(Vector3 obstacles[])
 {
 	for (int i = 0; i < NUM_OBSTACLES; i++)
 	{
-		al_draw_filled_rectangle(obstacles[i].x, obstacles[i].y, obstacles[i].x + 20, obstacles[i].y + 20, al_map_rgb(255,0,255));
+		if (obstacles[i].x < LEVELWIDTH)
+			al_draw_filled_rectangle(obstacles[i].x, obstacles[i].y, obstacles[i].x + 20, obstacles[i].y + 20, al_map_rgb(255,0,255));
 	}
 }
 
@@ -1057,15 +1056,20 @@ void DrawMagnets(Magnet magnets[], Magnet magnetsBot[])
 {
 	for(int i = 0; i < NUM_MAGNETS; ++i)
 	{
-		if (magnets[i].magnetPolarity == POSITIVE)
-			al_draw_filled_rectangle(magnets[i].magnetPosition.x, magnets[i].magnetPosition.y, magnets[i].magnetPosition.x + 20, magnets[i].magnetPosition.y + 20, al_map_rgb(255,0,0));
-		else
-			al_draw_filled_rectangle(magnets[i].magnetPosition.x, magnets[i].magnetPosition.y, magnets[i].magnetPosition.x + 20, magnets[i].magnetPosition.y + 20, al_map_rgb(255,255,255));
-
-		if (magnetsBot[i].magnetPolarity == POSITIVE)
-			al_draw_filled_rectangle(magnetsBot[i].magnetPosition.x, magnetsBot[i].magnetPosition.y, magnetsBot[i].magnetPosition.x + 20, magnetsBot[i].magnetPosition.y + 20, al_map_rgb(255, 0, 0));
-		else 
-			al_draw_filled_rectangle(magnetsBot[i].magnetPosition.x, magnetsBot[i].magnetPosition.y, magnetsBot[i].magnetPosition.x + 20, magnetsBot[i].magnetPosition.y + 20, al_map_rgb(255,255,255));
+		if (magnets[i].magnetPosition.x < LEVELWIDTH)
+		{
+			if (magnets[i].magnetPolarity == POSITIVE)
+				al_draw_filled_rectangle(magnets[i].magnetPosition.x, magnets[i].magnetPosition.y, magnets[i].magnetPosition.x + 20, magnets[i].magnetPosition.y + 20, al_map_rgb(255,0,0));
+			else
+				al_draw_filled_rectangle(magnets[i].magnetPosition.x, magnets[i].magnetPosition.y, magnets[i].magnetPosition.x + 20, magnets[i].magnetPosition.y + 20, al_map_rgb(255,255,255));
+		}
+		if (magnetsBot[i].magnetPosition.x < LEVELWIDTH)
+		{
+			if (magnetsBot[i].magnetPolarity == POSITIVE)
+				al_draw_filled_rectangle(magnetsBot[i].magnetPosition.x, magnetsBot[i].magnetPosition.y, magnetsBot[i].magnetPosition.x + 20, magnetsBot[i].magnetPosition.y + 20, al_map_rgb(255, 0, 0));
+			else 
+				al_draw_filled_rectangle(magnetsBot[i].magnetPosition.x, magnetsBot[i].magnetPosition.y, magnetsBot[i].magnetPosition.x + 20, magnetsBot[i].magnetPosition.y + 20, al_map_rgb(255,255,255));
+		}
 	}
 }
 
@@ -1314,6 +1318,10 @@ void SpaceMagnets(Magnet m[], int size)
 			if (m[i + 1].magnetPosition.x > (m[i].magnetPosition.x + (m[i].radius * 2) + 100) )
 			{
 				m[i + 1].magnetPosition.x = (m[i].magnetPosition.x + (m[i].radius * 2) + rand() % 100 );
+			}
+			else if (m[i + 1].magnetPosition.x < (m[i].magnetPosition.x + (m[i].radius * 1.5)))
+			{
+				m[i + 1].magnetPosition.x = m[i].magnetPosition.x + (m[i].radius * 1.5);
 			}
 		}
 	}
