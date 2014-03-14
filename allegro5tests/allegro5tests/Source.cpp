@@ -206,6 +206,7 @@ int main(void)
 
 	//Image for splash screen fade in.
 	splashScreen = al_load_bitmap("RedTeam.png");
+	//here
 	if (!splashScreen)
 		return -1;
 
@@ -401,6 +402,7 @@ int main(void)
 			{
 				gameManager.SetGameState(VICTORY);
 				delayer = 0;
+				//here
 			}
 
 			if(ev.type == ALLEGRO_EVENT_TIMER)
@@ -430,7 +432,7 @@ int main(void)
 					{
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, Vector3(LEVELWIDTH, LEVELHEIGHT / 2, 0));
 							ship.shipPos += distanceVec * 0.0005f;
-							continue;
+							continue; 
 					}
 
 					if ((topMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - topMagnets[i].magnetPosition.y)
@@ -444,8 +446,8 @@ int main(void)
 								continue;
 							
 							force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
-							if (force < 0.007)
-								force = 0.007;
+							if (force < 0.007) 
+								force = 0.007; 
 							else if (force > 0.07)
 								force = 0.07;
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
@@ -616,7 +618,6 @@ int main(void)
 			}
 		}
 		#pragma endregion
-		//here
 		#pragma region Game_Over
 		else if (gameManager.GetGameState() == GAMEOVER)
 		{
@@ -711,19 +712,18 @@ int main(void)
 				{
 					al_draw_text(font, al_map_rgb(255, 255, 110), currentX + (SCREENWIDTH / 2), SCREENHEIGHT / 2, 0, "COLLISION ");
 					al_draw_textf(font, al_map_rgb(255,100,100), currentX + 20, 50, 0, "ShipPos: ( %g, %g, %g)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
-					gameScore = 0;  
+					/*gameScore = 0;  
 					ship.shipPos.x = 20; 
 					ship.shipPos.y = SCREENHEIGHT / 2; 
-					gameManager.SetGameState(GAMEOVER);
-					//here
+					gameManager.SetGameState(GAMEOVER);*/
 				}
 
 				if (collideObstacle)
 				{
 					al_draw_text(font, al_map_rgb(255,255,255), currentX + 200, 300, 0, "Collide obstacles");
-					gameScore = 0;
+					/*gameScore = 0;
 					ship.shipPos.x = 20; 
-					ship.shipPos.y = SCREENHEIGHT / 2; 
+					ship.shipPos.y = SCREENHEIGHT / 2;*/ 
 				}
 
 				al_draw_textf(font, al_map_rgb(45, 120, 200), currentX + 20, SCREENHEIGHT - 100, 0, "currentX = %i", currentX);
@@ -761,13 +761,16 @@ int main(void)
 					gameManager.SetGameState(MAINMENU);
 				else
 				{
-					al_draw_tinted_bitmap(victoryFlash, al_map_rgba_f(255 * alphaValue, 255 * alphaValue, 255 * alphaValue, alphaValue), 0, 0, 0);
+					//here
+					al_draw_text(font, al_map_rgb(405, 120, 200), currentX + 200, SCREENHEIGHT / 2, 0, "V I C T O R Y");
+					al_draw_tinted_bitmap(victoryFlash, al_map_rgba_f(255 * alphaValue, 255 * alphaValue, 255 * alphaValue, alphaValue), currentX, currentY, 0); 
 				}
 			}
 
 			al_set_target_bitmap(al_get_backbuffer(display));
 
 			//al_draw_bitmap(backBuffer, 0, 0, 0);
+
 			al_draw_bitmap_region(backBuffer, currentX, currentY, currentX + SCREENWIDTH, currentY + SCREENHEIGHT, 0, 0, 0);
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(0,0,0));
