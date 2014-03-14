@@ -183,6 +183,7 @@ int main(void)
 	int currentY = 0;
 	#pragma endregion
 
+	#pragma region ALLEGRO Initialization
 	//allegro variables
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_BITMAP *backBuffer = NULL;
@@ -223,6 +224,7 @@ int main(void)
 		Seed set to 64789 for testing purposes.
 	*/
 	srand(64789);
+	#pragma endregion
 
 	#pragma region LoggerInitialize
 	//If log file currently exists, delete it for a fresh copy
@@ -802,9 +804,12 @@ int main(void)
 
 	#pragma endregion
 
+	#pragma region ALLEGRO Cleanup
 	al_destroy_timer(timer);
 	al_destroy_display(display);
 	return 0;
+	#pragma endregion
+
 }
 
 #pragma region Procedual Tunnel
