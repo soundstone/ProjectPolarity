@@ -122,6 +122,7 @@ bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo);
 bool CheckObstacleCollision(BoundingBox shipBox, BoundingBox obstacle);
 void SortMagnets(Magnet magnets[]);
 void SpaceMagnets(Magnet magnets[], int size);
+void SpaceObstacles(Vector3 o[], int size);
 void Sort(Vector3 arr[], int size);
 void ResetForce(SpaceShip &ship);
 void ApplyForces(Magnet magnets, SpaceShip &ship);
@@ -987,6 +988,7 @@ void Generateobstacles(Vector3 obstacles[], BoundingBox boxes[])
 {
 	char logStringBuffer[50];
 	logStringBuffer[0] = 0;
+	bool sorted = false;
 	
 	Logger::Log("\n", Logger::logLevelDebug);
 
@@ -999,7 +1001,7 @@ void Generateobstacles(Vector3 obstacles[], BoundingBox boxes[])
 		int random;
 		do
 		{
-			random = (rand() % 50) * 200;
+			random = (rand() % 50) * 100;
 			isRepeating = true;
 			for (int j = 0; j < i; j++)
 			{
@@ -1013,12 +1015,24 @@ void Generateobstacles(Vector3 obstacles[], BoundingBox boxes[])
 		storeRandom[i] = random;
 		obstacles[i].x = storeRandom[i];
 		obstacles[i].y = Height / 2 - ((rand() % 25) + 20);
+	}
+
+	if (!sorted)
+	{
+		Sort(obstacles, NUM_OBSTACLES);
+		sorted = true;
+	}
 	
+	SpaceObstacles(obstacles, NUM_OBSTACLES);
+	
+	for (int i = 0; i < NUM_OBSTACLES; i++)
+	{
 		boxes[i].x1 = obstacles[i].x;
 		boxes[i].x2 = obstacles[i].x + 20;
 		boxes[i].y1 = obstacles[i].y;
 		boxes[i].y2 = obstacles[i].y + 20;
 	}
+	
 	
 	Sort(obstacles, NUM_OBSTACLES);
 
@@ -1323,6 +1337,18 @@ void SpaceMagnets(Magnet m[], int size)
 			{
 				m[i + 1].magnetPosition.x = m[i].magnetPosition.x + (m[i].radius * 1.5);
 			}
+		}
+	}
+}
+
+void SpaceObstacles(Vector3 o[], int size)
+{
+	for (int i = 0; i < size; i++)
+	{
+		if (i + 1 < size)
+		{
+			if (o[i + 1].x < o[i].x + 300)
+				o[i + 1].x = o[i].x + 300;
 		}
 	}
 }
