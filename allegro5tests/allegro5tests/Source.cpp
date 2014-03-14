@@ -49,8 +49,6 @@ PointCharge *topPointCharges[NUM_MAGNETS];
 PointCharge *botPointCharges[NUM_MAGNETS];
 bool inMagneticFieldTop;
 bool inMagneticFieldBot;
-#define positiveMagnetColor = al_map_rgb(255,0,0)
-#define negativeMagnetColor = al_map_rgb(255,255,255)
 
 //obstacle consts
 const int NUM_OBSTACLES = 20;
@@ -125,7 +123,8 @@ bool CheckObstacleCollision(BoundingBox shipBox, BoundingBox obstacle);
 void SortMagnets(Magnet magnets[]);
 void SpaceMagnets(Magnet magnets[], int size);
 void Sort(Vector3 arr[], int size);
-
+void ResetForce(SpaceShip &ship);
+void ApplyForces(Magnet magnets, SpaceShip &ship);
 void DrawScore(float score, int currentX);
 
 //==========================================================================================
@@ -152,7 +151,7 @@ int main(void)
 	shipStartingPosition.x = 20;
 	shipStartingPosition.y = SCREENHEIGHT / 2;
 	shipStartingPosition.z = 0;
-	SpaceShip ship(shipStartingPosition, 15, 15, 7, 3, NEGATIVE);
+	SpaceShip ship(shipStartingPosition, 15, 15, 7, 3, NEGATIVE, 0.5f, 1.0f);
 	PointCharge shipPointCharge(shipStartingPosition.x, shipStartingPosition.y, 1);
 	BoundingBox shipBoundingBox;
 	GameManager gameManager;
@@ -401,12 +400,14 @@ int main(void)
 		{
 			#pragma region Update Loop
 			
+			#pragma region Check Victory
 			//check victory condition
-			if (ship.shipPos.x >= LEVELWIDTH)
+			if (ship.shipPos.x >= LEVELWIDTH - 5)
 			{
 				gameManager.SetGameState(VICTORY);
 				delayer = 0;
 			}
+			#pragma endregion
 
 			if(ev.type == ALLEGRO_EVENT_TIMER)
 			{
@@ -417,6 +418,7 @@ int main(void)
 				collideObstacle = false;
 				redraw = true;
 
+				#pragma region Update ShipPointCharge and shipBoundingBox and reset force
 				//update shipPointCharge for magnet calculations
 				shipPointCharge.pos.x = ship.shipPos.x;
 				shipPointCharge.pos.y = ship.shipPos.y;
@@ -427,6 +429,48 @@ int main(void)
 				shipBoundingBox.y1 = ship.shipPos.y;
 				shipBoundingBox.y2 = ship.shipPos.y + ship.GetHeight();
 
+				ResetForce(ship);
+				#pragma endregion
+				
+				#pragma region Tunnel Collision Checks
+				if (ship.shipPos.y < 190)
+				{
+					for (int i = 0; i < NUM_POINTS; i++)
+					{
+						if (ship.shipPos.x > topPoints[i + 1].x)
+							continue;
+						if (ship.shipPos.x < topPoints[i].x)
+							continue;
+						
+						collide = CheckCollisionsTop(ship, topPoints[i], topPoints[i + 1]);
+					}
+				}
+				else if (ship.shipPos.y > SCREENHEIGHT / 2 + 60)
+				{
+					for (int i = 0; i < NUM_POINTS; i++)
+					{
+						if (ship.shipPos.x > bottomPoints[i + 1].x)
+							continue;
+						if (ship.shipPos.x < bottomPoints[i].x)
+							continue;
+						collide = CheckCollisionsBottom(ship, bottomPoints[i], bottomPoints[i + 1]);
+					}
+				}
+				#pragma endregion
+
+				#pragma region Obstacle Collision Checks
+				for (int i = 0; i < NUM_OBSTACLES; i++)
+				{
+					if (shipBoundingBox.x1 > obstacleBoxes[i].x2)
+						continue;
+					if (shipBoundingBox.x2 < obstacleBoxes[i].x1)
+						continue;
+
+					collideObstacle = CheckObstacleCollision(shipBoundingBox, obstacleBoxes[i]);
+				}
+				#pragma endregion
+
+				#pragma region Magnet Force Checks
 				for ( int i = 0; i < NUM_MAGNETS; i++)
 				{
 					#pragma region TopMagnets
@@ -438,17 +482,18 @@ int main(void)
 								(ship.shipPos.y < botMagnets[i].magnetPosition.y - botMagnets[i].radius) )
 					{
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, Vector3(LEVELWIDTH, LEVELHEIGHT / 2, 0));
-							ship.shipPos += distanceVec * 0.0005f;
+							//ship.shipPos += distanceVec * 0.0005f;
 							continue;
 					}
 
-					if ((topMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - topMagnets[i].magnetPosition.y)
-						< topMagnets[i].radius)
+					if ( ( (topMagnets[i].magnetPosition.x - ship.shipPos.x) * (topMagnets[i].magnetPosition.x - ship.shipPos.x) )
+						+ ( (ship.shipPos.y - topMagnets[i].magnetPosition.y) * (ship.shipPos.y - topMagnets[i].magnetPosition.y) )
+						< (topMagnets[i].radius * topMagnets[i].radius) )
 					{ 
 						//move ship based on polarity
 						if (ship.GetPolarity() != topMagnets[i].magnetPolarity)
 						{
-							distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+							/*distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
 							if (abs(distance) < 15)
 								continue;
 
@@ -459,12 +504,18 @@ int main(void)
 								force = 0.07;
 							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
 							if (!collide)
-								ship.shipPos += distanceVec * (force);
+								ship.shipPos += distanceVec * (force);*/
+							ApplyForces(topMagnets[i], ship);
+							ship.SetxSpeed(ship.GetSpeedX() + (ship.GetxForce() / ship.GetMass()));
+							ship.SetySpeed(ship.GetSpeedY() + (ship.GetyForce() / ship.GetMass()));
+
+							ship.shipPos.x += ship.GetSpeedX();
+							ship.shipPos.y += ship.GetSpeedY();
 						}
 					}
 					else 
 					{
-					    distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+					    /*distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
 					    force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
 						if (force < 0.007)
 							force = 0.007;
@@ -472,7 +523,13 @@ int main(void)
 							force = 0.07;
 						Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
 						if (!collide)
-							ship.shipPos -= distanceVec * force;
+							ship.shipPos -= distanceVec * force;*/
+						ApplyForces(topMagnets[i], ship);
+						ship.SetxSpeed(ship.GetSpeedX() + (ship.GetxForce() / ship.GetMass()));
+						ship.SetySpeed(ship.GetSpeedY() + (ship.GetyForce() / ship.GetMass()));
+
+						ship.shipPos.x -= ship.GetSpeedX();
+						ship.shipPos.y -= ship.GetSpeedY();
 					}
 					#pragma endregion
 
@@ -511,7 +568,28 @@ int main(void)
 					}
 					#pragma endregion
 				}
+				#pragma endregion
 
+				#pragma region Move Screen
+				if (ship.shipPos.x > SCREENWIDTH / 2)
+				{
+					currentX += ship.GetSpeed();
+					if (currentX >= ship.shipPos.x - 300)
+						currentX = ship.shipPos.x - 300;						
+				}
+				else if (ship.shipPos.x < currentX + (SCREENWIDTH / 2))
+				{
+					if (currentX <= 0)
+						currentX = 0;
+					else
+						currentX = ship.shipPos.x - 300;
+				}
+
+				if (LEVELWIDTH - (SCREENWIDTH / 2) < currentX)
+					currentX = LEVELWIDTH - (SCREENWIDTH / 2);
+				#pragma endregion				
+
+				#pragma region Apply Input
 				if(keys[UP])
 					ship.MoveShipUp();
 				if(keys[DOWN])
@@ -546,71 +624,25 @@ int main(void)
 				}
 				if (gameManager.GetGameState() != PLAYING)
 					continue;
+				#pragma endregion
 
-				if (ship.shipPos.y < 190)
-				{
-					for (int i = 0; i < NUM_POINTS; i++)
-					{
-						if (ship.shipPos.x > topPoints[i + 1].x)
-							continue;
-						if (ship.shipPos.x < topPoints[i].x)
-							continue;
-						
-						collide = CheckCollisionsTop(ship, topPoints[i], topPoints[i + 1]);
-					}
-				}
-				else if (ship.shipPos.y > SCREENHEIGHT / 2 + 60)
-				{
-					for (int i = 0; i < NUM_POINTS; i++)
-					{
-						if (ship.shipPos.x > bottomPoints[i + 1].x)
-							continue;
-						if (ship.shipPos.x < bottomPoints[i].x)
-							continue;
-						collide = CheckCollisionsBottom(ship, bottomPoints[i], bottomPoints[i + 1]);
-					}
-				}
-				
-				for (int i = 0; i < NUM_OBSTACLES; i++)
-				{
-					if (shipBoundingBox.x1 > obstacleBoxes[i].x2)
-						continue;
-					if (shipBoundingBox.x2 < obstacleBoxes[i].x1)
-						continue;
-
-					collideObstacle = CheckObstacleCollision(shipBoundingBox, obstacleBoxes[i]);
-				}
-				
+				#pragma region Update Score
 				timeDelay += 0.1f;
 				if (timeDelay >= timeDelayLimit)
 				{
 					gameScore.UpdateScoreCounter(SCORE_INCREMENT);
 					timeDelay = 0.0f;
 				}
+				#pragma endregion
 
-				if (ship.shipPos.x > SCREENWIDTH / 2)
-				{
-					currentX += ship.GetSpeed();
-					if (currentX >= ship.shipPos.x - 300)
-						currentX = ship.shipPos.x - 300;						
-				}
-				else if (ship.shipPos.x < currentX + (SCREENWIDTH / 2))
-				{
-					if (currentX <= 0)
-						currentX = 0;
-					else
-						currentX = ship.shipPos.x - 300;
-				}
-
-				if (LEVELWIDTH - (SCREENWIDTH / 2) < currentX)
-					currentX = LEVELWIDTH - (SCREENWIDTH / 2);
-
-				if (collide || collideObstacle)
+				#pragma region Restart Level Upon Collision
+				/*if (collide || collideObstacle)
 				{
 					gameScore = 0;
 					ship.shipPos.x = 20;
 					ship.shipPos.y = SCREENHEIGHT / 2;
-				}
+				}*/
+				#pragma endregion
 			}
 			#pragma endregion
 
@@ -708,9 +740,9 @@ int main(void)
 				ConnectPointsBottom(bottomPoints);
 				
 				
-					al_draw_textf(font, al_map_rgb(255, 255, 110), currentX + 75, 30, 0, "Force = %g", force);
+				al_draw_textf(font, al_map_rgb(255, 255, 110), currentX + 75, 30, 0, "Force = %g", force);
 				
-					al_draw_textf(font, al_map_rgb(255,255,100), currentX + 75, 60, 0, "Distance = %g", distance);
+				al_draw_textf(font, al_map_rgb(255,255,100), currentX + 75, 60, 0, "Distance = %g", distance);
 
 				if (collide)
 				{
@@ -755,7 +787,9 @@ int main(void)
 					gameManager.SetGameState(MAINMENU);
 				else
 				{
-					al_draw_tinted_bitmap(victoryFlash, al_map_rgba_f(255 * alphaValue, 255 * alphaValue, 255 * alphaValue, alphaValue), 0, 0, 0);
+					//al_draw_text(font, al_map_rgb(405, 120, 200), currentX + 200, SCREENHEIGHT / 2, 0, "V I C T O R Y");
+					al_draw_tinted_bitmap(victoryFlash, al_map_rgba_f(255 * alphaValue, 255 * alphaValue, 255 * alphaValue, alphaValue), currentX, 0, 0);
+					//al_draw_tinted_bitmap(victoryFlash, al_map_rgba_f(255 * alphaValue, 255 * alphaValue, 255 * alphaValue, alphaValue), 0, 0, 0);
 				}
 			}
 
@@ -766,7 +800,7 @@ int main(void)
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(0,0,0));
 		}
-#pragma endregion
+		#pragma endregion
 	}
 
 	#pragma endregion
@@ -1031,7 +1065,7 @@ void DrawMagnets(Magnet magnets[], Magnet magnetsBot[])
 		if (magnetsBot[i].magnetPolarity == POSITIVE)
 			al_draw_filled_rectangle(magnetsBot[i].magnetPosition.x, magnetsBot[i].magnetPosition.y, magnetsBot[i].magnetPosition.x + 20, magnetsBot[i].magnetPosition.y + 20, al_map_rgb(255, 0, 0));
 		else 
-			al_draw_filled_rectangle(magnets[i].magnetPosition.x, magnets[i].magnetPosition.y, magnets[i].magnetPosition.x + 20, magnets[i].magnetPosition.y + 20, al_map_rgb(255,255,255));
+			al_draw_filled_rectangle(magnetsBot[i].magnetPosition.x, magnetsBot[i].magnetPosition.y, magnetsBot[i].magnetPosition.x + 20, magnetsBot[i].magnetPosition.y + 20, al_map_rgb(255,255,255));
 	}
 }
 
@@ -1053,7 +1087,7 @@ void SetupMagnetsTop()
 		if (i % 2 == 0)
 			polaricCharge = !polaricCharge;
 		
-		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 200, 0.9f, polaricCharge);
+		topMagnet->InitializeMagnet(i, GetMagnetLocationX(), GetMagnetLocationY(), 200, 0.09f, polaricCharge);
 		topMagnets[i] = *topMagnet;
 	}
 
@@ -1183,7 +1217,6 @@ bool CheckCollisionsBottom(SpaceShip &ship, Vector3 pointOne, Vector3 pointTwo)
 	return false;
 }
 
-
 bool CheckObstacleCollision(BoundingBox ship, BoundingBox obstacle)
 {
   /*return (abs(ship.x1 - obstacle.x1) * 2 < (ship.x2 + obstacle.x2)) &&
@@ -1284,6 +1317,30 @@ void SpaceMagnets(Magnet m[], int size)
 			}
 		}
 	}
+}
+
+void ResetForce(SpaceShip &ship)
+{
+	ship.SetxForce(0);
+	ship.SetyForce(0);
+}
+
+void ApplyForces(Magnet m, SpaceShip &ship)
+{
+	float dX = m.magnetPosition.x - ship.shipPos.x;
+	float dY = m.magnetPosition.y - ship.shipPos.y;
+
+	float distance = Polaris::Get_Distance(m.magnetPosition, ship.shipPos);
+	float force = (-ship.GetCharge() - m.force) / (distance * distance);
+
+	if (force > 1000)
+		force = 1000;
+
+	float xDirectionForce = force * (dX / distance);
+	float yDirectionForce = force * (dY / distance);
+
+	ship.SetxForce(ship.GetxForce() * xDirectionForce);
+	ship.SetyForce(ship.GetyForce() * yDirectionForce);
 }
 
 #pragma endregion

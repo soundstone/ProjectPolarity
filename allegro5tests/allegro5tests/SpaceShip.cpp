@@ -5,7 +5,7 @@ SpaceShip::SpaceShip()
 {
 }
 
-SpaceShip::SpaceShip(PolarisEngine::Vector3 pos, int widthOfShip, int heightOfShip, float spd, int life, bool polaricCharge)
+SpaceShip::SpaceShip(PolarisEngine::Vector3 pos, int widthOfShip, int heightOfShip, float spd, int life, bool polaricCharge, float chargeValue, float massValue)
 {
 	shipPos = pos;
 	width = widthOfShip;
@@ -14,6 +14,12 @@ SpaceShip::SpaceShip(PolarisEngine::Vector3 pos, int widthOfShip, int heightOfSh
 	lives = life;
 	polarity = polaricCharge;
 	score = 0;
+	charge = chargeValue;
+	mass = massValue;
+	xSpeed = 0;
+	ySpeed = 0;
+	xForce = 0;
+	yForce = 0;
 	
 	buttonTimer = 0.0f;
 }

@@ -11,8 +11,7 @@ class SpaceShip
 public:
 
 	SpaceShip();
-	SpaceShip(PolarisEngine::Vector3 pos, int widthOfShip, int heightOfShip, float spd, int life, bool polaricCharge);
-
+	SpaceShip(PolarisEngine::Vector3 pos, int widthOfShip, int heightOfShip, float spd, int life, bool polaricCharge, float chargeValue, float massValue);
 
 	int GetNumberOfLives() const 
 	{ 
@@ -34,11 +33,51 @@ public:
 	{
 		return polarity;
 	}
-	float GetSpeed() const 
+	float GetSpeedX() const 
 	{
-		return speed; 
+		return xSpeed; 
+	}
+	float GetSpeedY() const
+	{
+		return ySpeed;
+	}
+	float GetSpeed() const
+	{
+		return speed;
+	}
+	float GetCharge() const
+	{
+		return charge;
+	}
+	float GetxForce() const
+	{
+		return xForce;
+	}
+	float GetyForce() const
+	{
+		return yForce;
+	}
+	float GetMass() const
+	{
+		return mass;
 	}
 
+	void SetxForce(float value)
+	{
+		xForce = value;
+	}
+	void SetyForce(float value)
+	{
+		yForce = value;
+	}
+	void SetxSpeed(float value)
+	{
+		xSpeed = value;
+	}
+	void SetySpeed(float value)
+	{
+		ySpeed = value;
+	}
 
 	void MoveShipUp();
 	void MoveShipDown();
@@ -73,12 +112,26 @@ private:
 
 	
 	int lives;
+	//used for forced input movement.
 	float speed;
 	int width;
 	int height;
 	int score;
 	bool polarity;
 	float buttonTimer;
+
+	
+	//xSpeed and ySpeed are used for force calculations from magnet's influence.
+	float xSpeed;
+	float ySpeed;
+
+	//xForce and yForce are used for force calculations from magnet's influence. Ship will be moved by these amounts while in field.
+	float xForce;
+	float yForce;
+
+	//charge and mass are used in magnet force calculations while in magnetic field.
+	float charge;
+	float mass;
 
 	static const int SCREENHEIGHT = 500;
 	static const int SCREENWIDTH = 1280;
