@@ -16,8 +16,20 @@ through the tunnel. Each playthrough would be different and movement manuevers w
 played the current tunnel. 
 
 ==========================================
-Current Version: 1.06 ALPHA (2/28/2014)
+Current Version: 1.07 ALPHA (3/14/2014)
 ==========================================
+
+Changes in this version include:
+- Changed total level width from 4000 to 4000 - SCREENWIDTH / 2 to allow for victory graphic to display properly.
+- Shaved off more NUM_POINTS, NUM_MANGETS, and NUM_OBSTACLES to allot for smaller level size.
+- Implemented sorting algorithm for magnets and obstacles
+- Finalized spacing algorithm for magnets and obstacles
+- Finalized level flash in polaric colors for victory screen
+
+==================
+Previoius Versions
+==================
+- 1.06 ALPHA (2/28/2014)
 
 Changes in this version include: 
 - Changed total level width from 8100 to 4000 to allow for older pcs to play. 
@@ -28,9 +40,6 @@ Changes in this version include:
 - Implemented draft magnetic force eminating from magnets to pull and push player avatar. 
 - Implemented draft level flash in polaric colors for victory screen. 
 
-==================
-Previoius Versions
-==================
 - 1.05 ALPHA (2/9/2014)
 
 Changes in this version finish up pre-alpha goals. Camera is implemented with full scrolling both left and right. NUM_POINTS for both top and bottom of tunnel have been shaved to fit maximum bitmap size for level. Collision Detection works perfectly throughout level for both top and bottom of tunnel. 
