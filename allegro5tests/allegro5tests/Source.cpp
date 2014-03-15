@@ -47,6 +47,7 @@ Magnet topMagnets[NUM_MAGNETS];
 Magnet botMagnets[NUM_MAGNETS];
 PointCharge *topPointCharges[NUM_MAGNETS];
 PointCharge *botPointCharges[NUM_MAGNETS];
+PointCharge endMagnetCharge(LEVELWIDTH, LEVELHEIGHT / 2, 10253.4);
 bool inMagneticFieldTop;
 bool inMagneticFieldBot;
 
@@ -126,6 +127,7 @@ void SpaceObstacles(Vector3 o[], int size);
 void Sort(Vector3 arr[], int size);
 void ResetForce(SpaceShip &ship);
 void ApplyForces(Magnet magnets, SpaceShip &ship);
+void ApplyLevelForce(PointCharge c, SpaceShip &ship);
 void DrawScore(float score, int currentX);
 
 //==========================================================================================
@@ -181,6 +183,7 @@ int main(void)
 
 	int currentX = 0;
 	int currentY = 0;
+
 	#pragma endregion
 
 	#pragma region ALLEGRO Initialization
@@ -476,99 +479,114 @@ int main(void)
 				#pragma region Magnet Force Checks
 				for ( int i = 0; i < NUM_MAGNETS; i++)
 				{
-					#pragma region TopMagnets
+					//Global force continually pulls the player towards the end of the level.
+					#pragma region Apply Global Force 
+					
+					//if the ship is too far from other magnets skip them this update
+					if ( (ship.shipPos.x < topMagnets[i].magnetPosition.x - (topMagnets[i].radius + 100) ) ||
+						(ship.shipPos.x > topMagnets[i].magnetPosition.x + (topMagnets[i].radius + 100) ) )
+						continue;
+
 					if ( ((ship.shipPos.x < topMagnets[i].magnetPosition.x - topMagnets[i].radius) || 
-						 (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius) &&
-						 (ship.shipPos.y > topMagnets[i].magnetPosition.y + topMagnets[i].radius)) ||
+						 (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius))) 
+					{
+						 if (ship.shipPos.y < topMagnets[i].magnetPosition.y + topMagnets[i].radius) /*||
 								( (ship.shipPos.x < botMagnets[i].magnetPosition.x - botMagnets[i].radius) || 
 								(ship.shipPos.x > botMagnets[i].magnetPosition.x + botMagnets[i].radius) ) &&
-								(ship.shipPos.y < botMagnets[i].magnetPosition.y - botMagnets[i].radius) )
-					{
-							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, Vector3(LEVELWIDTH, LEVELHEIGHT / 2, 0));
-							//ship.shipPos += distanceVec * 0.0005f;
-							continue;
-					}
-
-					if ( ( (topMagnets[i].magnetPosition.x - ship.shipPos.x) * (topMagnets[i].magnetPosition.x - ship.shipPos.x) )
-						+ ( (ship.shipPos.y - topMagnets[i].magnetPosition.y) * (ship.shipPos.y - topMagnets[i].magnetPosition.y) )
-						< (topMagnets[i].radius * topMagnets[i].radius) )
-					{ 
-						//move ship based on polarity
-						if (ship.GetPolarity() != topMagnets[i].magnetPolarity)
+								(ship.shipPos.y < botMagnets[i].magnetPosition.y - botMagnets[i].radius) )*/
 						{
-							/*distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
-							if (abs(distance) < 15)
-								continue;
-
-							force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
-							if (force < 0.007)
-								force = 0.007;
-							else if (force > 0.07)
-								force = 0.07;
-							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
-							if (!collide)
-								ship.shipPos += distanceVec * (force);*/
-							ApplyForces(topMagnets[i], ship);
+							ApplyLevelForce(endMagnetCharge, ship);
 							ship.SetxSpeed(ship.GetSpeedX() + (ship.GetxForce() / ship.GetMass()));
 							ship.SetySpeed(ship.GetSpeedY() + (ship.GetyForce() / ship.GetMass()));
-
 							ship.shipPos.x += ship.GetSpeedX();
 							ship.shipPos.y += ship.GetSpeedY();
+							continue;
 						}
-					}
-					else 
-					{
-					    /*distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
-					    force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
-						if (force < 0.007)
-							force = 0.007;
-						else if (force > 0.07)
-							force = 0.07;
-						Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
-						if (!collide)
-							ship.shipPos -= distanceVec * force;*/
-						ApplyForces(topMagnets[i], ship);
-						ship.SetxSpeed(ship.GetSpeedX() + (ship.GetxForce() / ship.GetMass()));
-						ship.SetySpeed(ship.GetSpeedY() + (ship.GetyForce() / ship.GetMass()));
-
-						ship.shipPos.x -= ship.GetSpeedX();
-						ship.shipPos.y -= ship.GetSpeedY();
 					}
 					#pragma endregion
 
-					#pragma region Bottom Magnets
-					if ((botMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - botMagnets[i].magnetPosition.y)
-						< botMagnets[i].radius)
-					{ 
-						//move ship based on polarity
-						if (ship.GetPolarity() != botMagnets[i].magnetPolarity)
-						{
-							distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
-							if (abs(distance) < 15)
-								continue;
+					
+					#pragma region TopMagnets
+					//if ( ( (topMagnets[i].magnetPosition.x - ship.shipPos.x) * (topMagnets[i].magnetPosition.x - ship.shipPos.x) )
+					//	+ ( (ship.shipPos.y - topMagnets[i].magnetPosition.y) * (ship.shipPos.y - topMagnets[i].magnetPosition.y) )
+					//	< (topMagnets[i].radius * topMagnets[i].radius) )
+					//{ 
+					//	//move ship based on polarity
+					//	if (ship.GetPolarity() != topMagnets[i].magnetPolarity)
+					//	{
+					//		/*distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+					//		if (abs(distance) < 15)
+					//			continue;
 
-							force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
-							if (force < 0.007)
-								force = 0.007;
-							else if (force > 0.07)
-								force = 0.07;
-							Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
-							if (!collide)
-								ship.shipPos += distanceVec * (force);
-						}
-					}
-					else 
-					{
-					    distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
-					    force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
-						if (force < 0.007)
-							force = 0.007;
-						else if (force > 0.07)
-							force = 0.07;
-						Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
-						if (!collide)
-							ship.shipPos -= distanceVec * force;
-					}
+					//		force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+					//		if (force < 0.007)
+					//			force = 0.007;
+					//		else if (force > 0.07)
+					//			force = 0.07;
+					//		Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
+					//		if (!collide)
+					//			ship.shipPos += distanceVec * (force);*/
+					//		ApplyForces(topMagnets[i], ship);
+					//		ship.SetxSpeed(ship.GetSpeedX() + (ship.GetxForce() / ship.GetMass()));
+					//		ship.SetySpeed(ship.GetSpeedY() + (ship.GetyForce() / ship.GetMass()));
+
+					//		ship.shipPos.x += ship.GetSpeedX();
+					//		ship.shipPos.y += ship.GetSpeedY();
+					//	}
+					//}
+					//else 
+					//{
+					//    /*distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+					//    force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
+					//	if (force < 0.007)
+					//		force = 0.007;
+					//	else if (force > 0.07)
+					//		force = 0.07;
+					//	Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
+					//	if (!collide)
+					//		ship.shipPos -= distanceVec * force;*/
+					//	ApplyForces(topMagnets[i], ship);
+					//	ship.SetxSpeed(ship.GetSpeedX() + (ship.GetxForce() / ship.GetMass()));
+					//	ship.SetySpeed(ship.GetSpeedY() + (ship.GetyForce() / ship.GetMass()));
+
+					//	ship.shipPos.x -= ship.GetSpeedX();
+					//	ship.shipPos.y -= ship.GetSpeedY();
+					//}
+					#pragma endregion
+
+					#pragma region Bottom Magnets
+					//if ((botMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - botMagnets[i].magnetPosition.y)
+					//	< botMagnets[i].radius)
+					//{ 
+					//	//move ship based on polarity
+					//	if (ship.GetPolarity() != botMagnets[i].magnetPolarity)
+					//	{
+					//		distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
+					//		if (abs(distance) < 15)
+					//			continue;
+
+					//		force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
+					//		if (force < 0.007)
+					//			force = 0.007;
+					//		else if (force > 0.07)
+					//			force = 0.07;
+					//		Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
+					//		if (!collide)
+					//			ship.shipPos += distanceVec * (force);
+					//	}
+					//}
+					//else 
+					//{
+					//    distance = Polaris::Get_Distance(ship.shipPos, botMagnets[i].magnetPosition);
+					//    force = Polaris::Get_Force(shipPointCharge.charge, botMagnets[i].force, distance);
+					//	if (force < 0.007)
+					//		force = 0.007;
+					//	else if (force > 0.07)
+					//		force = 0.07;
+					//	Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
+					//	if (!collide)
+					//		ship.shipPos -= distanceVec * force;
+					//}
 					#pragma endregion
 				}
 				#pragma endregion
@@ -655,6 +673,7 @@ int main(void)
 			}
 		}
 		#pragma endregion
+
 
 		#pragma region Paused
 		else if (gameManager.GetGameState() == PAUSED)
@@ -1378,8 +1397,28 @@ void ApplyForces(Magnet m, SpaceShip &ship)
 	float xDirectionForce = force * (dX / distance);
 	float yDirectionForce = force * (dY / distance);
 
-	ship.SetxForce(ship.GetxForce() * xDirectionForce);
-	ship.SetyForce(ship.GetyForce() * yDirectionForce);
+	ship.SetxForce(ship.GetxForce() + xDirectionForce);
+	ship.SetyForce(ship.GetyForce() + yDirectionForce);
+}
+
+void ApplyLevelForce(PointCharge c, SpaceShip &ship)
+{
+	float dX = c.pos.x - ship.shipPos.x;
+	float dY = c.pos.y - ship.shipPos.y;
+
+	float distance = Polaris::Get_Distance(c.pos, ship.shipPos);
+	if (distance < 0)
+		distance *= -1;
+	float force = -(ship.GetCharge() - c.charge) / (distance * distance);
+
+	if (force > 1000)
+		force = 1000;
+
+	float xDirectionForce = force * (dX / distance);
+	float yDirectionForce = force * (dY / distance);
+
+	ship.SetxForce(ship.GetxForce() + xDirectionForce);
+	ship.SetyForce(ship.GetyForce() + yDirectionForce);
 }
 
 #pragma endregion
