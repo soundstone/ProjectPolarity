@@ -31,6 +31,7 @@ const int SCREENHEIGHT = 500;
 
 ALLEGRO_FONT *font;
 ALLEGRO_SAMPLE *bgMusic = NULL;
+ALLEGRO_SAMPLE *crash = NULL;
 
 //level dimensions
 const int LEVELWIDTH = 4000 - SCREENWIDTH / 2;
@@ -231,6 +232,10 @@ int main(void)
 
 	bgMusic = al_load_sample("bgMusic.ogg");
 	if (!bgMusic)
+		return -1;
+
+	crash = al_load_sample("crash.ogg");
+	if (!crash)
 		return -1;
 
 	//srand(time(NULL));
@@ -463,6 +468,8 @@ int main(void)
 							continue;
 						
 						collide = CheckCollisionsTop(ship, topPoints[i], topPoints[i + 1]);
+						if (collide)
+							al_play_sample(crash, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 					}
 				}
 				else if (ship.shipPos.y > SCREENHEIGHT / 2 + 60)
@@ -474,6 +481,8 @@ int main(void)
 						if (ship.shipPos.x < bottomPoints[i].x)
 							continue;
 						collide = CheckCollisionsBottom(ship, bottomPoints[i], bottomPoints[i + 1]);
+						if (collide)
+							al_play_sample(crash, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 					}
 				}
 				#pragma endregion
@@ -487,6 +496,8 @@ int main(void)
 						continue;
 
 					collideObstacle = CheckObstacleCollision(shipBoundingBox, obstacleBoxes[i]);
+					if (collideObstacle)
+						al_play_sample(crash, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 				}
 				#pragma endregion
 
