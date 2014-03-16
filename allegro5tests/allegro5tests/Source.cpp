@@ -3,6 +3,8 @@
 #include <allegro5\allegro_font.h>
 #include <allegro5\allegro_ttf.h>
 #include <allegro5\allegro_image.h>
+#include <allegro5\allegro_audio.h>
+#include <allegro5\allegro_acodec.h>
 #include <stdio.h>
 #include <math.h>
 #include <string>
@@ -28,6 +30,7 @@ const int SCREENWIDTH = 1280;
 const int SCREENHEIGHT = 500;
 
 ALLEGRO_FONT *font;
+ALLEGRO_SAMPLE *bgMusic = NULL;
 
 //level dimensions
 const int LEVELWIDTH = 4000 - SCREENWIDTH / 2;
@@ -206,6 +209,10 @@ int main(void)
 		return -1;
 
 	al_init_primitives_addon();
+	al_install_audio();
+	al_init_acodec_addon();
+	al_reserve_samples(2); //reserve audio samples 1 for song, 1 for collision sound fx
+
 	al_install_keyboard();
 	al_init_font_addon();
 	al_init_ttf_addon();
@@ -220,6 +227,10 @@ int main(void)
 
 	victoryFlash = al_load_bitmap("polaricFlash.png");
 	if (!victoryFlash)
+		return -1;
+
+	bgMusic = al_load_sample("bgMusic.ogg");
+	if (!bgMusic)
 		return -1;
 
 	//srand(time(NULL));
@@ -265,6 +276,9 @@ int main(void)
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 	al_register_event_source(event_queue, al_get_display_event_source(display));
+
+	//play bg music
+	al_play_sample(bgMusic, 1, 0, 1, ALLEGRO_PLAYMODE_LOOP, NULL);
 
 	al_start_timer(timer);
 	#pragma endregion
@@ -824,6 +838,7 @@ int main(void)
 	#pragma endregion
 
 	#pragma region ALLEGRO Cleanup
+	al_destroy_sample(bgMusic);
 	al_destroy_timer(timer);
 	al_destroy_display(display);
 	return 0;
