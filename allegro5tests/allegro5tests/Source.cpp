@@ -4,6 +4,8 @@
 #include <allegro5\allegro_ttf.h>
 #include <allegro5\allegro_image.h>
 #include <stdio.h>
+#include <allegro5\allegro_audio.h>
+#include <allegro5\allegro_acodec.h>
 #include <math.h>
 #include <string>
 #include "Logger.h"
@@ -36,6 +38,16 @@ const int LEVELHEIGHT = 500;
 //Camera position
 int cameraX = 0;
 int cameraY = 0;
+
+//Sound fx
+
+//ALLEGRO_SAMPLE *sample = al_load_sample("magnetic.wav");
+ 
+
+//here
+
+
+
 
 //how many points and spacing between points for lines drawn
 const int PLOT_INTERVAL = 36;
@@ -170,6 +182,17 @@ int main(void)
 	int checkIntro = 0;
 	double frameTime;
 	
+	//SOUND variables
+	 
+	 
+	//ALLEGRO_SAMPLE *sample = NULL;
+	/*if(!sample)
+	{
+		printf("Audio clip sample not loaded!\n");
+		return -1; 
+	}*/
+	//here
+
 	//Setup game starting score
 	ScoreCounter gameScore(0);
 
@@ -201,6 +224,29 @@ int main(void)
 
 	if(!display)
 		return -1;
+
+	//here
+	al_install_audio();
+	if(!al_install_audio())
+	{
+		return -1; 
+	}
+	al_init_acodec_addon();
+	//sample = al_load_sample("magnetic.wav");
+	al_reserve_samples(1);
+	ALLEGRO_SAMPLE *sample = al_load_sample("magnetic.wav");
+	//sample = al_load_sample("magnetic.wav");
+	if(!sample)
+	{
+		printf("Audio clip sample not loaded!\n");
+		system("pause"); 
+		return -1; 
+	}
+	if(!al_load_sample)
+	{
+		printf("loading not correct"); 
+		return -1; 
+	}
 
 	al_init_primitives_addon();
 	al_install_keyboard();
@@ -751,10 +797,15 @@ int main(void)
 				{
 					al_draw_text(font, al_map_rgb(255, 255, 110), currentX + (SCREENWIDTH / 2), SCREENHEIGHT / 2, 0, "COLLISION ");
 					al_draw_textf(font, al_map_rgb(255,100,100), currentX + 20, 50, 0, "ShipPos: ( %g, %g, %g)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
+					//here
+					
+					al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+					
 				}
 
 				if (collideObstacle)
 				{
+					al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 					al_draw_text(font, al_map_rgb(255,255,255), currentX + 200, 300, 0, "Collide obstacles");
 				}
 
@@ -807,6 +858,8 @@ int main(void)
 	#pragma region ALLEGRO Cleanup
 	al_destroy_timer(timer);
 	al_destroy_display(display);
+	al_destroy_sample(sample);
+	//here
 	return 0;
 	#pragma endregion
 
