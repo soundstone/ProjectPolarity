@@ -43,7 +43,7 @@ int cameraY = 0;
 
 //ALLEGRO_SAMPLE *sample = al_load_sample("magnetic.wav");
  
-
+ALLEGRO_SAMPLE *sample = NULL;
 //here
 
 
@@ -234,19 +234,14 @@ int main(void)
 	al_init_acodec_addon();
 	//sample = al_load_sample("magnetic.wav");
 	al_reserve_samples(1);
-	ALLEGRO_SAMPLE *sample = al_load_sample("magnetic.wav");
-	//sample = al_load_sample("magnetic.wav");
-	if(!sample)
+	//ALLEGRO_SAMPLE *sample = al_load_sample("magnetic.wav");
+	sample = al_load_sample("magnetic.wav");
+	/*if(!sample)
 	{
 		printf("Audio clip sample not loaded!\n");
 		system("pause"); 
 		return -1; 
-	}
-	if(!al_load_sample)
-	{
-		printf("loading not correct"); 
-		return -1; 
-	}
+	}*/
 
 	al_init_primitives_addon();
 	al_install_keyboard();
