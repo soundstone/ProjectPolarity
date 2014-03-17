@@ -213,8 +213,8 @@ int main(void)
 	al_init_primitives_addon();
 	al_install_audio();
 	al_init_acodec_addon();
-	al_reserve_samples(2); //reserve audio samples 1 for song, 1 for collision sound fx
-
+	//reserve audio samples 1 for song, 1 for collision sound fx
+	al_reserve_samples(2); 
 	al_install_keyboard();
 	al_init_font_addon();
 	al_init_ttf_addon();
@@ -227,22 +227,22 @@ int main(void)
 	if (!splashScreen)
 		return -1;
 
+	//Image for victory screen fade in.
 	victoryFlash = al_load_bitmap("polaricFlash.png");
 	if (!victoryFlash)
 		return -1;
 
+	//Background music for demo
 	bgMusic = al_load_sample("bgMusic.ogg");
 	if (!bgMusic)
 		return -1;
 
+	//Sound fx for collisions.
 	crash = al_load_sample("crash.ogg");
 	if (!crash)
 		return -1;
 
 	srand(time(NULL));
-	/*
-		Seed set to 64789 for testing purposes.
-	*/
 	//srand(64789);
 	#pragma endregion
 
@@ -260,7 +260,8 @@ int main(void)
 
 	#pragma region GameInitialize
 	//Font used for Debug display
-	font = al_load_font("arial.ttf", 16, 0);
+	//font = al_load_font("arial.ttf", 16, 0);
+	font = al_load_font("QuartzMS.ttf", 24, 0);
 	
 	//Initialize the magnets on the map
 	SetupMagnetsTop();
@@ -284,7 +285,7 @@ int main(void)
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 
 	//play bg music
-	al_play_sample(bgMusic, 1, 0, 1, ALLEGRO_PLAYMODE_LOOP, NULL);
+	al_play_sample(bgMusic, 1, 0, 1, ALLEGRO_PLAYMODE_LOOP, 0);
 
 	al_start_timer(timer);
 	#pragma endregion
@@ -455,6 +456,7 @@ int main(void)
 				shipBoundingBox.y1 = ship.shipPos.y;
 				shipBoundingBox.y2 = ship.shipPos.y + ship.GetHeight();
 
+				//Reset ship's force to 0 every frame.
 				ResetForce(ship);
 				#pragma endregion
 				
@@ -511,26 +513,25 @@ int main(void)
 						(ship.shipPos.x > topMagnets[i].magnetPosition.x + (topMagnets[i].radius + 100) ) )
 						continue;
 
+					//Test if ship is within circles bounding box. Tests Left / Right.
 					if ( ((ship.shipPos.x < topMagnets[i].magnetPosition.x - topMagnets[i].radius) || 
 						 (ship.shipPos.x > topMagnets[i].magnetPosition.x + topMagnets[i].radius))) 
 					{
+						//Test if ship is within circles bounding box. Test Up / Down.
 						 if (ship.shipPos.y < topMagnets[i].magnetPosition.y + topMagnets[i].radius) 
-						{
-							inMagneticFieldTop = IsInCircle(ship, topMagnets[i]);			
+						{	
 							{
-								//top magnet influence 
 								//move ship based on polarity
 								if (ship.GetPolarity() != topMagnets[i].magnetPolarity)
 								{
 									distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
-									if (abs(distance) < 15)
-										continue;
-
+									
 									force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
 									if (force < 0.007)
 										force = 0.007;
 									else if (force > 0.07)
 										force = 0.07;
+
 									Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
 									if (!collide)
 										ship.shipPos += distanceVec * (force);
@@ -538,11 +539,13 @@ int main(void)
 								else 
 								{
 								    distance = Polaris::Get_Distance(ship.shipPos, topMagnets[i].magnetPosition);
+
 								    force = Polaris::Get_Force(shipPointCharge.charge, topMagnets[i].force, distance);
 									if (force < 0.007)
 										force = 0.007;
 									else if (force > 0.07)
 										force = 0.07;
+
 									Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
 									if (!collide)
 										ship.shipPos -= distanceVec * force;
@@ -555,13 +558,15 @@ int main(void)
 				//bottom magnets check
 				for (int i = 0; i < NUM_MAGNETS; i++)
 				{
+					//if the ship is too far from other magnets skip them this update
 					if ( (ship.shipPos.x < botMagnets[i].magnetPosition.x - (botMagnets[i].radius + 100) ) ||
 						(ship.shipPos.x > botMagnets[i].magnetPosition.x + (botMagnets[i].radius + 100) ) )
 						continue;
-
+					//Test is ship is within circle's bounding box left / right
 					if ( ((ship.shipPos.x < botMagnets[i].magnetPosition.x - botMagnets[i].radius) || 
 						 (ship.shipPos.x > botMagnets[i].magnetPosition.x + botMagnets[i].radius))) 
 					{
+						//Test ship is within circle's bounding box up / down
 						 if (ship.shipPos.y < botMagnets[i].magnetPosition.y + botMagnets[i].radius) 
 						 {
 							 if (ship.GetPolarity() != botMagnets[i].magnetPolarity)
@@ -596,12 +601,14 @@ int main(void)
 				}
 				#pragma endregion
 
+				#pragma region Apply Global Level Pull
 				ApplyLevelForce(endMagnetCharge, ship);
 				ship.SetxSpeed(ship.GetSpeedX() + (ship.GetxForce() / ship.GetMass()));
 				ship.SetySpeed(ship.GetSpeedY() + (ship.GetyForce() / ship.GetMass()));
 				ship.shipPos.x += ship.GetSpeedX();
 				ship.shipPos.y += ship.GetSpeedY();
-
+				#pragma endregion
+				
 				#pragma region Move Screen
 				if (ship.shipPos.x > SCREENWIDTH / 2)
 				{
@@ -668,12 +675,12 @@ int main(void)
 				#pragma endregion
 
 				#pragma region Restart Level Upon Collision
-				/*if (collide || collideObstacle)
+				if (collide || collideObstacle)
 				{
 					gameScore = 0;
 					ship.shipPos.x = 20;
 					ship.shipPos.y = SCREENHEIGHT / 2;
-				}*/
+				}
 				#pragma endregion
 			}
 			#pragma endregion
@@ -771,23 +778,18 @@ int main(void)
 				ConnectPointsTop(topPoints);
 				ConnectPointsBottom(bottomPoints);
 				
-				
-				al_draw_textf(font, al_map_rgb(255, 255, 110), currentX + 75, 30, 0, "Force = %g", force);
-				
-				al_draw_textf(font, al_map_rgb(255,255,100), currentX + 75, 60, 0, "Distance = %g", distance);
-
-				if (collide)
+				/*if (collide)
 				{
 					al_draw_text(font, al_map_rgb(255, 255, 110), currentX + (SCREENWIDTH / 2), SCREENHEIGHT / 2, 0, "COLLISION ");
 					al_draw_textf(font, al_map_rgb(255,100,100), currentX + 20, 50, 0, "ShipPos: ( %g, %g, %g)", ship.shipPos.x, ship.shipPos.y, ship.shipPos.z);
-				}
+				}*/
 
-				if (collideObstacle)
+				/*if (collideObstacle)
 				{
 					al_draw_text(font, al_map_rgb(255,255,255), currentX + 200, 300, 0, "Collide obstacles");
-				}
+				}*/
 
-				al_draw_textf(font, al_map_rgb(45, 120, 200), currentX + 20, SCREENHEIGHT - 100, 0, "currentX = %i", currentX);
+				//al_draw_textf(font, al_map_rgb(45, 120, 200), currentX + 20, SCREENHEIGHT - 100, 0, "currentX = %i", currentX);
 				al_draw_line(currentX, 10, currentX, SCREENHEIGHT, al_map_rgb(255,0,0), 3);
 				al_draw_line(LEVELWIDTH, 0, LEVELWIDTH, LEVELHEIGHT, al_map_rgb(0,0,255), 10);
 
@@ -1299,7 +1301,7 @@ Vector3 GetVectorDistance(Vector3 vectorOne, Vector3 vectorTwo)
 
 void DrawScore(float score, int currentX)
 {
-	al_draw_textf(font, al_map_rgb(145,58,83), currentX + (SCREENWIDTH - 100), SCREENHEIGHT - 30, 0, "Score: %g", score);
+	al_draw_textf(font, al_map_rgb(255,250,0), currentX + (SCREENWIDTH / 2), 20, 0, "Score: %g", score);
 }
 
 void SortMagnets(Magnet magnets[])
