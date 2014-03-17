@@ -43,7 +43,7 @@ int cameraY = 0;
 
 //how many points and spacing between points for lines drawn
 const int PLOT_INTERVAL = 36;
-const int NUM_POINTS = 120;
+const int NUM_POINTS = 130;
 
 //Magnet variables
 const int NUM_MAGNETS = 12;
@@ -239,11 +239,11 @@ int main(void)
 	if (!crash)
 		return -1;
 
-	//srand(time(NULL));
+	srand(time(NULL));
 	/*
 		Seed set to 64789 for testing purposes.
 	*/
-	srand(64789);
+	//srand(64789);
 	#pragma endregion
 
 	#pragma region LoggerInitialize
@@ -506,9 +506,6 @@ int main(void)
 				for ( int i = 0; i < NUM_MAGNETS; i++)
 				{
 					inMagneticFieldTop = false;
-					//Global force continually pulls the player towards the end of the level.
-					#pragma region Apply Global Force 
-					
 					//if the ship is too far from other magnets skip them this update
 					if ( (ship.shipPos.x < topMagnets[i].magnetPosition.x - (topMagnets[i].radius + 100) ) ||
 						(ship.shipPos.x > topMagnets[i].magnetPosition.x + (topMagnets[i].radius + 100) ) )
@@ -553,15 +550,6 @@ int main(void)
 							}
 						}
 					}
-					#pragma endregion
-
-					
-					#pragma region Bottom Magnets
-					//if ((botMagnets[i].magnetPosition.x - ship.shipPos.x) + (ship.shipPos.y - botMagnets[i].magnetPosition.y)
-					//	< botMagnets[i].radius)
-					//{ 
-						//move ship based on polarity
-						#pragma endregion
 				}
 
 				//bottom magnets check
@@ -696,7 +684,6 @@ int main(void)
 			}
 		}
 		#pragma endregion
-
 
 		#pragma region Paused
 		else if (gameManager.GetGameState() == PAUSED)
