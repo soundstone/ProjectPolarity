@@ -5,19 +5,29 @@ Polaris physics engine and game prototype Polarity
 
 Project Polarity - HISTORY
 
-Project Polarity started as an idea from a friend for a cool mechanic for a mobile game. It has over the years morphed and 
-conformed into many different things, latest of which was as an entry for my Senior Innovation Project at University of 
-Advancing Technology. The idea was to create a C++ library that supported physics based on magnetism and electro-magnetic
-force. The testing of this physics library would be demostrated with a game that featured magnetism as its core mechanic.
+Project Polarity started as an idea from a friend for a cool mechanic for a mobile game. It has over the years morphed and conformed into many different things, latest of which was as an entry for my Senior Innovation Project at University of Advancing Technology. 
+
+The idea was to create a C++ library that supported physics based on magnetism and electro-magnetic force. The testing of this physics library would be demostrated with a game that featured magnetism as its core mechanic.
+
 The duo were dubbed Polarity (game) and Polaris (physics library). 
   
 Polarity is a procedurally generated tunnel navigation game that uses magnetism to manipulate a player's avatar movement
-through the tunnel. Each playthrough would be different and movement manuevers would get harder the longer the player has
-played the current tunnel. 
+through the tunnel. Each playthrough would be different and movement manuevers would get harder the longer the player has played the current tunnel. 
 
 ==========================================
-Current Version: 1.07 ALPHA (3/14/2014)
+Current Version: 2.00 BETA (3/17/2014)
 ==========================================
+
+This version implemented background music to the demo, as well as collision sound fx. Each magnet now demonstrates a magnetic pull or push based on its radius. The overall level now increases speed over time to simulate more difficulty. Force calculations were reworked to include mass of player avatar for overall level pull. Player and score reset on collision to beginning of level. 
+
+Remaining Goals:
+- Remove debug code
+- Remove force input controls
+
+==================
+Previoius Versions
+==================
+- 1.07 ALPHA (3/14/2014)
 
 Changes in this version include:
 - Changed total level width from 4000 to 4000 - SCREENWIDTH / 2 to allow for victory graphic to display properly.
@@ -26,9 +36,6 @@ Changes in this version include:
 - Finalized spacing algorithm for magnets and obstacles
 - Finalized level flash in polaric colors for victory screen
 
-==================
-Previoius Versions
-==================
 - 1.06 ALPHA (2/28/2014)
 
 Changes in this version include: 
