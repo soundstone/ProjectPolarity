@@ -286,6 +286,9 @@ int main(void)
 
 	//play bg music
 	al_play_sample(bgMusic, 1, 0, 1, ALLEGRO_PLAYMODE_LOOP, 0);
+	
+	//start ship at a faster velocity.
+	ship.SetxSpeed(0.9f);
 
 	al_start_timer(timer);
 	#pragma endregion
@@ -680,6 +683,11 @@ int main(void)
 					gameScore = 0;
 					ship.shipPos.x = 20;
 					ship.shipPos.y = SCREENHEIGHT / 2;
+
+					ship.SetxForce(0);
+					ship.SetyForce(0);
+					ship.SetxSpeed(0.9f);
+					ship.SetySpeed(0);
 				}
 				#pragma endregion
 			}
