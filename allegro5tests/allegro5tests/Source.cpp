@@ -615,7 +615,8 @@ int main(void)
 				#pragma region Move Screen
 				if (ship.shipPos.x > SCREENWIDTH / 2)
 				{
-					currentX += ship.GetSpeed();
+					//move the currentX according to the ship's current speed and this updates force increase.
+					currentX += ship.GetSpeedX() + ship.GetxForce();
 					if (currentX >= ship.shipPos.x - 300)
 						currentX = ship.shipPos.x - 300;						
 				}
