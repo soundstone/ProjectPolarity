@@ -530,10 +530,12 @@ int main(void)
 									if (force < 0.007)
 										force = 0.007;
 									else if (force > 0.07)
-										force = 0.07;
+										force = 0.07; 
 									Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
 									if (!collide)
+									{
 										ship.shipPos += distanceVec * (force);
+									}
 								}
 								else 
 								{
@@ -545,7 +547,9 @@ int main(void)
 										force = 0.07;
 									Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, topMagnets[i].magnetPosition);
 									if (!collide)
+									{
 										ship.shipPos -= distanceVec * force;
+									}
 								}
 							}
 						}
@@ -577,7 +581,9 @@ int main(void)
 							 		force = 0.07;
 							 	Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
 							 	if (!collide)
+								{
 							 		ship.shipPos += distanceVec * (force);
+								}
 							 }
 							 else 
 							 {
@@ -589,7 +595,9 @@ int main(void)
 							 		force = 0.07;
 							 	Vector3 distanceVec = Polaris::Get_Distance_Vector(ship.shipPos, botMagnets[i].magnetPosition);
 							 	if (!collide)
+								{
 							 		ship.shipPos -= distanceVec * force;
+								}
 							 }
 						 }
 					}
@@ -668,12 +676,15 @@ int main(void)
 				#pragma endregion
 
 				#pragma region Restart Level Upon Collision
-				/*if (collide || collideObstacle)
+				if (collide || collideObstacle)
 				{
 					gameScore = 0;
 					ship.shipPos.x = 20;
 					ship.shipPos.y = SCREENHEIGHT / 2;
-				}*/
+					//ship.SetxSpeed(0);
+					//ship.SetySpeed(0);
+					//here
+				}
 				#pragma endregion
 			}
 			#pragma endregion
