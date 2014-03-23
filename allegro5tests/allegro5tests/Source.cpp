@@ -681,8 +681,8 @@ int main(void)
 					gameScore = 0;
 					ship.shipPos.x = 20;
 					ship.shipPos.y = SCREENHEIGHT / 2;
-					//ship.SetxSpeed(0);
-					//ship.SetySpeed(0);
+					ship.SetxSpeed(0);
+					ship.SetySpeed(0);
 					//here
 				}
 				#pragma endregion
